@@ -1,0 +1,20 @@
+Name: gameserver
+Host: 0.0.0.0
+Port: 8088
+Mode: dev
+Timeout: 30000
+
+Session:
+  Secret: please-change-me-in-prod
+  # 与 room 的 8h 宽限期配套；留出余量覆盖跨次切后台 / 跨夜场景。
+  TTLMinutes: 1440
+
+Cors:
+  AllowOrigins:
+    - "http://localhost:5173"
+    - "http://127.0.0.1:5173"
+
+Log:
+  Mode: console
+  Encoding: plain
+  Level: info
