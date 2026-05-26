@@ -10,14 +10,15 @@ const roomStore = useRoomStore();
       <div
         v-for="t in roomStore.toasts"
         :key="t.id"
-        class="px-4 py-2 rounded-xl shadow-xl text-sm font-medium pointer-events-auto backdrop-blur"
-        :class="{
-          'bg-emerald-500/90 text-white': t.type === 'success',
-          'bg-rose-500/90 text-white': t.type === 'error',
-          'bg-amber-500/90 text-white': t.type === 'warn',
-          'bg-slate-700/90 text-slate-50': t.type === 'info',
-        }"
+        class="rpg-toast px-4 py-2 rounded-md text-sm font-serif tracking-wider pointer-events-auto"
+        :class="`rpg-toast--${t.type}`"
       >
+        <span class="rune-mark mr-1">
+          <template v-if="t.type === 'success'">✓</template>
+          <template v-else-if="t.type === 'error'">✗</template>
+          <template v-else-if="t.type === 'warn'">⚠</template>
+          <template v-else>✦</template>
+        </span>
         {{ t.message }}
       </div>
     </transition-group>
@@ -25,13 +26,35 @@ const roomStore = useRoomStore();
 </template>
 
 <style scoped>
+.rpg-toast {
+  border: 1px solid rgba(212, 175, 55, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 235, 180, 0.18),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    0 14px 40px -10px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+  color: #fff7e0;
+}
+.rpg-toast--success {
+  background: linear-gradient(180deg, #5a7a32 0%, #3f5a1f 100%);
+}
+.rpg-toast--error {
+  background: linear-gradient(180deg, #a02323 0%, #5e1212 100%);
+}
+.rpg-toast--warn {
+  background: linear-gradient(180deg, #c2410c 0%, #7c2d12 100%);
+}
+.rpg-toast--info {
+  background: linear-gradient(180deg, #2a1a10 0%, #120804 100%);
+}
+
 .toast-enter-active,
 .toast-leave-active {
   transition: all 0.2s ease;
 }
 .toast-enter-from {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-10px);
 }
 .toast-leave-to {
   opacity: 0;

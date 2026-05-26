@@ -187,50 +187,58 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       @click.self="emit('close')"
     >
-      <div class="card w-full max-w-2xl max-h-[90vh] flex flex-col animate-slide-up">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-white/10">
-          <h3 class="text-lg font-semibold text-slate-50">本局结算</h3>
-          <button class="btn-ghost py-1 px-3 text-xs" @click="emit('close')">取消</button>
+      <div class="card rpg-corners w-full max-w-2xl max-h-[92vh] flex flex-col animate-slide-up">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gold-500/25">
+          <h3 class="rpg-title text-xl">
+            <span class="rune-mark mr-1">⚖</span>盘点结账
+          </h3>
+          <button class="btn-ghost py-1.5 px-3 text-xs" @click="emit('close')">作罢</button>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-          <!-- A. 本局结果 -->
+        <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
           <section>
-            <div class="text-xs uppercase tracking-wider text-slate-400 mb-2">本局结果</div>
+            <div class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2">
+              <span class="rune-mark mr-1">❖</span>本场结果
+            </div>
             <div class="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                class="rounded-xl border px-4 py-3 text-left transition-colors"
-                :class="
-                  outcome === 'EVACUATED'
-                    ? 'border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
-                    : 'border-white/10 bg-slate-900/50 text-slate-300 hover:border-emerald-400/30'
-                "
+                class="judgment-card"
+                :class="outcome === 'EVACUATED' ? 'is-evacuated' : ''"
                 @click="outcome = 'EVACUATED'"
               >
-                <div class="font-semibold">撤离成功</div>
-                <div class="text-[11px] mt-0.5 text-slate-400">扣减保底 · 每人 +3 币</div>
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">🛡️</span>
+                  <div class="font-display tracking-[0.2em] text-lg uppercase text-forest-300">
+                    顺利出仓
+                  </div>
+                </div>
+                <div class="font-body italic text-[11px] mt-1 text-parchment-300/85">
+                  保底 −X · 全员各入袋 +3 金
+                </div>
               </button>
               <button
                 type="button"
-                class="rounded-xl border px-4 py-3 text-left transition-colors"
-                :class="
-                  outcome === 'BOMBED'
-                    ? 'border-rose-400/60 bg-rose-500/10 text-rose-200'
-                    : 'border-white/10 bg-slate-900/50 text-slate-300 hover:border-rose-400/30'
-                "
+                class="judgment-card"
+                :class="outcome === 'BOMBED' ? 'is-bombed' : ''"
                 @click="outcome = 'BOMBED'"
               >
-                <div class="font-semibold">炸单</div>
-                <div class="text-[11px] mt-0.5 text-slate-400">增加保底 · 默认 +60W</div>
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">💀</span>
+                  <div class="font-display tracking-[0.2em] text-lg uppercase text-oxblood-300">
+                    炸单覆灭
+                  </div>
+                </div>
+                <div class="font-body italic text-[11px] mt-1 text-parchment-300/85">
+                  保底 +X · 默认 +60W
+                </div>
               </button>
             </div>
           </section>
 
-          <!-- B. 保底变化输入 -->
           <section>
-            <label class="text-xs uppercase tracking-wider text-slate-400 mb-2 block">
-              {{ outcome === 'EVACUATED' ? '扣减保底（W）' : '增加保底（W）' }}
+            <label class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2 block">
+              <span class="rune-mark mr-1">❖</span>{{ outcome === 'EVACUATED' ? '保底扣减（W）' : '保底增加（W）' }}
             </label>
             <div class="flex items-center gap-2">
               <input
@@ -240,61 +248,62 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 class="input flex-1"
                 :placeholder="outcome === 'EVACUATED' ? '例如 200' : '60'"
               />
-              <span class="text-amber-300 font-mono text-sm whitespace-nowrap">
-                当前 {{ currentGuarantee }}W
+              <span class="font-serif text-sm text-gold-200 whitespace-nowrap">
+                现保底 {{ currentGuarantee }}W
               </span>
             </div>
             <div
               v-if="newGuarantee !== null"
-              class="text-xs mt-1.5"
-              :class="newGuarantee < 0 || newGuarantee > GUARANTEE_MAX ? 'text-rose-400' : 'text-slate-400'"
+              class="font-body italic text-xs mt-2"
+              :class="newGuarantee < 0 || newGuarantee > GUARANTEE_MAX ? 'text-oxblood-300' : 'text-parchment-300/85'"
             >
-              结算后保底：
-              <span class="font-mono font-semibold text-slate-200">{{ newGuarantee }}W</span>
-              <span class="ml-1 text-slate-500">
+              结账之后保底：
+              <span class="font-serif font-bold not-italic text-parchment-50">{{ newGuarantee }}W</span>
+              <span class="ml-1 text-parchment-400/80">
                 ({{ outcome === 'EVACUATED' ? '−' : '+' }}{{ guaranteeDelta }}W)
               </span>
             </div>
           </section>
 
-          <!-- C. 玩家明细表 -->
           <section>
-            <div class="text-xs uppercase tracking-wider text-slate-400 mb-2">三位玩家结算明细</div>
-            <div class="rounded-xl border border-white/10 overflow-hidden">
+            <div class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2">
+              <span class="rune-mark mr-1">❖</span>三鼠战绩
+            </div>
+            <div class="rounded-md overflow-hidden border border-gold-500/30">
               <table class="w-full text-sm">
-                <thead class="bg-slate-900/60 text-slate-400">
-                  <tr>
-                    <th class="text-left font-medium px-3 py-2">玩家</th>
+                <thead>
+                  <tr class="bg-ink-700/80">
+                    <th class="text-left font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2">伙计</th>
                     <th
                       v-for="h in STAT_HEADERS"
                       :key="h.key"
-                      class="text-center font-medium px-2 py-2 w-20"
+                      class="text-center font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-2 py-2 w-20"
                     >
                       {{ h.label }}
                     </th>
-                    <th class="text-right font-medium px-3 py-2 w-20">本次币</th>
+                    <th class="text-right font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2 w-20">入袋</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="p in players"
                     :key="p.id"
-                    class="border-t border-white/5"
+                    class="border-t border-gold-500/15"
                   >
                     <td class="px-3 py-2">
                       <div class="flex items-center gap-2 min-w-0">
                         <Avatar :seed="p.id" :name="p.nickname" size="sm" />
                         <div class="min-w-0">
-                          <div class="font-semibold text-slate-100 truncate flex items-center gap-1">
-                            <span v-if="p.isHost" class="text-amber-400">👑</span>
+                          <div class="font-serif font-semibold text-parchment-50 truncate flex items-center gap-1">
+                            <span v-if="p.isHost" class="text-gold-300">👑</span>
                             {{ p.nickname }}
                           </div>
                           <span
                             class="badge text-[10px]"
                             :class="
                               p.role === 'BOSS'
-                                ? 'bg-orange-500/20 text-orange-300'
-                                : 'bg-blue-500/20 text-blue-300'
+                                ? '!border-ember-400/60 !text-ember-300'
+                                : '!border-sapphire-300/60 !text-sapphire-300'
                             "
                           >
                             {{ p.role ? ROLE_LABEL[p.role] : '' }}
@@ -307,15 +316,15 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                         v-model="stats[p.id][h.key]"
                         inputmode="numeric"
                         pattern="[0-9]*"
-                        class="w-full rounded-lg border border-white/10 bg-slate-900/70 px-2 py-1.5 text-sm text-center text-slate-100 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400/40"
+                        class="stat-input"
                       />
                     </td>
-                    <td class="px-3 py-2 text-right font-mono">
+                    <td class="px-3 py-2 text-right font-serif font-bold">
                       <template v-if="previewCoinDelta(p.id) === null">
-                        <span class="text-rose-400 text-xs">非法</span>
+                        <span class="text-oxblood-300 text-xs italic">非法</span>
                       </template>
                       <template v-else>
-                        <span class="text-emerald-400">+{{ previewCoinDelta(p.id) }}</span>
+                        <span class="text-forest-300">+{{ previewCoinDelta(p.id) }}</span>
                       </template>
                     </td>
                   </tr>
@@ -324,26 +333,31 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
             </div>
           </section>
 
-          <!-- D. 奖励规则提示 -->
-          <section class="rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 text-xs text-slate-400 leading-relaxed">
-            <div class="text-slate-300 font-semibold mb-1">奖励规则</div>
-            <div>击杀 1 人 +1 币 · 摸 1 个小红 +1 币 · 摸 1 个 6 格 +2 币 · 摸 1 个 9 格及以上 +3 币</div>
-            <div class="text-emerald-300/80 mt-0.5">撤离成功额外每人 +3 币</div>
+          <section class="rounded-md border border-gold-500/25 bg-ink-700/55 px-4 py-3 text-xs leading-relaxed">
+            <div class="font-serif tracking-[0.18em] uppercase text-gold-300/90 mb-1">
+              <span class="rune-mark mr-1">❖</span>分账规矩
+            </div>
+            <div class="font-body text-parchment-200/90">
+              击杀 1 人 +1 金 · 摸 1 个小红 +1 金 · 摸 1 件 6 格 +2 金 · 摸 1 件 9+ 格 +3 金
+            </div>
+            <div class="font-body italic text-forest-300/90 mt-0.5">
+              顺利出仓 · 全员各加封 +3 金
+            </div>
           </section>
         </div>
 
-        <div class="px-5 py-4 border-t border-white/10 flex items-center justify-between gap-3">
-          <div class="text-xs text-rose-400 min-h-[1em]">
+        <div class="px-5 py-4 border-t border-gold-500/25 flex items-center justify-between gap-3">
+          <div class="font-body italic text-xs text-oxblood-300 min-h-[1em]">
             {{ validation.ok ? '' : validation.reason }}
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button class="btn-ghost py-2 px-4 text-sm" @click="emit('close')">取消</button>
+            <button class="btn-ghost py-2 px-4" @click="emit('close')">作罢</button>
             <button
-              class="btn-primary py-2 px-4 text-sm"
+              class="btn-primary py-2 px-4"
               :disabled="!canSubmit"
               @click="submit"
             >
-              {{ submitting ? '结算中…' : '确认结算' }}
+              {{ submitting ? '盘账中…' : '⚖ 一锤定账' }}
             </button>
           </div>
         </div>
@@ -353,6 +367,64 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 </template>
 
 <style scoped>
+.judgment-card {
+  border-radius: 6px;
+  padding: 14px 16px;
+  text-align: left;
+  transition: all 0.2s ease;
+  background:
+    linear-gradient(180deg, rgba(212, 175, 55, 0.05), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #1a0f0a, #120804);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: inset 0 1px 0 rgba(244, 230, 194, 0.06);
+}
+.judgment-card:hover {
+  border-color: rgba(232, 200, 124, 0.6);
+}
+.judgment-card.is-evacuated {
+  border-color: rgba(90, 122, 50, 0.85);
+  background:
+    linear-gradient(180deg, rgba(90, 122, 50, 0.18), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #14200a, #0a1505);
+  box-shadow:
+    inset 0 1px 0 rgba(136, 160, 79, 0.18),
+    0 0 0 1px rgba(90, 122, 50, 0.55),
+    0 0 18px -4px rgba(90, 122, 50, 0.5);
+}
+.judgment-card.is-bombed {
+  border-color: rgba(160, 35, 35, 0.85);
+  background:
+    linear-gradient(180deg, rgba(160, 35, 35, 0.18), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #2a0c0c, #1a0606);
+  box-shadow:
+    inset 0 1px 0 rgba(193, 58, 58, 0.2),
+    0 0 0 1px rgba(160, 35, 35, 0.55),
+    0 0 18px -4px rgba(160, 35, 35, 0.5);
+}
+
+.stat-input {
+  width: 100%;
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #1a0f0a, #120804);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #f4e6c2;
+  text-align: center;
+  font-family: 'Cinzel', 'Cardo', 'Noto Serif SC', serif;
+  font-size: 0.875rem;
+  padding: 6px 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+.stat-input:focus {
+  outline: none;
+  border-color: rgba(232, 200, 124, 0.85);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(212, 175, 55, 0.4);
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.18s ease;

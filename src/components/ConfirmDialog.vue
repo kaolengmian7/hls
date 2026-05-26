@@ -17,18 +17,22 @@ const emit = defineEmits<{
   <transition name="fade">
     <div
       v-if="open"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       @click.self="emit('cancel')"
     >
-      <div class="card w-[92%] max-w-sm p-6 animate-slide-up">
-        <h3 class="text-lg font-semibold mb-2 text-slate-50">{{ title }}</h3>
-        <p class="text-sm text-slate-300 leading-relaxed">{{ message }}</p>
-        <div class="mt-5 flex gap-3 justify-end">
-          <button class="btn-ghost" @click="emit('cancel')">
-            {{ cancelText ?? '取消' }}
+      <div class="card rpg-corners w-[92%] max-w-sm p-7 animate-slide-up text-center">
+        <div class="rune-mark text-2xl text-gold-300 animate-flicker">⚜</div>
+        <h3 class="rpg-title text-xl mt-1 mb-2">{{ title }}</h3>
+        <div class="mx-auto max-w-[60%] rpg-divider mb-3" />
+        <p class="font-body italic text-sm text-parchment-200/90 leading-relaxed">
+          {{ message }}
+        </p>
+        <div class="mt-6 flex gap-3 justify-center">
+          <button class="btn-ghost px-4 py-2" @click="emit('cancel')">
+            {{ cancelText ?? '稍候' }}
           </button>
           <button :class="danger ? 'btn-danger' : 'btn-primary'" @click="emit('confirm')">
-            {{ confirmText ?? '确认' }}
+            {{ confirmText ?? '应允' }}
           </button>
         </div>
       </div>

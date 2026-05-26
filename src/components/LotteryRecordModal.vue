@@ -30,52 +30,57 @@ const records = computed(() => roomStore.lotteryRecords);
   <transition name="fade">
     <div
       v-if="open"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       @click.self="emit('close')"
     >
-      <div class="card w-full max-w-2xl max-h-[80vh] flex flex-col animate-slide-up">
-        <div class="flex items-center justify-between p-5 border-b border-white/10">
-          <h3 class="text-lg font-semibold text-slate-50">抽奖记录</h3>
-          <button class="btn-ghost py-1 px-3" @click="emit('close')">关闭</button>
+      <div class="card rpg-corners w-full max-w-2xl max-h-[82vh] flex flex-col animate-slide-up">
+        <div class="flex items-center justify-between p-5 border-b border-gold-500/25">
+          <h3 class="rpg-title text-xl">
+            <span class="rune-mark mr-1">⚜</span>开箱记事
+          </h3>
+          <button class="btn-ghost py-1.5 px-3" @click="emit('close')">合上</button>
         </div>
         <div class="flex-1 overflow-y-auto p-5">
           <table class="w-full text-sm">
-            <thead class="text-slate-400 text-left">
-              <tr class="border-b border-white/10">
-                <th class="py-2 font-medium">时间</th>
-                <th class="py-2 font-medium">抽奖人</th>
-                <th class="py-2 font-medium">消耗</th>
-                <th class="py-2 font-medium">物品</th>
-                <th class="py-2 font-medium">稀有度</th>
-                <th class="py-2 font-medium">价值</th>
-                <th class="py-2 font-medium">保底变化</th>
+            <thead>
+              <tr class="text-left">
+                <th class="py-2 font-serif text-[11px] tracking-[0.18em] uppercase text-gold-300/85">时辰</th>
+                <th class="py-2 font-serif text-[11px] tracking-[0.18em] uppercase text-gold-300/85">开箱人</th>
+                <th class="py-2 font-serif text-[11px] tracking-[0.18em] uppercase text-gold-300/85">耗金</th>
+                <th class="py-2 font-serif text-[11px] tracking-[0.18em] uppercase text-gold-300/85">所得</th>
+                <th class="py-2 font-serif text-[11px] tracking-[0.18em] uppercase text-gold-300/85">阶位</th>
+                <th class="py-2 font-serif text-[11px] tracking-[0.18em] uppercase text-gold-300/85">价值</th>
+                <th class="py-2 font-serif text-[11px] tracking-[0.18em] uppercase text-gold-300/85">保底变化</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="r in records"
                 :key="r.id"
-                class="border-b border-white/5 hover:bg-slate-900/40"
+                class="border-t border-gold-500/15 hover:bg-ink-500/40 transition-colors"
               >
-                <td class="py-2 text-slate-300">{{ format(r.at) }}</td>
-                <td class="py-2 text-slate-200">{{ nameOf(r.playerId) }}</td>
-                <td class="py-2 text-amber-400">{{ r.cost }}</td>
+                <td class="py-2 font-serif text-parchment-300/90">{{ format(r.at) }}</td>
+                <td class="py-2 font-serif text-parchment-100">{{ nameOf(r.playerId) }}</td>
+                <td class="py-2 coin-tag">💰 {{ r.cost }}</td>
                 <td
-                  class="py-2 font-medium"
-                  :class="RARITY_COLOR[r.item.rarity as Rarity] ?? 'text-slate-200'"
+                  class="py-2 font-serif font-bold"
+                  :class="RARITY_COLOR[r.item.rarity as Rarity] ?? 'text-parchment-100'"
                 >
                   {{ r.item.name }}
                 </td>
-                <td class="py-2 text-slate-300">
+                <td class="py-2 font-body italic text-parchment-200/80">
                   {{ RARITY_LABEL[r.item.rarity as Rarity] ?? r.item.rarity }}
                 </td>
-                <td class="py-2 text-emerald-300">{{ formatValueW(r.item.value) }}</td>
-                <td class="py-2 text-amber-300 whitespace-nowrap">
+                <td class="py-2 text-forest-300 font-serif">{{ formatValueW(r.item.value) }}</td>
+                <td class="py-2 text-gold-200 whitespace-nowrap font-serif">
                   {{ formatGuaranteeShift(r.guaranteeDelta, r.guaranteeBefore, r.guaranteeAfter) || '—' }}
                 </td>
               </tr>
               <tr v-if="records.length === 0">
-                <td colspan="7" class="py-8 text-center text-slate-500">尚无抽奖记录</td>
+                <td colspan="7" class="py-10 text-center">
+                  <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
+                  <div class="font-body italic text-parchment-300/75 mt-2">尚无开箱记事</div>
+                </td>
               </tr>
             </tbody>
           </table>

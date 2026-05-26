@@ -38,7 +38,7 @@ watch(
 
 function drawOne(): void {
   if (myCoin.value < SINGLE_DRAW_COST) {
-    roomStore.pushToast('warn', '金币不足');
+    roomStore.pushToast('warn', '钱袋不足');
     return;
   }
   roomStore.sendIntent('DRAW_LOTTERY', { times: 1 });
@@ -46,56 +46,87 @@ function drawOne(): void {
 </script>
 
 <template>
-  <div class="card p-6 relative overflow-hidden">
+  <div class="card rpg-corners p-6 relative overflow-hidden">
     <div
-      class="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-orange-500/10 blur-3xl"
+      class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-ember-500/15 blur-3xl"
+    />
+    <div
+      class="pointer-events-none absolute -bottom-32 -left-20 w-72 h-72 rounded-full bg-royal-500/10 blur-3xl"
     />
     <div class="relative">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-slate-50">抽奖机 · 老板专属</h3>
-        <span class="badge bg-orange-500/20 text-orange-300">幸运在你这边</span>
+      <div class="flex items-center justify-between mb-4 gap-2">
+        <h3 class="rpg-title text-xl">
+          <span class="rune-mark mr-1">⚜</span>神秘货柜
+        </h3>
+        <span class="badge !border-ember-400/60 !text-ember-300 animate-flicker">
+          <span class="rune-mark mr-1">★</span>掌柜手气正旺
+        </span>
       </div>
+      <div class="rpg-divider mb-5" />
 
-      <div class="rounded-2xl border border-orange-400/20 bg-slate-900/60 p-6 min-h-[140px] flex items-center justify-center transition-all">
-        <div v-if="animating" class="text-3xl font-bold animate-pulse_soft text-amber-300">
-          ✨ 正在揭晓 ✨
+      <div
+        class="rounded-md p-6 min-h-[150px] flex items-center justify-center transition-all relative overflow-hidden"
+        style="
+          border: 1px solid rgba(212, 175, 55, 0.45);
+          background:
+            radial-gradient(120% 80% at 50% 0%, rgba(249, 115, 22, 0.18), transparent 60%),
+            linear-gradient(180deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.65)),
+            #1a0f0a;
+          box-shadow:
+            inset 0 0 24px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+        "
+      >
+        <div v-if="animating" class="text-center">
+          <div class="rune-mark text-4xl animate-rune-spin inline-block">✶</div>
+          <div class="rpg-title text-2xl mt-2 animate-flicker">货柜启封中</div>
         </div>
         <div v-else-if="showcase.length >= 1" class="text-center animate-slide-up">
-          <div class="text-sm text-slate-400 mb-1">本次抽中</div>
+          <div class="font-serif italic text-xs text-gold-300/80 tracking-[0.32em] uppercase mb-2">
+            ✦ 本次开出 ✦
+          </div>
           <div
-            class="text-2xl font-bold"
-            :class="RARITY_COLOR[showcase[0]!.item.rarity as Rarity] ?? 'text-slate-200'"
+            class="font-display text-3xl font-bold tracking-wide text-shadow-relic"
+            :class="RARITY_COLOR[showcase[0]!.item.rarity as Rarity] ?? 'text-parchment-100'"
           >
             {{ showcase[0]!.item.name }}
           </div>
-          <div class="text-xs mt-1 text-slate-400">
-            {{ RARITY_LABEL[showcase[0]!.item.rarity as Rarity] ?? showcase[0]!.item.rarity }}
-            ·
-            <span class="text-emerald-300">价值 {{ formatValueW(showcase[0]!.item.value) }}</span>
+          <div class="text-xs mt-2 font-serif text-parchment-300/80">
+            <span class="tracking-widest uppercase">
+              {{ RARITY_LABEL[showcase[0]!.item.rarity as Rarity] ?? showcase[0]!.item.rarity }}
+            </span>
+            <span class="mx-1 text-gold-400/60">·</span>
+            <span class="text-forest-300 font-semibold">
+              价值 {{ formatValueW(showcase[0]!.item.value) }}
+            </span>
           </div>
           <div
             v-if="showcase[0]!.guaranteeDelta > 0"
-            class="text-[11px] mt-1 text-amber-300"
+            class="text-[11px] mt-2 font-serif text-gold-200 tracking-wider"
           >
+            <span class="rune-mark mr-1">⚜</span>
             保底 {{ formatGuaranteeShift(showcase[0]!.guaranteeDelta, showcase[0]!.guaranteeBefore, showcase[0]!.guaranteeAfter) }}
           </div>
         </div>
-        <div v-else class="text-slate-500 text-sm text-center">
-          点击下方按钮开始抽奖
+        <div v-else class="text-center">
+          <div class="rune-mark text-3xl text-gold-400/70 animate-flicker">✶</div>
+          <div class="font-body italic text-parchment-300/80 text-sm mt-2">
+            扣动货柜机关，方知珍藏几何。
+          </div>
         </div>
       </div>
 
       <div class="mt-5">
         <button
-          class="btn-boss w-full"
+          class="btn-boss w-full py-3"
           :disabled="myCoin < SINGLE_DRAW_COST"
           @click="drawOne"
         >
-          单抽 · {{ SINGLE_DRAW_COST }} 币
+          <span class="rune-mark">🎁</span> 开柜一次 · {{ SINGLE_DRAW_COST }} 金
         </button>
       </div>
-      <p class="text-[11px] text-slate-500 mt-3 leading-relaxed">
-        抽奖结果由服务端裁决并广播，所有玩家可在「抽奖记录」中查看。
+      <p class="font-body italic text-[12px] text-parchment-300/75 mt-3 leading-relaxed text-center">
+        开箱由本店神签（服务端 crypto/rand）裁定并昭告全店，全员可于「开箱记事」共览。
       </p>
     </div>
   </div>

@@ -48,78 +48,84 @@ function bundledNames(eq: Equipment): string {
 </script>
 
 <template>
-  <div class="card p-5">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-slate-50">装备商店</h3>
-      <span class="text-xs text-slate-400">余额 💰 {{ myCoin }}</span>
+  <div class="card rpg-corners p-6">
+    <div class="flex items-center justify-between mb-3 gap-2">
+      <h3 class="rpg-title text-xl">
+        <span class="rune-mark mr-1">⚔</span>护航军械架
+      </h3>
+      <span class="font-serif text-xs tracking-[0.2em] uppercase text-gold-300">
+        钱袋 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
+      </span>
     </div>
+    <div class="rpg-divider mb-5" />
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div
         v-for="eq in EQUIPMENT_LIST"
         :key="eq.id"
-        class="rounded-xl border border-white/10 bg-slate-900/50 p-4 flex flex-col gap-2 hover:border-blue-400/40 transition-colors"
+        class="armory-card rounded-md p-4 flex flex-col gap-2 transition-all"
       >
         <div class="flex items-center gap-3">
-          <div class="text-2xl">{{ eq.icon }}</div>
+          <div class="text-3xl filter drop-shadow">{{ eq.icon }}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-semibold text-slate-100 truncate">{{ eq.name }}</div>
-            <div class="text-xs text-slate-400">{{ eq.description }}</div>
+            <div class="font-serif font-bold text-parchment-50 truncate text-base">{{ eq.name }}</div>
+            <div class="font-body italic text-xs text-parchment-300/85">{{ eq.description }}</div>
           </div>
         </div>
 
-        <div v-if="eq.bundledIds?.length" class="text-[11px] text-slate-500">
-          自带：<span class="text-slate-300">{{ bundledNames(eq) }}</span>
+        <div v-if="eq.bundledIds?.length" class="text-[11px] font-body text-parchment-400/80">
+          搭配：<span class="text-gold-200">{{ bundledNames(eq) }}</span>
         </div>
 
-        <div class="flex items-center justify-between mt-1">
-          <span class="text-amber-400 font-semibold flex items-center gap-1">
+        <div class="flex items-center justify-between mt-1 pt-2 border-t border-gold-500/15">
+          <span class="coin-tag text-base">
             <span>💰</span> {{ eq.price }}
           </span>
           <button
-            class="btn-escort py-1.5 text-xs"
+            class="btn-escort py-1.5 px-3 text-[11px]"
             :disabled="!canAfford(eq)"
             @click="startBuy(eq)"
           >
-            {{ needsPick(eq) ? '选枪购买' : '购买' }}
+            {{ needsPick(eq) ? '挑兵器购入' : '入手' }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 二级选枪面板（modal） -->
     <transition name="fade">
       <div
         v-if="pickingFor"
-        class="fixed inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+        class="fixed inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
         @click.self="cancelPick"
       >
-        <div class="card w-full max-w-lg p-5">
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="text-base font-semibold text-slate-50">
-              选枪 · {{ pickingFor.name }}
-              <span class="text-amber-400 ml-2 text-sm font-bold">💰 {{ pickingFor.price }}</span>
+        <div class="card rpg-corners w-full max-w-lg p-5 animate-slide-up">
+          <div class="flex items-center justify-between mb-2 gap-2">
+            <h4 class="rpg-title text-lg">
+              <span class="rune-mark mr-1">⚔</span>挑兵器 · {{ pickingFor.name }}
+              <span class="coin-tag ml-2 text-sm">💰 {{ pickingFor.price }}</span>
             </h4>
-            <button class="btn-ghost py-1 text-xs" @click="cancelPick">取消</button>
+            <button class="btn-ghost py-1 px-2 text-[11px]" @click="cancelPick">作罢</button>
           </div>
-          <div v-if="pickingFor.bundledIds?.length" class="text-xs text-slate-400 mb-3">
-            组合中自带：<span class="text-slate-200">{{ bundledNames(pickingFor) }}</span>
+          <div class="rpg-divider mb-3" />
+          <div v-if="pickingFor.bundledIds?.length" class="font-body italic text-xs text-parchment-300/85 mb-3">
+            搭配中已附：<span class="text-gold-200 not-italic">{{ bundledNames(pickingFor) }}</span>
           </div>
-          <div class="text-xs text-slate-500 mb-2">请选择一把枪：</div>
+          <div class="font-serif text-[11px] tracking-[0.32em] uppercase text-gold-300/80 mb-2">
+            ✦ 请择一柄趁手兵器 ✦
+          </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[60vh] overflow-y-auto pr-1">
             <button
               v-for="w in pickableWeapons(pickingFor)"
               :key="w.id"
-              class="rounded-lg border border-white/10 bg-slate-900/70 px-3 py-2 text-left
-                hover:border-blue-400/40 hover:bg-slate-800 transition-colors
-                focus:outline-none focus:ring-2 focus:ring-blue-400/40"
+              class="weapon-card rounded-md px-3 py-2 text-left transition-all
+                focus:outline-none focus:ring-1 focus:ring-gold-400/60"
               @click="confirmPick(w.id)"
             >
               <div class="flex items-center gap-2">
-                <span class="text-lg">{{ w.icon }}</span>
+                <span class="text-xl">{{ w.icon }}</span>
                 <div class="min-w-0">
-                  <div class="text-sm font-semibold text-slate-100 truncate">{{ w.name }}</div>
-                  <div class="text-[11px] text-slate-500">{{ w.category }}</div>
+                  <div class="font-serif text-sm font-semibold text-parchment-50 truncate">{{ w.name }}</div>
+                  <div class="font-body italic text-[11px] text-parchment-400/80">{{ w.category }}</div>
                 </div>
               </div>
             </button>
@@ -131,6 +137,30 @@ function bundledNames(eq: Equipment): string {
 </template>
 
 <style scoped>
+.armory-card {
+  background:
+    linear-gradient(180deg, rgba(212, 175, 55, 0.06), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #1a0f0a, #120804);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: inset 0 1px 0 rgba(244, 230, 194, 0.06);
+}
+.armory-card:hover {
+  border-color: rgba(232, 200, 124, 0.7);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 230, 194, 0.1),
+    0 8px 22px -8px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(212, 175, 55, 0.25);
+}
+.weapon-card {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0)), #15100b;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+}
+.weapon-card:hover {
+  border-color: rgba(232, 200, 124, 0.65);
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.06), rgba(0, 0, 0, 0)), #1c140d;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.18s ease;

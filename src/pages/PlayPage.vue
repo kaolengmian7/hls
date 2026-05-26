@@ -93,91 +93,97 @@ function dismissClosed(): void {
 <template>
   <div v-if="restoring || !roomStore.snapshot" class="flex-1 flex items-center justify-center min-h-screen">
     <ToastContainer />
-    <div class="card p-8 text-center text-slate-300">
-      <div class="text-base font-semibold mb-2">正在恢复对局连接...</div>
-      <div class="text-xs text-slate-500">房间号 {{ code }}</div>
+    <div class="card rpg-corners p-10 text-center max-w-sm">
+      <div class="rune-mark text-3xl animate-flicker">✶</div>
+      <div class="rpg-title text-xl mt-2">回店续档</div>
+      <div class="font-body italic text-parchment-300/80 mt-2">正在重新对接花栗鼠分号…</div>
+      <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
+        暗号 · {{ code }}
+      </div>
     </div>
   </div>
 
   <div v-else class="flex-1 flex flex-col min-h-screen">
     <ToastContainer />
 
-    <header class="px-4 sm:px-8 py-3 border-b border-white/5 sticky top-0 backdrop-blur bg-slate-950/70 z-10">
-      <div class="flex items-center justify-between gap-3">
+    <header class="px-4 sm:px-8 py-3 sticky top-0 z-10 backdrop-blur bg-ink-700/80 border-b border-gold-500/25">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
         <div class="flex items-center gap-4 min-w-0">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-3">
             <Avatar v-if="me" :seed="me.id" :name="me.nickname" size="md" />
             <div v-if="me" class="min-w-0">
-              <div class="font-semibold text-slate-100 truncate flex items-center gap-1">
-                <span v-if="me.isHost" class="text-amber-400">👑</span>
+              <div class="font-serif font-semibold text-parchment-50 truncate flex items-center gap-1.5">
+                <span v-if="me.isHost" class="text-gold-300" title="掌柜">👑</span>
                 {{ me.nickname }}
                 <span
                   class="badge text-[10px]"
                   :class="
                     me.role === 'BOSS'
-                      ? 'bg-orange-500/20 text-orange-300'
-                      : 'bg-blue-500/20 text-blue-300'
+                      ? '!border-ember-400/60 !text-ember-300'
+                      : '!border-sapphire-300/60 !text-sapphire-300'
                   "
                 >
                   {{ me.role ? ROLE_LABEL[me.role] : '' }}
                 </span>
               </div>
-              <div class="text-amber-400 text-sm font-bold flex items-center gap-1">
-                💰 {{ me.coin }}
+              <div class="coin-tag text-base mt-0.5">
+                <span>💰</span> {{ me.coin }}
               </div>
             </div>
           </div>
 
-          <div class="hidden sm:flex items-center gap-2">
+          <div class="hidden md:flex items-center gap-2">
             <div
               v-for="t in teammates"
               :key="t.id"
-              class="rounded-xl border border-white/10 bg-slate-900/40 px-3 py-1.5 flex items-center gap-2"
+              class="rounded-md px-3 py-1.5 flex items-center gap-2 border border-gold-500/25 bg-ink-700/60"
             >
               <Avatar :seed="t.id" :name="t.nickname" size="sm" />
-              <div class="text-xs">
-                <div class="text-slate-200 truncate max-w-[80px]">{{ t.nickname }}</div>
-                <div class="text-slate-400 flex items-center gap-1">
+              <div class="text-xs leading-tight">
+                <div class="font-serif text-parchment-100 truncate max-w-[88px]">{{ t.nickname }}</div>
+                <div class="flex items-center gap-1 mt-0.5">
                   <span
                     class="badge text-[10px]"
                     :class="
                       t.role === 'BOSS'
-                        ? 'bg-orange-500/20 text-orange-300'
-                        : 'bg-blue-500/20 text-blue-300'
+                        ? '!border-ember-400/60 !text-ember-300'
+                        : '!border-sapphire-300/60 !text-sapphire-300'
                     "
                   >
                     {{ t.role ? ROLE_LABEL[t.role] : '' }}
                   </span>
-                  <span class="text-amber-400">💰{{ t.coin }}</span>
+                  <span class="coin-tag text-[11px]">💰{{ t.coin }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <div
-            class="rounded-xl border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 leading-tight text-right"
-            :title="`房间保底金额（仅展示，不影响金币结算）`"
+            class="rounded-md px-2.5 py-1 leading-tight text-right border border-gold-500/40 bg-ink-700/70"
+            :title="`本店保底货量（仅供登记，不影响金币结算）`"
           >
-            <div class="text-[10px] uppercase tracking-wider text-amber-300/80">保底</div>
-            <div class="text-sm font-semibold text-amber-200 font-mono">
-              {{ roomStore.guaranteedAmount }}<span class="text-amber-300/70 ml-0.5">W</span>
+            <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
+              保底
+            </div>
+            <div class="text-sm font-bold font-serif text-gold-200">
+              {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
             </div>
           </div>
           <button
             v-if="canSettle"
-            class="btn-primary py-1.5 px-3 text-xs"
+            class="btn-boss py-1.5 px-3 text-[11px]"
             @click="showSettlement = true"
           >
-            本局结算
+            ⚖ 盘点结账
           </button>
-          <button class="btn-ghost py-1.5 text-xs" @click="showSettlementHistory = true">
-            结算记录
+          <button class="btn-ghost text-[11px]" @click="showSettlementHistory = true">
+            流水账册
           </button>
-          <button class="btn-ghost py-1.5 text-xs" @click="showLottery = true">抽奖记录</button>
-          <button class="btn-ghost text-rose-400 py-1.5 text-xs" @click="showLeaveConfirm = true">
-            退出
+          <button class="btn-ghost text-[11px]" @click="showLottery = true">开箱记事</button>
+          <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300 text-[11px]" @click="showLeaveConfirm = true">
+            离店
           </button>
         </div>
       </div>
@@ -187,12 +193,24 @@ function dismissClosed(): void {
       <section class="space-y-5">
         <template v-if="me?.role === 'BOSS'">
           <LotteryPanel />
-          <div class="card p-5 text-sm text-slate-400">
-            <h3 class="text-base font-semibold text-slate-100 mb-2">老板的策略提示</h3>
-            <ul class="list-disc pl-4 space-y-1">
-              <li>初始 0 币，等待后续机制（时间奖励 / 任务结算）注入收益。</li>
-              <li>抽奖结果由服务端裁决（crypto/rand），可在「抽奖记录」中查看全员历史。</li>
-              <li>稀有度越高的物品在公屏播报中越亮眼，可作为博弈筹码。</li>
+          <div class="card rpg-corners p-6 text-sm">
+            <h3 class="rpg-title text-lg mb-3">
+              <span class="rune-mark mr-1">⚜</span>掌柜的小算盘
+            </h3>
+            <div class="rpg-divider mb-3" />
+            <ul class="space-y-2 font-body text-parchment-200/90 leading-relaxed">
+              <li class="flex gap-2">
+                <span class="rune-mark text-gold-300">✦</span>
+                开张时钱袋空空，须由日积月累与盘账逐步充盈。
+              </li>
+              <li class="flex gap-2">
+                <span class="rune-mark text-gold-300">✦</span>
+                神秘货柜由本店神签（服务端 crypto/rand）裁定，全员可于「开箱记事」共览。
+              </li>
+              <li class="flex gap-2">
+                <span class="rune-mark text-gold-300">✦</span>
+                稀世珍品在传话筒里愈发耀眼，可作博弈筹码。
+              </li>
             </ul>
           </div>
         </template>
@@ -202,8 +220,11 @@ function dismissClosed(): void {
         </template>
 
         <template v-else>
-          <div class="card p-8 text-center text-slate-400">
-            正在等待角色信息同步...
+          <div class="card rpg-corners p-10 text-center">
+            <div class="rune-mark text-3xl animate-flicker">⚜</div>
+            <div class="font-serif italic text-parchment-300 mt-2">
+              正在向本店核对您的分位…
+            </div>
           </div>
         </template>
       </section>
@@ -222,13 +243,13 @@ function dismissClosed(): void {
 
     <ConfirmDialog
       :open="showLeaveConfirm"
-      :title="roomStore.isHost ? '解散对局？' : '退出对局？'"
+      :title="roomStore.isHost ? '关张本店？' : '中途离店？'"
       :message="
         roomStore.isHost
-          ? '你是房主，退出后房间立即销毁，所有玩家将回到首页。'
-          : '当前对局进度不会保留，确认要退出吗？'
+          ? '您是掌柜，离店之后这场买卖立即收摊，同行伙计将各奔前程。'
+          : '本场买卖进度将不复留存，确认要离店吗？'
       "
-      :confirm-text="roomStore.isHost ? '解散' : '退出'"
+      :confirm-text="roomStore.isHost ? '关张' : '离店'"
       danger
       @confirm="confirmLeave"
       @cancel="showLeaveConfirm = false"
@@ -236,9 +257,9 @@ function dismissClosed(): void {
 
     <ConfirmDialog
       :open="showClosedDialog"
-      title="连接已断开"
-      :message="`房间已关闭（${closedReason || 'CLOSED'}），3 秒后自动返回首页。`"
-      confirm-text="返回首页"
+      title="本店已歇业"
+      :message="`本店已歇业（${closedReason || 'CLOSED'}），3 秒后自动返回门前。`"
+      confirm-text="返回门前"
       cancel-text="稍候"
       @confirm="dismissClosed"
       @cancel="dismissClosed"

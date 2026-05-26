@@ -81,7 +81,7 @@ export const useRoomStore = defineStore('room', () => {
           closedReason.value = '';
           playerStore.setSessionToken(input.code, payload.sessionToken);
           if (wasReconnecting) {
-            pushToast('success', '已重新连接');
+            pushToast('success', '已重新归店');
           }
           if (!settled) {
             settled = true;
@@ -200,7 +200,7 @@ export const useRoomStore = defineStore('room', () => {
       }
       case 'ACTION_REJECTED': {
         const p = payload as EventMap['ACTION_REJECTED'];
-        pushToast('warn', p.message ?? `操作失败：${p.reason}`);
+        pushToast('warn', p.message ?? `本店未受理：${p.reason}`);
         break;
       }
       case 'HOST_CHANGED': {
@@ -212,7 +212,7 @@ export const useRoomStore = defineStore('room', () => {
           }));
           snapshot.value = { ...snapshot.value, hostId: p.newHostId, players: next };
         }
-        pushToast('info', '房主已变更');
+        pushToast('info', '掌柜易主');
         break;
       }
       // 其余 PLAYER_JOINED / PLAYER_LEFT / ROLE_CHANGED / READY_CHANGED /
