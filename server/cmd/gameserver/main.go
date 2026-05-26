@@ -1,10 +1,10 @@
 // Package main 是游戏服务端入口。
 //
 // 启动流程：
-//   1. 解析配置文件（go-zero conf）。
-//   2. 构造 ServiceContext（Hub / Generator / Signer）。
-//   3. 注册 REST + WebSocket 路由。
-//   4. 监听 SIGINT / SIGTERM 做优雅退出。
+//  1. 解析配置文件（go-zero conf）。
+//  2. 构造 ServiceContext（Hub / Generator / Signer）。
+//  3. 注册 REST + WebSocket 路由。
+//  4. 监听 SIGINT / SIGTERM 做优雅退出。
 package main
 
 import (
@@ -30,6 +30,9 @@ func main() {
 
 	var cfg config.Config
 	conf.MustLoad(*configFile, &cfg)
+	if err := config.ApplyEnvOverrides(&cfg); err != nil {
+		logx.Must(err)
+	}
 
 	opts := []rest.RunOption{}
 	if len(cfg.Cors.AllowOrigins) > 0 {

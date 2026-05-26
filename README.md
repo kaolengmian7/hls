@@ -49,7 +49,7 @@ hls/
 cd server
 go mod tidy
 go run ./cmd/gameserver -f etc/gameserver.yaml
-# 监听 0.0.0.0:8080
+# 监听 0.0.0.0:8088
 ```
 
 > 主要依赖：
@@ -60,7 +60,7 @@ go run ./cmd/gameserver -f etc/gameserver.yaml
 
 ```bash
 # 在仓库根目录
-cp .env.example .env   # 默认指向 http://localhost:8080
+cp .env.example .env   # 本地开发默认指向 http://localhost:8088
 npm install
 npm run dev
 # 监听 http://localhost:5173
@@ -71,8 +71,13 @@ npm run dev
 ## 环境变量（前端）
 
 ```env
-VITE_API_BASE=http://localhost:8080
-# VITE_WS_BASE=ws://localhost:8080   # 留空则自动从 API_BASE 派生
+# .env，本地开发
+VITE_API_BASE=http://localhost:8088
+# VITE_WS_BASE=ws://localhost:8088   # 留空则自动从 API_BASE 派生
+
+# .env.production，生产构建
+VITE_API_BASE=http://43.135.10.215:8088
+# VITE_WS_BASE=ws://43.135.10.215:8088   # 留空则自动从 API_BASE 派生
 ```
 
 ## 网络拓扑
