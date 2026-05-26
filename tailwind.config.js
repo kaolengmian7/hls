@@ -4,10 +4,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        // 装饰字体：仅用于大标题（房间号、Logo 等少量场景）
         display: ['"Cinzel Decorative"', 'Cinzel', '"Noto Serif SC"', 'serif'],
-        serif: ['Cinzel', 'Cardo', '"Noto Serif SC"', 'serif'],
-        body: ['"Cormorant Garamond"', '"IM Fell English"', '"Noto Serif SC"', 'Georgia', 'serif'],
-        rune: ['"Uncial Antiqua"', '"Cinzel Decorative"', 'serif'],
+        // 全站统一正文/标题字族：拉丁走 Cinzel，中文走思源宋体
+        serif: ['Cinzel', '"Noto Serif SC"', 'serif'],
+        body: ['Cinzel', '"Noto Serif SC"', 'serif'],
       },
       colors: {
         // 羊皮纸：从亮米白到深沉发黄

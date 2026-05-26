@@ -104,7 +104,7 @@ function dismissClosed(): void {
     <div class="card rpg-corners p-10 text-center max-w-sm">
       <div class="rune-mark text-3xl animate-flicker">✶</div>
       <div class="rpg-title text-xl mt-2">回店续档</div>
-      <div class="font-body italic text-parchment-300/80 mt-2">正在重新对接花栗鼠分号…</div>
+      <div class="font-body text-parchment-300/80 mt-2">正在重新对接花栗鼠分号…</div>
       <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
         暗号 · {{ code }}
       </div>
@@ -226,7 +226,7 @@ function dismissClosed(): void {
         <template v-else>
           <div class="card rpg-corners p-10 text-center">
             <div class="rune-mark text-3xl animate-flicker">⚜</div>
-            <div class="font-serif italic text-parchment-300 mt-2">
+            <div class="font-serif text-parchment-300 mt-2">
               正在向本店核对您的分位…
             </div>
           </div>

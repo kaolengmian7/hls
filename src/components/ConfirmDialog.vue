@@ -24,7 +24,7 @@ const emit = defineEmits<{
         <div class="rune-mark text-2xl text-gold-300 animate-flicker">⚜</div>
         <h3 class="rpg-title text-xl mt-1 mb-2">{{ title }}</h3>
         <div class="mx-auto max-w-[60%] rpg-divider mb-3" />
-        <p class="font-body italic text-sm text-parchment-200/90 leading-relaxed">
+        <p class="font-body text-sm text-parchment-200/90 leading-relaxed">
           {{ message }}
         </p>
         <div class="mt-6 flex gap-3 justify-center">

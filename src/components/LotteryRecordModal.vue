@@ -68,7 +68,7 @@ const records = computed(() => roomStore.lotteryRecords);
                 >
                   {{ r.item.name }}
                 </td>
-                <td class="py-2 font-body italic text-parchment-200/80">
+                <td class="py-2 font-body text-parchment-200/80">
                   {{ RARITY_LABEL[r.item.rarity as Rarity] ?? r.item.rarity }}
                 </td>
                 <td class="py-2 text-forest-300 font-serif">{{ formatValueW(r.item.value) }}</td>
@@ -79,7 +79,7 @@ const records = computed(() => roomStore.lotteryRecords);
               <tr v-if="records.length === 0">
                 <td colspan="7" class="py-10 text-center">
                   <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
-                  <div class="font-body italic text-parchment-300/75 mt-2">尚无开箱记事</div>
+                  <div class="font-body text-parchment-300/75 mt-2">尚无开箱记事</div>
                 </td>
               </tr>
             </tbody>

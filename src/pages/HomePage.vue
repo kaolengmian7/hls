@@ -166,7 +166,7 @@ async function handleJoin(): Promise<void> {
         花栗鼠的神秘商店
       </h1>
       <div class="mt-4 mx-auto max-w-xs rpg-divider" />
-      <p class="mt-3 font-body italic text-parchment-300/80 text-sm sm:text-base">
+      <p class="mt-3 font-body text-parchment-300/80 text-sm sm:text-base">
         一鼠坐镇神秘货柜，二鼠押镖出仓护航。
       </p>
     </header>
@@ -194,7 +194,7 @@ async function handleJoin(): Promise<void> {
         <div class="mb-7">
           <label class="font-serif text-xs tracking-[0.32em] uppercase text-gold-300 mb-2 block">
             <span class="rune-mark mr-1">❖</span>保底货量
-            <span class="ml-1 normal-case tracking-normal text-parchment-400/70 italic">
+            <span class="ml-1 normal-case tracking-normal text-parchment-400/70">
               （仅供登记，不影响金币结算）
             </span>
           </label>
@@ -212,9 +212,9 @@ async function handleJoin(): Promise<void> {
               class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gold-300 text-sm font-bold tracking-widest"
             >W</span>
           </div>
-          <p class="text-[11px] mt-2 font-body italic" :class="guaranteeValid ? 'text-parchment-300/80' : 'text-oxblood-300'">
+          <p class="text-[11px] mt-2 font-body" :class="guaranteeValid ? 'text-parchment-300/80' : 'text-oxblood-300'">
             <template v-if="guaranteeValid">
-              当前货量：<span class="text-gold-300 font-bold not-italic">{{ guaranteeNumber }}W</span>
+              当前货量：<span class="text-gold-300 font-bold">{{ guaranteeNumber }}W</span>
               · 允许范围 {{ MIN_GUARANTEED_AMOUNT }} ~ {{ MAX_GUARANTEED_AMOUNT }}
             </template>
             <template v-else>

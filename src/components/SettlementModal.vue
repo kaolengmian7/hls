@@ -213,7 +213,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                     顺利出仓
                   </div>
                 </div>
-                <div class="font-body italic text-[11px] mt-1 text-parchment-300/85">
+                <div class="font-body text-[11px] mt-1 text-parchment-300/85">
                   保底 −X · 全员各入袋 +3 金
                 </div>
               </button>
@@ -229,7 +229,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                     炸单覆灭
                   </div>
                 </div>
-                <div class="font-body italic text-[11px] mt-1 text-parchment-300/85">
+                <div class="font-body text-[11px] mt-1 text-parchment-300/85">
                   保底 +X · 默认 +60W
                 </div>
               </button>
@@ -254,11 +254,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
             </div>
             <div
               v-if="newGuarantee !== null"
-              class="font-body italic text-xs mt-2"
+              class="font-body text-xs mt-2"
               :class="newGuarantee < 0 || newGuarantee > GUARANTEE_MAX ? 'text-oxblood-300' : 'text-parchment-300/85'"
             >
               结账之后保底：
-              <span class="font-serif font-bold not-italic text-parchment-50">{{ newGuarantee }}W</span>
+              <span class="font-serif font-bold text-parchment-50">{{ newGuarantee }}W</span>
               <span class="ml-1 text-parchment-400/80">
                 ({{ outcome === 'EVACUATED' ? '−' : '+' }}{{ guaranteeDelta }}W)
               </span>
@@ -321,7 +321,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                     </td>
                     <td class="px-3 py-2 text-right font-serif font-bold">
                       <template v-if="previewCoinDelta(p.id) === null">
-                        <span class="text-oxblood-300 text-xs italic">非法</span>
+                        <span class="text-oxblood-300 text-xs">非法</span>
                       </template>
                       <template v-else>
                         <span class="text-forest-300">+{{ previewCoinDelta(p.id) }}</span>
@@ -340,14 +340,14 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
             <div class="font-body text-parchment-200/90">
               击杀 1 人 +1 金 · 摸 1 个小红 +1 金 · 摸 1 件 6 格 +2 金 · 摸 1 件 9+ 格 +3 金
             </div>
-            <div class="font-body italic text-forest-300/90 mt-0.5">
+            <div class="font-body text-forest-300/90 mt-0.5">
               顺利出仓 · 全员各加封 +3 金
             </div>
           </section>
         </div>
 
         <div class="px-5 py-4 border-t border-gold-500/25 flex items-center justify-between gap-3">
-          <div class="font-body italic text-xs text-oxblood-300 min-h-[1em]">
+          <div class="font-body text-xs text-oxblood-300 min-h-[1em]">
             {{ validation.ok ? '' : validation.reason }}
           </div>
           <div class="flex items-center gap-2 shrink-0">

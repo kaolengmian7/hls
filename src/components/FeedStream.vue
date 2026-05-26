@@ -113,13 +113,13 @@ const events = computed(() => roomStore.feed);
             </span>
           </template>
           <template v-else>
-            <span class="text-parchment-400/80 font-serif italic">{{ ev.kind }}</span>
+            <span class="text-parchment-400/80 font-serif">{{ ev.kind }}</span>
           </template>
         </div>
       </transition-group>
       <div v-if="events.length === 0" class="text-center py-8">
         <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
-        <div class="font-body italic text-parchment-300/70 text-sm mt-2">
+        <div class="font-body text-parchment-300/70 text-sm mt-2">
           传话筒静默，静候本店开张。
         </div>
       </div>

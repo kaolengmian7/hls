@@ -69,7 +69,7 @@ function bundledNames(eq: Equipment): string {
           <div class="text-3xl filter drop-shadow">{{ eq.icon }}</div>
           <div class="flex-1 min-w-0">
             <div class="font-serif font-bold text-parchment-50 truncate text-base">{{ eq.name }}</div>
-            <div class="font-body italic text-xs text-parchment-300/85">{{ eq.description }}</div>
+            <div class="font-body text-xs text-parchment-300/85">{{ eq.description }}</div>
           </div>
         </div>
 
@@ -107,8 +107,8 @@ function bundledNames(eq: Equipment): string {
             <button class="btn-ghost py-1 px-2 text-[11px]" @click="cancelPick">作罢</button>
           </div>
           <div class="rpg-divider mb-3" />
-          <div v-if="pickingFor.bundledIds?.length" class="font-body italic text-xs text-parchment-300/85 mb-3">
-            搭配中已附：<span class="text-gold-200 not-italic">{{ bundledNames(pickingFor) }}</span>
+          <div v-if="pickingFor.bundledIds?.length" class="font-body text-xs text-parchment-300/85 mb-3">
+            搭配中已附：<span class="text-gold-200">{{ bundledNames(pickingFor) }}</span>
           </div>
           <div class="font-serif text-[11px] tracking-[0.32em] uppercase text-gold-300/80 mb-2">
             ✦ 请择一柄趁手兵器 ✦
@@ -125,7 +125,7 @@ function bundledNames(eq: Equipment): string {
                 <span class="text-xl">{{ w.icon }}</span>
                 <div class="min-w-0">
                   <div class="font-serif text-sm font-semibold text-parchment-50 truncate">{{ w.name }}</div>
-                  <div class="font-body italic text-[11px] text-parchment-400/80">{{ w.category }}</div>
+                  <div class="font-body text-[11px] text-parchment-400/80">{{ w.category }}</div>
                 </div>
               </div>
             </button>

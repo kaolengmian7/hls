@@ -89,7 +89,7 @@
   }
 
   .rpg-subtitle {
-    @apply font-serif italic tracking-[0.32em] text-gold-300/80;
+    @apply font-serif tracking-[0.32em] text-gold-300/80;
   }
 
   /* 古典分隔线，中央有菱形宝石 */

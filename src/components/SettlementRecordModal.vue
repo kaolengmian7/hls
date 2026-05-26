@@ -46,7 +46,7 @@ const records = computed(() => roomStore.settlementRecords);
         <div class="flex-1 overflow-y-auto p-5">
           <div v-if="records.length === 0" class="text-center py-10">
             <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
-            <div class="font-body italic text-parchment-300/75 mt-2">尚无流水记录</div>
+            <div class="font-body text-parchment-300/75 mt-2">尚无流水记录</div>
           </div>
           <ul v-else class="space-y-4">
             <li

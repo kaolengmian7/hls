@@ -150,7 +150,7 @@ function dismissHostClosed(): void {
     <div class="card rpg-corners p-10 text-center max-w-sm">
       <div class="rune-mark text-3xl animate-flicker">✶</div>
       <div class="rpg-title text-xl mt-2">敲门归店</div>
-      <div class="font-body italic text-parchment-300/80 mt-2">正在重新对接花栗鼠分号…</div>
+      <div class="font-body text-parchment-300/80 mt-2">正在重新对接花栗鼠分号…</div>
       <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
         暗号 · {{ code }}
       </div>
@@ -198,7 +198,7 @@ function dismissHostClosed(): void {
       <div class="text-center mb-6">
         <h2 class="rpg-title text-2xl sm:text-3xl">店内议事 · 分位与契约</h2>
         <div class="mx-auto max-w-md mt-2 rpg-divider" />
-        <p class="mt-2 font-body italic text-parchment-300/80 text-sm">
+        <p class="mt-2 font-body text-parchment-300/80 text-sm">
           一鼠坐镇神秘货柜，二鼠押镖出仓护航。
         </p>
       </div>
@@ -217,7 +217,7 @@ function dismissHostClosed(): void {
           <h3 class="rpg-title text-lg sm:text-xl">
             <span class="rune-mark mr-1">⚜</span>认领分位
           </h3>
-          <span class="font-body italic text-xs text-parchment-300/70">
+          <span class="font-body text-xs text-parchment-300/70">
             认下即立约，契约下不得擅改。
           </span>
         </div>
@@ -238,7 +238,7 @@ function dismissHostClosed(): void {
               </div>
             </div>
             <div class="rpg-divider mt-2 mb-2 opacity-70" />
-            <p class="font-body italic text-xs text-parchment-300/85 leading-relaxed">
+            <p class="font-body text-xs text-parchment-300/85 leading-relaxed">
               名额 2 · 起始 10 金 · 自军械架挑选兵器
             </p>
           </button>
@@ -258,12 +258,12 @@ function dismissHostClosed(): void {
               </div>
             </div>
             <div class="rpg-divider mt-2 mb-2 opacity-70" />
-            <p class="font-body italic text-xs text-parchment-300/85 leading-relaxed">
+            <p class="font-body text-xs text-parchment-300/85 leading-relaxed">
               名额 1 · 起始 0 金 · 执掌神秘货柜与开箱
             </p>
           </button>
         </div>
-        <p class="font-body italic text-[12px] text-parchment-400/80 mt-4 text-center">
+        <p class="font-body text-[12px] text-parchment-400/80 mt-4 text-center">
           一旦改换分位，原契约即作废（先前的「已立约」状态会被取消）。
         </p>
       </div>
@@ -280,7 +280,7 @@ function dismissHostClosed(): void {
               <span class="text-gold-300 font-bold tracking-widest uppercase">尚未签约</span>
             </template>
           </div>
-          <div class="font-body italic text-xs text-parchment-300/80 mt-1">{{ startHint }}</div>
+          <div class="font-body text-xs text-parchment-300/80 mt-1">{{ startHint }}</div>
         </div>
         <div class="flex flex-wrap gap-3 items-center">
           <button

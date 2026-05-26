@@ -82,7 +82,7 @@ function drawOne(): void {
           <div class="rpg-title text-2xl mt-2 animate-flicker">货柜启封中</div>
         </div>
         <div v-else-if="showcase.length >= 1" class="text-center animate-slide-up">
-          <div class="font-serif italic text-xs text-gold-300/80 tracking-[0.32em] uppercase mb-2">
+          <div class="font-serif text-xs text-gold-300/80 tracking-[0.32em] uppercase mb-2">
             ✦ 本次开出 ✦
           </div>
           <div
@@ -110,7 +110,7 @@ function drawOne(): void {
         </div>
         <div v-else class="text-center">
           <div class="rune-mark text-3xl text-gold-400/70 animate-flicker">✶</div>
-          <div class="font-body italic text-parchment-300/80 text-sm mt-2">
+          <div class="font-body text-parchment-300/80 text-sm mt-2">
             扣动货柜机关，方知珍藏几何。
           </div>
         </div>
@@ -125,7 +125,7 @@ function drawOne(): void {
           <span class="rune-mark">🎁</span> 开柜一次 · {{ SINGLE_DRAW_COST }} 金
         </button>
       </div>
-      <p class="font-body italic text-[12px] text-parchment-300/75 mt-3 leading-relaxed text-center">
+      <p class="font-body text-[12px] text-parchment-300/75 mt-3 leading-relaxed text-center">
         开箱由本店神签（服务端 crypto/rand）裁定并昭告全店，全员可于「开箱记事」共览。
       </p>
     </div>

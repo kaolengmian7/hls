@@ -46,7 +46,7 @@ const frameClass = computed(() => {
           <span class="truncate max-w-[140px]">{{ player.nickname }}</span>
           <span v-if="isSelf" class="badge !text-gold-200 !border-gold-400/60">我</span>
         </div>
-        <div class="font-serif italic text-[11px] text-parchment-400/80 mt-1 tracking-wider">
+        <div class="font-serif text-[11px] text-parchment-400/80 mt-1 tracking-wider">
           ✦ {{ (player.id ?? '').slice(-6) }} ✦
         </div>
       </div>
@@ -65,7 +65,7 @@ const frameClass = computed(() => {
     <template v-else>
       <div class="flex-1 flex flex-col items-center justify-center gap-2 text-parchment-400/70">
         <div class="rune-mark text-2xl animate-flicker">✦</div>
-        <div class="font-serif italic text-sm tracking-widest">空位待客…</div>
+        <div class="font-serif text-sm tracking-widest">空位待客…</div>
       </div>
     </template>
   </div>
