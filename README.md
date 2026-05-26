@@ -76,8 +76,8 @@ VITE_API_BASE=http://localhost:8088
 # VITE_WS_BASE=ws://localhost:8088   # 留空则自动从 API_BASE 派生
 
 # .env.production，生产构建
-VITE_API_BASE=http://43.135.10.215:8088
-# VITE_WS_BASE=ws://43.135.10.215:8088   # 留空则自动从 API_BASE 派生
+VITE_API_BASE=https://api.hls-club.com
+# VITE_WS_BASE=wss://api.hls-club.com   # 留空则自动从 API_BASE 派生
 ```
 
 ## 网络拓扑
@@ -144,5 +144,35 @@ npm run build
 ## 部署
 
 - 前端：`npm run build` → `dist/`，部署到 Vercel/Nginx/CDN；保留 SPA fallback 到 `index.html`。
-- 后端：单进程 Go 服务，监听端口；可放在 Nginx 反代后（注意 WebSocket Upgrade 头透传）。
+- 后端：`server/docker-compose.yml` 使用 Caddy 对外暴露 `80/443` 并自动申请 / 续期 HTTPS 证书，Go 服务只在 Docker 网络内监听 `8088`。
 - 房间状态目前仅存内存。如需水平扩展或滚动升级，参考设计文档 §7 引入 Redis。
+
+### 后端 HTTPS 部署
+
+1. 在 DNS 中添加 `api.hls-club.com` 的 `A` 记录，指向腾讯云公网 IP。
+2. 腾讯云安全组放行 `80`、`443`；`8088` 可不再对公网开放。
+3. 在服务器上配置环境变量：
+
+```bash
+cd server
+cp .env.example .env
+```
+
+```env
+HLS_API_DOMAIN=api.hls-club.com
+HLS_SESSION_SECRET=replace-with-a-long-random-secret
+HLS_CORS_ALLOW_ORIGINS=https://hls-club.com,https://你的-vercel域名.vercel.app
+```
+
+4. 启动服务：
+
+```bash
+docker compose up -d --build
+```
+
+5. Vercel 中设置并重新部署：
+
+```env
+VITE_API_BASE=https://api.hls-club.com
+# VITE_WS_BASE 留空即可自动推导为 wss://api.hls-club.com
+```

@@ -1,0 +1,5 @@
+{$HLS_API_DOMAIN} {
+	encode zstd gzip
+
+	reverse_proxy gameserver:8088
+}
