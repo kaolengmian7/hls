@@ -34,9 +34,17 @@ const canSettle = computed(
 
 const code = computed(() => roomStore.code || (route.params.code as string));
 const me = computed(() => roomStore.me);
-const teammates = computed(() =>
-  roomStore.players.filter((p) => p.id !== roomStore.selfPlayerId),
-);
+
+/**
+ * 同店在场名单：本人置顶，其余按服务端顺序。
+ * 用于左侧"店内同仁"栏统一展示三人账目。
+ */
+const roster = computed(() => {
+  const players = roomStore.players;
+  const self = players.find((p) => p.id === roomStore.selfPlayerId);
+  const others = players.filter((p) => p.id !== roomStore.selfPlayerId);
+  return self ? [self, ...others] : players;
+});
 
 onMounted(async () => {
   playerStore.ensureIdentity();
@@ -108,53 +116,12 @@ function dismissClosed(): void {
 
     <header class="px-4 sm:px-8 py-3 sticky top-0 z-10 backdrop-blur bg-ink-700/80 border-b border-gold-500/25">
       <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="flex items-center gap-4 min-w-0">
-          <div class="flex items-center gap-3">
-            <Avatar v-if="me" :seed="me.id" :name="me.nickname" size="md" />
-            <div v-if="me" class="min-w-0">
-              <div class="font-serif font-semibold text-parchment-50 truncate flex items-center gap-1.5">
-                <span v-if="me.isHost" class="text-gold-300" title="掌柜">👑</span>
-                {{ me.nickname }}
-                <span
-                  class="badge text-[10px]"
-                  :class="
-                    me.role === 'BOSS'
-                      ? '!border-ember-400/60 !text-ember-300'
-                      : '!border-sapphire-300/60 !text-sapphire-300'
-                  "
-                >
-                  {{ me.role ? ROLE_LABEL[me.role] : '' }}
-                </span>
-              </div>
-              <div class="coin-tag text-base mt-0.5">
-                <span>💰</span> {{ me.coin }}
-              </div>
-            </div>
-          </div>
-
-          <div class="hidden md:flex items-center gap-2">
-            <div
-              v-for="t in teammates"
-              :key="t.id"
-              class="rounded-md px-3 py-1.5 flex items-center gap-2 border border-gold-500/25 bg-ink-700/60"
-            >
-              <Avatar :seed="t.id" :name="t.nickname" size="sm" />
-              <div class="text-xs leading-tight">
-                <div class="font-serif text-parchment-100 truncate max-w-[88px]">{{ t.nickname }}</div>
-                <div class="flex items-center gap-1 mt-0.5">
-                  <span
-                    class="badge text-[10px]"
-                    :class="
-                      t.role === 'BOSS'
-                        ? '!border-ember-400/60 !text-ember-300'
-                        : '!border-sapphire-300/60 !text-sapphire-300'
-                    "
-                  >
-                    {{ t.role ? ROLE_LABEL[t.role] : '' }}
-                  </span>
-                  <span class="coin-tag text-[11px]">💰{{ t.coin }}</span>
-                </div>
-              </div>
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="rune-mark text-2xl animate-flicker">⚜</div>
+          <div class="min-w-0">
+            <div class="rpg-title text-base sm:text-lg leading-tight">花栗鼠分号</div>
+            <div class="font-serif text-[10px] tracking-[0.3em] uppercase text-gold-300/70 mt-0.5">
+              暗号 · {{ code }}
             </div>
           </div>
         </div>
@@ -189,30 +156,67 @@ function dismissClosed(): void {
       </div>
     </header>
 
-    <main class="flex-1 px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 max-w-6xl mx-auto w-full">
-      <section class="space-y-5">
+    <main class="flex-1 px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-[260px_1fr_340px] gap-6 max-w-7xl mx-auto w-full">
+      <aside class="order-2 lg:order-1">
+        <div class="card rpg-corners p-4 lg:sticky lg:top-24">
+          <h3 class="rpg-title text-base flex items-center gap-2">
+            <span class="rune-mark">⚜</span>店内同仁
+          </h3>
+          <div class="rpg-divider my-3" />
+          <div class="space-y-2.5">
+            <div
+              v-for="p in roster"
+              :key="p.id"
+              class="rounded-md p-2.5 flex items-center gap-3 border transition-colors"
+              :class="
+                p.id === roomStore.selfPlayerId
+                  ? 'border-gold-400/70 bg-gold-500/10'
+                  : 'border-gold-500/25 bg-ink-700/60'
+              "
+            >
+              <div class="relative shrink-0">
+                <Avatar :seed="p.id" :name="p.nickname" size="md" />
+                <span
+                  v-if="!p.connected"
+                  class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-oxblood-500 border border-ink-700"
+                  title="掉线中"
+                />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-serif font-semibold text-parchment-50 truncate flex items-center gap-1">
+                  <span v-if="p.isHost" class="text-gold-300 shrink-0" title="掌柜">👑</span>
+                  <span class="truncate">{{ p.nickname }}</span>
+                  <span
+                    v-if="p.id === roomStore.selfPlayerId"
+                    class="badge !text-gold-200 !border-gold-400/60 text-[10px] shrink-0"
+                  >
+                    我
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span
+                    class="badge text-[10px]"
+                    :class="
+                      p.role === 'BOSS'
+                        ? '!border-ember-400/60 !text-ember-300'
+                        : '!border-sapphire-300/60 !text-sapphire-300'
+                    "
+                  >
+                    {{ p.role ? ROLE_LABEL[p.role] : '未占位' }}
+                  </span>
+                </div>
+                <div class="coin-tag text-sm mt-1.5">
+                  <span>💰</span> {{ p.coin }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="order-1 lg:order-2 space-y-5">
         <template v-if="me?.role === 'BOSS'">
           <LotteryPanel />
-          <div class="card rpg-corners p-6 text-sm">
-            <h3 class="rpg-title text-lg mb-3">
-              <span class="rune-mark mr-1">⚜</span>掌柜的小算盘
-            </h3>
-            <div class="rpg-divider mb-3" />
-            <ul class="space-y-2 font-body text-parchment-200/90 leading-relaxed">
-              <li class="flex gap-2">
-                <span class="rune-mark text-gold-300">✦</span>
-                开张时钱袋空空，须由日积月累与盘账逐步充盈。
-              </li>
-              <li class="flex gap-2">
-                <span class="rune-mark text-gold-300">✦</span>
-                神秘货柜由本店神签（服务端 crypto/rand）裁定，全员可于「开箱记事」共览。
-              </li>
-              <li class="flex gap-2">
-                <span class="rune-mark text-gold-300">✦</span>
-                稀世珍品在传话筒里愈发耀眼，可作博弈筹码。
-              </li>
-            </ul>
-          </div>
         </template>
 
         <template v-else-if="me?.role === 'ESCORT'">
@@ -229,7 +233,7 @@ function dismissClosed(): void {
         </template>
       </section>
 
-      <aside>
+      <aside class="order-3">
         <FeedStream />
       </aside>
     </main>
