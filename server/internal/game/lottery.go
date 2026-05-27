@@ -47,10 +47,12 @@ const (
 
 // lotteryPool 老板抽奖奖品池。
 //
-// 共 42 件奖品，价值合计 5403W。每件奖品的 Value 在抽中时累加到房间
+// 共 51 件奖品，价值合计 10348W。每件奖品的 Value 在抽中时累加到房间
 // GuaranteedAmount；如累加后 newGuarantee > MaxGuaranteedAmount，
 // 则整次抽奖回滚（金币不扣、保底不变、不下发 LOTTERY_DRAWN）。
 var lotteryPool = []LotteryItem{
+	{ID: "TEAR_OF_THE_OCEAN", Name: "海洋之泪", Rarity: rarityHigh, Value: 2800, Weight: 0.05},
+	{ID: "HEART_OF_AFRICA", Name: "非洲之心", Rarity: rarityHigh, Value: 1300, Weight: 0.1},
 	{ID: "PORTABLE_VENTILATOR", Name: "复苏呼吸机", Rarity: rarityHigh, Value: 530, Weight: 0.3},
 	{ID: "MICRO_REACTOR", Name: "微型反应炉", Rarity: rarityHigh, Value: 470, Weight: 0.4},
 	{ID: "ARMORED_VEHICLE_BATTERY", Name: "装甲车电池", Rarity: rarityHigh, Value: 380, Weight: 0.55},
@@ -63,11 +65,14 @@ var lotteryPool = []LotteryItem{
 	{ID: "IMPRESSIONIST_PAINTING", Name: "印象派名画", Rarity: rarityHigh, Value: 210, Weight: 1.1},
 	{ID: "ROBOT_VAC_MOP", Name: "扫拖一体机器人", Rarity: rarityHigh, Value: 200, Weight: 1.2},
 	{ID: "REINFORCED_CARBON_FIBER_PLATE", Name: "强化碳纤维板", Rarity: rarityHigh, Value: 200, Weight: 1.2},
+	{ID: "FLIGHT_RECORDER", Name: "飞行记录仪", Rarity: rarityHigh, Value: 170, Weight: 1.5},
 	{ID: "FAMOUS_KILN_PORCELAIN", Name: "名窑瓷器", Rarity: rarityHigh, Value: 150, Weight: 1.7},
 	{ID: "BATTERY_PACK", Name: "动力电池组", Rarity: rarityHigh, Value: 150, Weight: 1.7},
 	{ID: "MIL_SHELL", Name: "军用炮弹", Rarity: rarityHigh, Value: 150, Weight: 1.7},
+	{ID: "DISK_ARRAY_HS_COMPACT", Name: "高速磁盘阵列", Rarity: rarityHigh, Value: 150, Weight: 1.7},
 	{ID: "AED", Name: "自动体外除颤仪", Rarity: rarityHigh, Value: 140, Weight: 1.9},
 	{ID: "POWERFUL_VACUUM", Name: "强力吸尘器", Rarity: rarityHigh, Value: 140, Weight: 1.9},
+	{ID: "BLADE_SERVER", Name: "刀片服务器", Rarity: rarityHigh, Value: 140, Weight: 1.9},
 	{ID: "IFV_MODEL_DELUXE", Name: "步战车模型", Rarity: rarityHigh, Value: 220, Weight: 1},
 	{ID: "MIL_DRONE", Name: "军用无人机", Rarity: rarityMedium, Value: 50, Weight: 6},
 	{ID: "MIL_INFO_TERMINAL", Name: "军用信息终端", Rarity: rarityMedium, Value: 38, Weight: 8},
@@ -80,8 +85,12 @@ var lotteryPool = []LotteryItem{
 	{ID: "ARCHIVED_AUDIO_SOURCE", Name: "已封存音源", Rarity: rarityMedium, Value: 50, Weight: 6},
 	{ID: "GOLDEN_CROCODILE_BUST", Name: "黄金鳄鱼头雕像", Rarity: rarityMedium, Value: 50, Weight: 6},
 	{ID: "TIANYUAN_DIFANG", Name: "天圆地方", Rarity: rarityMedium, Value: 60, Weight: 5},
+	{ID: "CAMERA", Name: "摄影机", Rarity: rarityMedium, Value: 65, Weight: 4.8},
 	{ID: "MUSKET", Name: "滑膛枪", Rarity: rarityMedium, Value: 70, Weight: 4.5},
+	{ID: "MIL_RADIO", Name: "军用电台", Rarity: rarityMedium, Value: 100, Weight: 3.2},
+	{ID: "ELECTRONIC_ANKLET", Name: "电子脚镣", Rarity: rarityMedium, Value: 100, Weight: 3.2},
 	{ID: "MEDICAL_ROBOT", Name: "医疗机器人", Rarity: rarityMedium, Value: 120, Weight: 2.6},
+	{ID: "LAPTOP", Name: "笔记本电脑", Rarity: rarityMedium, Value: 120, Weight: 2.6},
 	{ID: "IFV_MODEL", Name: "步战车模型", Rarity: rarityMedium, Value: 130, Weight: 2.3},
 	{ID: "CLOUD_STORAGE_ARRAY", Name: "云储存阵列", Rarity: rarityMedium, Value: 130, Weight: 2.3},
 	{ID: "VENTILATOR", Name: "呼吸机", Rarity: rarityMedium, Value: 45, Weight: 7},
