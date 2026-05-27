@@ -32,7 +32,7 @@ const emit = defineEmits<{
             {{ cancelText ?? '稍候' }}
           </button>
           <button :class="danger ? 'btn-danger' : 'btn-primary'" @click="emit('confirm')">
-            {{ confirmText ?? '应允' }}
+            {{ confirmText ?? '确认' }}
           </button>
         </div>
       </div>

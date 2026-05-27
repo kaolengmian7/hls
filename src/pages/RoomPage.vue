@@ -35,16 +35,16 @@ const startReady = computed(() => {
 });
 
 const startHint = computed(() => {
-  if (startReady.value.ok) return '万事俱备，可开张迎客';
+  if (startReady.value.ok) return '三星已聚，远征启程在即';
   switch (startReady.value.reason) {
     case 'NOT_FULL':
-      return '尚有空位，等待入伙';
+      return '尚有空席，渡鸦犹在传讯';
     case 'ROLE_INCOMPLETE':
-      return '分位未齐（须 1 位老板 + 2 位护航）';
+      return '职阶未齐（须 1 位灰袍法师 + 2 位守誓骑士）';
     case 'NOT_ALL_READY':
-      return '尚有同行未签契约';
+      return '尚有同伴未立下盟誓';
     default:
-      return '尚未具备开张条件';
+      return '尚未具备启程条件';
   }
 });
 
@@ -94,9 +94,9 @@ watch(
 async function copyCode(): Promise<void> {
   try {
     await navigator.clipboard.writeText(code.value);
-    roomStore.pushToast('success', '分号暗号已抄录');
+    roomStore.pushToast('success', '古印密语已誊于秘银卷轴');
   } catch {
-    roomStore.pushToast('warn', '抄录失败');
+    roomStore.pushToast('warn', '誊抄失败');
   }
 }
 
@@ -104,9 +104,9 @@ async function copyLink(): Promise<void> {
   try {
     const url = `${window.location.origin}/?code=${code.value}`;
     await navigator.clipboard.writeText(url);
-    roomStore.pushToast('success', '邀请帖已抄录');
+    roomStore.pushToast('success', '渡鸦传符已备');
   } catch {
-    roomStore.pushToast('warn', '抄录失败');
+    roomStore.pushToast('warn', '誊抄失败');
   }
 }
 
@@ -117,7 +117,7 @@ function changeRole(role: 'BOSS' | 'ESCORT'): void {
 function toggleReady(): void {
   if (!me.value) return;
   if (!me.value.role) {
-    roomStore.pushToast('warn', '请先认领分位');
+    roomStore.pushToast('warn', '请先择定职阶');
     return;
   }
   roomStore.sendIntent('READY', { ready: !me.value.ready });
@@ -126,7 +126,7 @@ function toggleReady(): void {
 function startGame(): void {
   if (!isHost.value) return;
   if (!startReady.value.ok) {
-    roomStore.pushToast('warn', `尚未开张：${startHint.value}`);
+    roomStore.pushToast('warn', `尚未启程：${startHint.value}`);
     return;
   }
   roomStore.sendIntent('START_GAME', {});
@@ -149,10 +149,10 @@ function dismissHostClosed(): void {
     <ToastContainer />
     <div class="card rpg-corners p-10 text-center max-w-sm">
       <div class="rune-mark text-3xl animate-flicker">✶</div>
-      <div class="rpg-title text-xl mt-2">敲门归店</div>
-      <div class="font-body text-parchment-300/80 mt-2">正在重新对接花栗鼠分号…</div>
+      <div class="rpg-title text-xl mt-2">重叩公会古门</div>
+      <div class="font-body text-parchment-300/80 mt-2">正在循古印重投花栗鼠魔法公会…</div>
       <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
-        暗号 · {{ code }}
+        古印 · {{ code }}
       </div>
     </div>
   </div>
@@ -166,20 +166,20 @@ function dismissHostClosed(): void {
       <div class="flex items-center gap-3 flex-wrap">
         <div class="leading-tight">
           <div class="font-serif text-[10px] tracking-[0.32em] uppercase text-gold-300/70">
-            <span class="rune-mark mr-1">⚜</span>分号暗号
+            <span class="rune-mark mr-1">⚜</span>古印密语
           </div>
           <div class="rpg-title text-2xl tracking-[.4em] font-display">{{ code }}</div>
         </div>
-        <button class="btn-ghost" @click="copyCode">抄录暗号</button>
-        <button class="btn-ghost" @click="copyLink">分发邀请帖</button>
+        <button class="btn-ghost" @click="copyCode">誊抄古印</button>
+        <button class="btn-ghost" @click="copyLink">渡鸦传符</button>
       </div>
       <div class="flex items-center gap-3">
         <div
           class="rounded-md px-3 py-1.5 leading-tight text-right border border-gold-500/40 bg-ink-700/60"
-          :title="`本店保底货量（仅供登记，不影响金币结算）`"
+          :title="`公会魔晶库藏（仅记于编年史，不影响金币结算）`"
         >
           <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
-            保底货量
+            魔晶库藏
           </div>
           <div class="text-base font-bold font-serif text-gold-200">
             {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
@@ -189,17 +189,17 @@ function dismissHostClosed(): void {
           <span class="rune-mark mr-1">🐿</span>{{ players.length }} / {{ MAX_PLAYERS }}
         </div>
         <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300" @click="showLeaveConfirm = true">
-          告别本店
+          离公会而去
         </button>
       </div>
     </header>
 
     <main class="flex-1 px-4 sm:px-8 py-8 max-w-4xl mx-auto w-full">
       <div class="text-center mb-6">
-        <h2 class="rpg-title text-2xl sm:text-3xl">店内议事 · 分位与契约</h2>
+        <h2 class="rpg-title text-2xl sm:text-3xl">白议会 · 职阶与盟誓</h2>
         <div class="mx-auto max-w-md mt-2 rpg-divider" />
         <p class="mt-2 font-body text-parchment-300/80 text-sm">
-          一鼠坐镇神秘货柜，二鼠押镖出仓护航。
+          一位灰袍法师启封群星圣匣，两位守誓骑士护其凯旋归家。
         </p>
       </div>
 
@@ -215,10 +215,10 @@ function dismissHostClosed(): void {
       <div class="card rpg-corners mt-7 p-6">
         <div class="flex items-center justify-between mb-4">
           <h3 class="rpg-title text-lg sm:text-xl">
-            <span class="rune-mark mr-1">⚜</span>认领分位
+            <span class="rune-mark mr-1">⚜</span>择定职阶
           </h3>
           <span class="font-body text-xs text-parchment-300/70">
-            认下即立约，契约下不得擅改。
+            盟誓既立，途中不得擅改。
           </span>
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -234,12 +234,12 @@ function dismissHostClosed(): void {
             <div class="flex items-center gap-2">
               <span class="text-2xl">🛡️</span>
               <div class="font-display tracking-[0.2em] text-sapphire-300 text-xl uppercase">
-                护航
+                守誓骑士
               </div>
             </div>
             <div class="rpg-divider mt-2 mb-2 opacity-70" />
             <p class="font-body text-xs text-parchment-300/85 leading-relaxed">
-              名额 2 · 起始 10 金 · 自军械架挑选兵器
+              名额 2 · 起始 10 金 · 于秘银武库择取信物
             </p>
           </button>
           <button
@@ -252,19 +252,19 @@ function dismissHostClosed(): void {
             @click="changeRole('BOSS')"
           >
             <div class="flex items-center gap-2">
-              <span class="text-2xl">👑</span>
+              <span class="text-2xl">🧙</span>
               <div class="font-display tracking-[0.2em] text-ember-400 text-xl uppercase">
-                老板
+                灰袍法师
               </div>
             </div>
             <div class="rpg-divider mt-2 mb-2 opacity-70" />
             <p class="font-body text-xs text-parchment-300/85 leading-relaxed">
-              名额 1 · 起始 0 金 · 执掌神秘货柜与开箱
+              名额 1 · 起始 0 金 · 启封群星圣匣，洞察命运珍藏
             </p>
           </button>
         </div>
         <p class="font-body text-[12px] text-parchment-400/80 mt-4 text-center">
-          一旦改换分位，原契约即作废（先前的「已立约」状态会被取消）。
+          若改换职阶，前盟即破，需重立新誓。
         </p>
       </div>
 
@@ -273,11 +273,11 @@ function dismissHostClosed(): void {
           <div class="font-serif text-sm flex items-center gap-2">
             <template v-if="me?.ready">
               <span class="rune-mark text-forest-300 text-lg animate-pulse_soft">✓</span>
-              <span class="text-forest-300 font-bold tracking-widest uppercase">契约已立</span>
+              <span class="text-forest-300 font-bold tracking-widest uppercase">盟誓已立</span>
             </template>
             <template v-else>
               <span class="rune-mark text-gold-300 text-lg animate-flicker">✦</span>
-              <span class="text-gold-300 font-bold tracking-widest uppercase">尚未签约</span>
+              <span class="text-gold-300 font-bold tracking-widest uppercase">盟誓未立</span>
             </template>
           </div>
           <div class="font-body text-xs text-parchment-300/80 mt-1">{{ startHint }}</div>
@@ -288,7 +288,7 @@ function dismissHostClosed(): void {
             :class="me?.ready ? 'btn-danger' : 'btn-primary'"
             @click="toggleReady"
           >
-            {{ me?.ready ? '撤回契约' : '签下契约' }}
+            {{ me?.ready ? '撤回盟誓' : '立下盟誓' }}
           </button>
           <button
             v-if="isHost"
@@ -297,7 +297,7 @@ function dismissHostClosed(): void {
             :title="startHint"
             @click="startGame"
           >
-            ⚜ 开张营业
+            ⚜ 启程远征
           </button>
         </div>
       </div>
@@ -305,13 +305,13 @@ function dismissHostClosed(): void {
 
     <ConfirmDialog
       :open="showLeaveConfirm"
-      :title="isHost ? '关张本店？' : '告别本店？'"
+      :title="isHost ? '解散公会？' : '辞别同盟？'"
       :message="
         isHost
-          ? '您是掌柜，离去之后本店随即关张，同行伙计将各奔前程。'
-          : '告别之后契约暂歇，凭分号暗号仍可再度回店。'
+          ? '您身为公会会长，一旦离去，远征即解，同伴皆将各奔灰港。'
+          : '辞别后誓约暂歇，凭古印密语仍可重投远征。'
       "
-      :confirm-text="isHost ? '关张' : '告别'"
+      :confirm-text="isHost ? '解散' : '辞行'"
       danger
       @confirm="confirmLeave"
       @cancel="showLeaveConfirm = false"
@@ -319,9 +319,9 @@ function dismissHostClosed(): void {
 
     <ConfirmDialog
       :open="showHostClosedDialog"
-      title="本店已歇业"
-      :message="`本店已歇业（${hostClosedReason || 'CLOSED'}），3 秒后自动返回门前。`"
-      confirm-text="返回门前"
+      title="公会已星散"
+      :message="`公会已星散（${hostClosedReason || 'CLOSED'}），3 秒后自归灰港门厅。`"
+      confirm-text="归灰港"
       cancel-text="稍候"
       @confirm="dismissHostClosed"
       @cancel="dismissHostClosed"

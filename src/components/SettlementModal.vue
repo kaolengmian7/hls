@@ -119,28 +119,28 @@ function coinWeight(k: StatKey): number {
 
 const validation = computed<{ ok: boolean; reason: string }>(() => {
   if (guaranteeDelta.value === null) {
-    return { ok: false, reason: '请输入合法的保底变化（非负整数）' };
+    return { ok: false, reason: '请输入合法的库藏变动（非负整数）' };
   }
   if (guaranteeDelta.value > GUARANTEE_MAX) {
-    return { ok: false, reason: `保底变化不能超过 ${GUARANTEE_MAX}` };
+    return { ok: false, reason: `库藏变动不可逾越 ${GUARANTEE_MAX}` };
   }
   if (newGuarantee.value === null) {
     return { ok: false, reason: '' };
   }
   if (newGuarantee.value < 0) {
-    return { ok: false, reason: '保底金额不足，扣减后不能为负' };
+    return { ok: false, reason: '库藏不丰，扣减后不可为负' };
   }
   if (newGuarantee.value > GUARANTEE_MAX) {
-    return { ok: false, reason: `结算后保底超过上限 ${GUARANTEE_MAX}W` };
+    return { ok: false, reason: `裁决后库藏超过上限 ${GUARANTEE_MAX}W` };
   }
   for (const p of players.value) {
     for (const k of STAT_KEYS) {
       const v = statValue(p.id, k);
       if (v < 0) {
-        return { ok: false, reason: `${p.nickname} 的字段必须为 0 ~ ${STAT_MAX} 整数` };
+        return { ok: false, reason: `${p.nickname} 的字段须填 0 ~ ${STAT_MAX} 之整数` };
       }
       if (v > STAT_MAX) {
-        return { ok: false, reason: `${p.nickname} 的字段超过 ${STAT_MAX}` };
+        return { ok: false, reason: `${p.nickname} 的字段逾越 ${STAT_MAX}` };
       }
     }
   }
@@ -173,10 +173,10 @@ function submit(): void {
 }
 
 const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
-  { key: 'kills', label: '击杀', suffix: '人' },
+  { key: 'kills', label: '斩敌', suffix: '人' },
   { key: 'smallReds', label: '小红', suffix: '个' },
-  { key: 'sixGrids', label: '6 格', suffix: '个' },
-  { key: 'nineGrids', label: '9+ 格', suffix: '个' },
+  { key: 'sixGrids', label: '6 格', suffix: '件' },
+  { key: 'nineGrids', label: '9+ 格', suffix: '件' },
 ];
 </script>
 
@@ -190,7 +190,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
       <div class="card rpg-corners w-full max-w-2xl max-h-[92vh] flex flex-col animate-slide-up">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gold-500/25">
           <h3 class="rpg-title text-xl">
-            <span class="rune-mark mr-1">⚖</span>盘点结账
+            <span class="rune-mark mr-1">⚖</span>战誓裁决
           </h3>
           <button class="btn-ghost py-1.5 px-3 text-xs" @click="emit('close')">作罢</button>
         </div>
@@ -198,7 +198,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
         <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
           <section>
             <div class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2">
-              <span class="rune-mark mr-1">❖</span>本场结果
+              <span class="rune-mark mr-1">❖</span>战誓终局
             </div>
             <div class="grid grid-cols-2 gap-3">
               <button
@@ -210,11 +210,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">🛡️</span>
                   <div class="font-display tracking-[0.2em] text-lg uppercase text-forest-300">
-                    顺利出仓
+                    凯旋归来
                   </div>
                 </div>
                 <div class="font-body text-[11px] mt-1 text-parchment-300/85">
-                  保底 −X · 全员各入袋 +3 金
+                  库藏 −X · 全员各得 +3 金
                 </div>
               </button>
               <button
@@ -226,11 +226,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">💀</span>
                   <div class="font-display tracking-[0.2em] text-lg uppercase text-oxblood-300">
-                    炸单覆灭
+                    群星陨落
                   </div>
                 </div>
                 <div class="font-body text-[11px] mt-1 text-parchment-300/85">
-                  保底 +X · 默认 +60W
+                  库藏 +X · 默认 +60W
                 </div>
               </button>
             </div>
@@ -238,7 +238,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 
           <section>
             <label class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2 block">
-              <span class="rune-mark mr-1">❖</span>{{ outcome === 'EVACUATED' ? '保底扣减（W）' : '保底增加（W）' }}
+              <span class="rune-mark mr-1">❖</span>{{ outcome === 'EVACUATED' ? '库藏扣减（W）' : '库藏增益（W）' }}
             </label>
             <div class="flex items-center gap-2">
               <input
@@ -249,7 +249,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 :placeholder="outcome === 'EVACUATED' ? '例如 200' : '60'"
               />
               <span class="font-serif text-sm text-gold-200 whitespace-nowrap">
-                现保底 {{ currentGuarantee }}W
+                当前库藏 {{ currentGuarantee }}W
               </span>
             </div>
             <div
@@ -257,7 +257,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               class="font-body text-xs mt-2"
               :class="newGuarantee < 0 || newGuarantee > GUARANTEE_MAX ? 'text-oxblood-300' : 'text-parchment-300/85'"
             >
-              结账之后保底：
+              裁决后库藏：
               <span class="font-serif font-bold text-parchment-50">{{ newGuarantee }}W</span>
               <span class="ml-1 text-parchment-400/80">
                 ({{ outcome === 'EVACUATED' ? '−' : '+' }}{{ guaranteeDelta }}W)
@@ -267,13 +267,13 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 
           <section>
             <div class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2">
-              <span class="rune-mark mr-1">❖</span>三鼠战绩
+              <span class="rune-mark mr-1">❖</span>三人征战录
             </div>
             <div class="rounded-md overflow-hidden border border-gold-500/30">
               <table class="w-full text-sm">
                 <thead>
                   <tr class="bg-ink-700/80">
-                    <th class="text-left font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2">伙计</th>
+                    <th class="text-left font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2">同袍</th>
                     <th
                       v-for="h in STAT_HEADERS"
                       :key="h.key"
@@ -281,7 +281,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                     >
                       {{ h.label }}
                     </th>
-                    <th class="text-right font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2 w-20">入袋</th>
+                    <th class="text-right font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2 w-20">所得</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -321,7 +321,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                     </td>
                     <td class="px-3 py-2 text-right font-serif font-bold">
                       <template v-if="previewCoinDelta(p.id) === null">
-                        <span class="text-oxblood-300 text-xs">非法</span>
+                        <span class="text-oxblood-300 text-xs">逆数</span>
                       </template>
                       <template v-else>
                         <span class="text-forest-300">+{{ previewCoinDelta(p.id) }}</span>
@@ -335,13 +335,13 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 
           <section class="rounded-md border border-gold-500/25 bg-ink-700/55 px-4 py-3 text-xs leading-relaxed">
             <div class="font-serif tracking-[0.18em] uppercase text-gold-300/90 mb-1">
-              <span class="rune-mark mr-1">❖</span>分账规矩
+              <span class="rune-mark mr-1">❖</span>裁决律例
             </div>
             <div class="font-body text-parchment-200/90">
-              击杀 1 人 +1 金 · 摸 1 个小红 +1 金 · 摸 1 件 6 格 +2 金 · 摸 1 件 9+ 格 +3 金
+              斩敌 1 +1 金 · 拾小红 1 +1 金 · 取 6 格遗珍 +2 金 · 取 9+ 格秘藏 +3 金
             </div>
             <div class="font-body text-forest-300/90 mt-0.5">
-              顺利出仓 · 全员各加封 +3 金
+              凯旋归来 · 全员各得 +3 金
             </div>
           </section>
         </div>
@@ -357,7 +357,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               :disabled="!canSubmit"
               @click="submit"
             >
-              {{ submitting ? '盘账中…' : '⚖ 一锤定账' }}
+              {{ submitting ? '裁决中…' : '⚖ 落印裁决' }}
             </button>
           </div>
         </div>

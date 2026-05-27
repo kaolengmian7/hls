@@ -36,8 +36,8 @@ const code = computed(() => roomStore.code || (route.params.code as string));
 const me = computed(() => roomStore.me);
 
 /**
- * 同店在场名单：本人置顶，其余按服务端顺序。
- * 用于左侧"店内同仁"栏统一展示三人账目。
+ * 同公会在场名单：本人置顶，其余按服务端顺序。
+ * 用于左侧"公会伙伴"栏统一展示三人账目。
  */
 const roster = computed(() => {
   const players = roomStore.players;
@@ -103,10 +103,10 @@ function dismissClosed(): void {
     <ToastContainer />
     <div class="card rpg-corners p-10 text-center max-w-sm">
       <div class="rune-mark text-3xl animate-flicker">✶</div>
-      <div class="rpg-title text-xl mt-2">回店续档</div>
-      <div class="font-body text-parchment-300/80 mt-2">正在重新对接花栗鼠分号…</div>
+      <div class="rpg-title text-xl mt-2">重叩公会古门</div>
+      <div class="font-body text-parchment-300/80 mt-2">正在循古印重投花栗鼠魔法公会…</div>
       <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
-        暗号 · {{ code }}
+        古印 · {{ code }}
       </div>
     </div>
   </div>
@@ -119,9 +119,9 @@ function dismissClosed(): void {
         <div class="flex items-center gap-3 min-w-0">
           <div class="rune-mark text-2xl animate-flicker">⚜</div>
           <div class="min-w-0">
-            <div class="rpg-title text-base sm:text-lg leading-tight">花栗鼠分号</div>
+            <div class="rpg-title text-base sm:text-lg leading-tight">花栗鼠魔法公会</div>
             <div class="font-serif text-[10px] tracking-[0.3em] uppercase text-gold-300/70 mt-0.5">
-              暗号 · {{ code }}
+              古印 · {{ code }}
             </div>
           </div>
         </div>
@@ -129,10 +129,10 @@ function dismissClosed(): void {
         <div class="flex items-center gap-2 flex-wrap">
           <div
             class="rounded-md px-2.5 py-1 leading-tight text-right border border-gold-500/40 bg-ink-700/70"
-            :title="`本店保底货量（仅供登记，不影响金币结算）`"
+            :title="`公会魔晶库藏（仅记于编年史，不影响金币结算）`"
           >
             <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
-              保底
+              库藏
             </div>
             <div class="text-sm font-bold font-serif text-gold-200">
               {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
@@ -143,14 +143,14 @@ function dismissClosed(): void {
             class="btn-boss py-1.5 px-3 text-[11px]"
             @click="showSettlement = true"
           >
-            ⚖ 盘点结账
+            ⚖ 战誓裁决
           </button>
           <button class="btn-ghost text-[11px]" @click="showSettlementHistory = true">
-            流水账册
+            征战编年史
           </button>
-          <button class="btn-ghost text-[11px]" @click="showLottery = true">开箱记事</button>
+          <button class="btn-ghost text-[11px]" @click="showLottery = true">圣匣秘录</button>
           <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300 text-[11px]" @click="showLeaveConfirm = true">
-            离店
+            辞行
           </button>
         </div>
       </div>
@@ -160,7 +160,7 @@ function dismissClosed(): void {
       <aside class="order-2 lg:order-1">
         <div class="card rpg-corners p-4 lg:sticky lg:top-24">
           <h3 class="rpg-title text-base flex items-center gap-2">
-            <span class="rune-mark">⚜</span>店内同仁
+            <span class="rune-mark">⚜</span>同盟伙伴
           </h3>
           <div class="rpg-divider my-3" />
           <div class="space-y-2.5">
@@ -179,18 +179,18 @@ function dismissClosed(): void {
                 <span
                   v-if="!p.connected"
                   class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-oxblood-500 border border-ink-700"
-                  title="掉线中"
+                  title="失联中"
                 />
               </div>
               <div class="flex-1 min-w-0">
                 <div class="font-serif font-semibold text-parchment-50 truncate flex items-center gap-1">
-                  <span v-if="p.isHost" class="text-gold-300 shrink-0" title="掌柜">👑</span>
+                  <span v-if="p.isHost" class="text-gold-300 shrink-0" title="会长">👑</span>
                   <span class="truncate">{{ p.nickname }}</span>
                   <span
                     v-if="p.id === roomStore.selfPlayerId"
                     class="badge !text-gold-200 !border-gold-400/60 text-[10px] shrink-0"
                   >
-                    我
+                    吾
                   </span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-1">
@@ -202,7 +202,7 @@ function dismissClosed(): void {
                         : '!border-sapphire-300/60 !text-sapphire-300'
                     "
                   >
-                    {{ p.role ? ROLE_LABEL[p.role] : '未占位' }}
+                    {{ p.role ? ROLE_LABEL[p.role] : '未择阶' }}
                   </span>
                 </div>
                 <div class="coin-tag text-sm mt-1.5">
@@ -227,7 +227,7 @@ function dismissClosed(): void {
           <div class="card rpg-corners p-10 text-center">
             <div class="rune-mark text-3xl animate-flicker">⚜</div>
             <div class="font-serif text-parchment-300 mt-2">
-              正在向本店核对您的分位…
+              白议会正核对您的职阶古印…
             </div>
           </div>
         </template>
@@ -247,13 +247,13 @@ function dismissClosed(): void {
 
     <ConfirmDialog
       :open="showLeaveConfirm"
-      :title="roomStore.isHost ? '关张本店？' : '中途离店？'"
+      :title="roomStore.isHost ? '解散公会？' : '中途辞行？'"
       :message="
         roomStore.isHost
-          ? '您是掌柜，离店之后这场买卖立即收摊，同行伙计将各奔前程。'
-          : '本场买卖进度将不复留存，确认要离店吗？'
+          ? '您身为公会会长，一旦离去，此役立即收旗，同伴皆将各奔灰港。'
+          : '远征中途辞行，本程战绩将随风消散，确认要走吗？'
       "
-      :confirm-text="roomStore.isHost ? '关张' : '离店'"
+      :confirm-text="roomStore.isHost ? '解散' : '辞行'"
       danger
       @confirm="confirmLeave"
       @cancel="showLeaveConfirm = false"
@@ -261,9 +261,9 @@ function dismissClosed(): void {
 
     <ConfirmDialog
       :open="showClosedDialog"
-      title="本店已歇业"
-      :message="`本店已歇业（${closedReason || 'CLOSED'}），3 秒后自动返回门前。`"
-      confirm-text="返回门前"
+      title="公会已星散"
+      :message="`公会已星散（${closedReason || 'CLOSED'}），3 秒后自归灰港门厅。`"
+      confirm-text="归灰港"
       cancel-text="稍候"
       @confirm="dismissClosed"
       @cancel="dismissClosed"

@@ -35,16 +35,16 @@ const frameClass = computed(() => {
         <span
           v-if="player.ready"
           class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-forest-500 border border-gold-400 text-parchment-50"
-          title="已签契约"
+          title="已缔结契约"
         >
           ✓
         </span>
       </div>
       <div class="text-center">
         <div class="font-serif text-base font-semibold text-parchment-50 flex items-center justify-center gap-1.5">
-          <span v-if="player.isHost" title="掌柜" class="text-gold-300">👑</span>
+          <span v-if="player.isHost" title="会长" class="text-gold-300">👑</span>
           <span class="truncate max-w-[140px]">{{ player.nickname }}</span>
-          <span v-if="isSelf" class="badge !text-gold-200 !border-gold-400/60">我</span>
+          <span v-if="isSelf" class="badge !text-gold-200 !border-gold-400/60">吾</span>
         </div>
         <div class="font-serif text-[11px] text-parchment-400/80 mt-1 tracking-wider">
           ✦ {{ (player.id ?? '').slice(-6) }} ✦
@@ -52,20 +52,20 @@ const frameClass = computed(() => {
       </div>
       <div class="flex gap-2 items-center mt-auto">
         <span class="badge" :class="roleClass">
-          {{ player.role ? ROLE_LABEL[player.role] : '未占位' }}
+          {{ player.role ? ROLE_LABEL[player.role] : '未择阶' }}
         </span>
         <span
           class="badge"
           :class="player.ready ? '!border-forest-400/70 !text-forest-300' : ''"
         >
-          {{ player.ready ? '已签约' : '未签约' }}
+          {{ player.ready ? '已立誓' : '未立誓' }}
         </span>
       </div>
     </template>
     <template v-else>
       <div class="flex-1 flex flex-col items-center justify-center gap-2 text-parchment-400/70">
         <div class="rune-mark text-2xl animate-flicker">✦</div>
-        <div class="font-serif text-sm tracking-widest">空位待客…</div>
+        <div class="font-serif text-sm tracking-widest">虚位以待…</div>
       </div>
     </template>
   </div>

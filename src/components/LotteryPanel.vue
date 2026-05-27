@@ -38,7 +38,7 @@ watch(
 
 function drawOne(): void {
   if (myCoin.value < SINGLE_DRAW_COST) {
-    roomStore.pushToast('warn', '钱袋不足');
+    roomStore.pushToast('warn', '囊中金币不足以启封圣匣');
     return;
   }
   roomStore.sendIntent('DRAW_LOTTERY', { times: 1 });
@@ -56,10 +56,10 @@ function drawOne(): void {
     <div class="relative">
       <div class="flex items-center justify-between mb-4 gap-2">
         <h3 class="rpg-title text-xl">
-          <span class="rune-mark mr-1">⚜</span>神秘货柜
+          <span class="rune-mark mr-1">⚜</span>群星圣匣
         </h3>
         <span class="badge !border-ember-400/60 !text-ember-300 animate-flicker">
-          <span class="rune-mark mr-1">★</span>掌柜手气正旺
+          <span class="rune-mark mr-1">★</span>群星眷顾灰袍
         </span>
       </div>
       <div class="rpg-divider mb-5" />
@@ -79,11 +79,11 @@ function drawOne(): void {
       >
         <div v-if="animating" class="text-center">
           <div class="rune-mark text-4xl animate-rune-spin inline-block">✶</div>
-          <div class="rpg-title text-2xl mt-2 animate-flicker">货柜启封中</div>
+          <div class="rpg-title text-2xl mt-2 animate-flicker">群星圣匣启封中</div>
         </div>
         <div v-else-if="showcase.length >= 1" class="text-center animate-slide-up">
           <div class="font-serif text-xs text-gold-300/80 tracking-[0.32em] uppercase mb-2">
-            ✦ 本次开出 ✦
+            ✦ 群星见证之物 ✦
           </div>
           <div
             class="font-display text-3xl font-bold tracking-wide text-shadow-relic"
@@ -105,13 +105,13 @@ function drawOne(): void {
             class="text-[11px] mt-2 font-serif text-gold-200 tracking-wider"
           >
             <span class="rune-mark mr-1">⚜</span>
-            保底 {{ formatGuaranteeShift(showcase[0]!.guaranteeDelta, showcase[0]!.guaranteeBefore, showcase[0]!.guaranteeAfter) }}
+            库藏 {{ formatGuaranteeShift(showcase[0]!.guaranteeDelta, showcase[0]!.guaranteeBefore, showcase[0]!.guaranteeAfter) }}
           </div>
         </div>
         <div v-else class="text-center">
           <div class="rune-mark text-3xl text-gold-400/70 animate-flicker">✶</div>
           <div class="font-body text-parchment-300/80 text-sm mt-2">
-            扣动货柜机关，方知珍藏几何。
+            诵咒启封圣匣，方知群星藏珍几何。
           </div>
         </div>
       </div>
@@ -122,11 +122,11 @@ function drawOne(): void {
           :disabled="myCoin < SINGLE_DRAW_COST"
           @click="drawOne"
         >
-          <span class="rune-mark">🎁</span> 开柜一次 · {{ SINGLE_DRAW_COST }} 金
+          <span class="rune-mark">🎁</span> 启封群星圣匣 · {{ SINGLE_DRAW_COST }} 金
         </button>
       </div>
       <p class="font-body text-[12px] text-parchment-300/75 mt-3 leading-relaxed text-center">
-        开箱由本店神签（服务端 crypto/rand）裁定并昭告全店，全员可于「开箱记事」共览。
+        启封由公会神谕（服务端 crypto/rand）裁定并昭告全员，可于「圣匣秘录」共览。
       </p>
     </div>
   </div>
