@@ -12,26 +12,21 @@ import {
 import type { LotteryRecord } from '@/net/protocol';
 
 const roomStore = useRoomStore();
-const animating = ref(false);
+const highlightReveal = ref(false);
 const showcase = ref<LotteryRecord[]>([]);
 
 const myCoin = computed(() => roomStore.me?.coin ?? 0);
 
-// 监听最新抽奖记录变化（仅当抽奖人是自己时弹出动画）
+// 老板本人收到私有 LOTTERY_DRAWN 后立即展示结果，再由后续快照同步公告与流水。
 watch(
-  () => roomStore.lotteryRecords,
-  (next, prev) => {
-    if (!prev || prev === next) return;
-    const newCount = next.length - prev.length;
-    if (newCount <= 0) return;
-    const fresh = next.slice(0, newCount);
-    if (fresh.length && fresh[0]!.playerId === roomStore.selfPlayerId) {
-      showcase.value = fresh;
-      animating.value = true;
-      setTimeout(() => {
-        animating.value = false;
-      }, 1800);
-    }
+  () => roomStore.latestLotteryReveal,
+  (next) => {
+    if (next.length === 0) return;
+    showcase.value = next;
+    highlightReveal.value = true;
+    setTimeout(() => {
+      highlightReveal.value = false;
+    }, 1800);
   },
   { deep: false },
 );
@@ -77,11 +72,11 @@ function drawOne(): void {
             inset 0 0 0 1px rgba(0, 0, 0, 0.45);
         "
       >
-        <div v-if="animating" class="text-center">
-          <div class="rune-mark text-4xl animate-rune-spin inline-block">✶</div>
-          <div class="rpg-title text-2xl mt-2 animate-flicker">神秘货柜开启中</div>
-        </div>
-        <div v-else-if="showcase.length >= 1" class="text-center animate-slide-up">
+        <div
+          v-if="showcase.length >= 1"
+          class="text-center"
+          :class="highlightReveal ? 'animate-slide-up' : ''"
+        >
           <div class="font-serif text-xs text-gold-300/80 tracking-[0.32em] uppercase mb-2">
             ✦ 本次开出的货品 ✦
           </div>

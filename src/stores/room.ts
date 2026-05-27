@@ -14,6 +14,7 @@ import type {
   EventType,
   IntentMap,
   IntentType,
+  LotteryRecord,
   Player,
   RoomSnapshot,
 } from '@/net/protocol';
@@ -31,6 +32,7 @@ let toastSeq = 0;
 
 export const useRoomStore = defineStore('room', () => {
   const snapshot = shallowRef<RoomSnapshot | null>(null);
+  const latestLotteryReveal = shallowRef<LotteryRecord[]>([]);
   const selfPlayerId = ref<string>('');
   const code = ref<string>('');
   const status = ref<ConnStatus>('idle');
@@ -75,6 +77,7 @@ export const useRoomStore = defineStore('room', () => {
         },
         onAccepted: (payload) => {
           snapshot.value = payload.snapshot;
+          latestLotteryReveal.value = [];
           selfPlayerId.value = payload.selfPlayerId;
           const wasReconnecting = status.value === 'reconnecting';
           status.value = 'connected';
@@ -171,6 +174,7 @@ export const useRoomStore = defineStore('room', () => {
     teardownClient();
     playerStore.clearSession();
     snapshot.value = null;
+    latestLotteryReveal.value = [];
     code.value = '';
     selfPlayerId.value = '';
     status.value = 'idle';
@@ -215,8 +219,14 @@ export const useRoomStore = defineStore('room', () => {
         pushToast('info', '房主已经变更');
         break;
       }
+      case 'LOTTERY_DRAWN': {
+        const p = payload as EventMap['LOTTERY_DRAWN'];
+        latestLotteryReveal.value =
+          p.records.length > 0 && p.records[0]!.playerId === selfPlayerId.value ? p.records : [];
+        break;
+      }
       // 其余 PLAYER_JOINED / PLAYER_LEFT / ROLE_CHANGED / READY_CHANGED /
-      // COIN_CHANGED / EQUIPMENT_PURCHASED / LOTTERY_DRAWN 都由 STATE_SNAPSHOT 覆盖；
+      // COIN_CHANGED / EQUIPMENT_PURCHASED 都由 STATE_SNAPSHOT 覆盖；
       // 这里不做增量合并，依赖服务端紧随其后的 STATE_SNAPSHOT 对账。
       default:
         break;
@@ -252,6 +262,7 @@ export const useRoomStore = defineStore('room', () => {
     me,
     isHost,
     lotteryRecords,
+    latestLotteryReveal,
     settlementRecords,
     feed,
     roomStatus,

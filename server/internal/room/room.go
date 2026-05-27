@@ -713,7 +713,9 @@ func (r *Room) handleDrawLottery(ctx context.Context, it Intent) {
 		})
 	}
 
-	// 广播顺序：COIN_CHANGED → GUARANTEE_CHANGED → LOTTERY_DRAWN → STATE_SNAPSHOT。
+	// 发送顺序：
+	//  1. 先给老板本人单播 LOTTERY_DRAWN，确保其先看到抽奖结果；
+	//  2. 再向全员广播 STATE_SNAPSHOT，把公告 / feed 同步出去。
 	// 与 docs/page.MD §3.2.2 「服务端裁决（抽奖 → 保底联动）」约定一致。
 	r.broadcast(protocol.EventCoinChanged, protocol.CoinChangedPayload{
 		Changes: []protocol.CoinChange{{
@@ -726,7 +728,7 @@ func (r *Room) handleDrawLottery(ctx context.Context, it Intent) {
 			After:  newGuarantee,
 		})
 	}
-	r.broadcast(protocol.EventLotteryDrawn, protocol.LotteryDrawnPayload{Records: records})
+	r.sendToPlayer(pid, protocol.EventLotteryDrawn, protocol.LotteryDrawnPayload{Records: records})
 	r.broadcastSnapshot()
 	logx.WithContext(ctx).Infow("lottery drawn",
 		logx.Field("code", r.code),
@@ -940,6 +942,14 @@ func (r *Room) broadcast(eventType string, payload any) {
 		}
 		c.SendEvent(eventType, payload, "")
 	}
+}
+
+func (r *Room) sendToPlayer(playerID, eventType string, payload any) {
+	c, ok := r.clients[playerID]
+	if !ok || c == nil {
+		return
+	}
+	c.SendEvent(eventType, payload, "")
 }
 
 func (r *Room) broadcastExcept(exceptPlayerID, eventType string, payload any) {
