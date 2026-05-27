@@ -25,7 +25,7 @@ const events = computed(() => roomStore.feed);
   <div class="card rpg-corners p-5 flex flex-col">
     <div class="flex items-center justify-between mb-3">
       <h3 class="rpg-title text-lg">
-        <span class="rune-mark mr-1">⚜</span>远见水晶 · 渡鸦传讯
+        <span class="rune-mark mr-1">⚜</span>店内播报
       </h3>
       <span class="font-serif text-[11px] tracking-[0.2em] uppercase text-gold-300/70">
         {{ events.length }} 缄
@@ -46,19 +46,19 @@ const events = computed(() => roomStore.feed);
             <span class="font-serif font-semibold text-forest-300">
               「{{ asStr(ev.payload.nickname) || nameOf(asStr(ev.payload.playerId)) }}」
             </span>
-            投身远征同盟。
+            进入了神秘商店。
           </template>
           <template v-else-if="ev.kind === 'PLAYER_LEFT'">
             <span class="font-serif font-semibold text-oxblood-300">
               「{{ nameOf(asStr(ev.payload.playerId)) }}」
             </span>
-            自此远征隐去身形。
+            离开了神秘商店。
           </template>
           <template v-else-if="ev.kind === 'LOTTERY'">
             <span class="font-serif font-semibold text-gold-200">
               「{{ nameOf(asStr(ev.payload.playerId)) }}」
             </span>
-            诵咒启封群星圣匣 ——
+            打开了神秘货柜 -
             <span class="font-serif font-bold text-royal-400">
               ‹{{ asStr(ev.payload.itemName) }}›
             </span>
@@ -80,7 +80,7 @@ const events = computed(() => roomStore.feed);
             <span class="font-serif font-semibold text-sapphire-300">
               「{{ nameOf(asStr(ev.payload.playerId)) }}」
             </span>
-            自秘银武库请得
+            从补给架拿走了
             <span class="font-serif font-bold text-parchment-50">
               ‹{{ getEquipment(asStr(ev.payload.equipmentId))?.name ?? asStr(ev.payload.equipmentId) }}›
             </span>
@@ -93,7 +93,7 @@ const events = computed(() => roomStore.feed);
           </template>
           <template v-else-if="ev.kind === 'GAME_STARTED'">
             <span class="rpg-title text-base font-bold tracking-widest">
-              ⚜ 群星见证 · 中洲秘境今夜开启！
+              ⚜ 神秘商店正式开张！
             </span>
           </template>
           <template v-else-if="ev.kind === 'SETTLEMENT'">
@@ -105,7 +105,7 @@ const events = computed(() => roomStore.feed);
                   : 'text-oxblood-300'
               "
             >
-              【裁决】{{ ev.payload.outcome === 'EVACUATED' ? '凯旋归来' : '群星陨落' }}
+              【结算】{{ ev.payload.outcome === 'EVACUATED' ? '成功撤离' : '炸单翻车' }}
             </span>
             <span v-if="Number(ev.payload.guaranteeDelta) > 0" class="text-gold-200 ml-1">
               · 库藏 {{ asStr(ev.payload.guaranteeBefore) }}W →
@@ -120,7 +120,7 @@ const events = computed(() => roomStore.feed);
       <div v-if="events.length === 0" class="text-center py-8">
         <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
         <div class="font-body text-parchment-300/70 text-sm mt-2">
-          远见水晶静默无光，渡鸦尚在远途。
+          还没有新的店内播报。
         </div>
       </div>
     </div>

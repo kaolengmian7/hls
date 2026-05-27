@@ -12,8 +12,8 @@ export const MAX_ESCORTS = 2;
 export const MAX_BOSSES = 1;
 
 export const ROLE_LABEL: Record<Role, string> = {
-  BOSS: '灰袍法师',
-  ESCORT: '守誓骑士',
+  BOSS: '老板',
+  ESCORT: '护航',
 };
 
 export type RosterSummary = {

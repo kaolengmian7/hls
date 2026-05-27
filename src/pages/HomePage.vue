@@ -69,13 +69,13 @@ async function handleCreate(): Promise<void> {
   if (creating.value) return;
   syncNickname();
   if (!playerStore.nickname.trim()) {
-    roomStore.pushToast('warn', '请先于秘银卷轴上铭下真名');
+    roomStore.pushToast('warn', '请先填写昵称');
     return;
   }
   if (!guaranteeValid.value) {
     roomStore.pushToast(
       'warn',
-      `魔晶库藏请填 ${MIN_GUARANTEED_AMOUNT}~${MAX_GUARANTEED_AMOUNT} 之间的整数`,
+      `店铺保底请填 ${MIN_GUARANTEED_AMOUNT}~${MAX_GUARANTEED_AMOUNT} 之间的整数`,
     );
     return;
   }
@@ -99,7 +99,7 @@ async function handleCreate(): Promise<void> {
   } catch (err) {
     const message =
       err instanceof ApiError ? err.message : (err as Error).message;
-    roomStore.pushToast('error', `古咒受阻：${message}`);
+    roomStore.pushToast('error', `创建商店失败：${message}`);
   } finally {
     creating.value = false;
   }
@@ -109,26 +109,26 @@ async function handleJoin(): Promise<void> {
   if (joining.value) return;
   syncNickname();
   if (!playerStore.nickname.trim()) {
-    roomStore.pushToast('warn', '请先于秘银卷轴上铭下真名');
+    roomStore.pushToast('warn', '请先填写昵称');
     return;
   }
   if (!isValidRoomCode(codeInput.value)) {
-    roomStore.pushToast('warn', '请咏出 6 位古印密语');
+    roomStore.pushToast('warn', '请输入 6 位店铺口令');
     return;
   }
   joining.value = true;
   try {
     const summary = await queryRoom(codeInput.value);
     if (!summary.exists) {
-      roomStore.pushToast('error', '此公会从未铭于卷轴，或已随风消散');
+      roomStore.pushToast('error', '这家商店不存在，或已经关闭');
       return;
     }
     if (summary.status === 'PLAYING') {
-      roomStore.pushToast('warn', '远征已启程踏入秘境，无人可中途追上');
+      roomStore.pushToast('warn', '商店已经开张，暂时不能中途加入');
       return;
     }
     if ((summary.playerCount ?? 0) >= 3) {
-      roomStore.pushToast('warn', '三席齐至，公会再无虚位');
+      roomStore.pushToast('warn', '店内 3 个位置已满');
       return;
     }
 
@@ -142,12 +142,12 @@ async function handleJoin(): Promise<void> {
     router.push({ name: 'room', params: { code: codeInput.value } });
   } catch (err) {
     const reason = (err as Error).message;
-    if (reason === 'FULL') roomStore.pushToast('warn', '三席齐至，公会再无虚位');
-    else if (reason === 'PLAYING') roomStore.pushToast('warn', '远征已启程踏入秘境，无人可中途追上');
-    else if (reason === 'DUP') roomStore.pushToast('warn', '您已立誓于此远征之中');
-    else if (reason === 'NOT_FOUND') roomStore.pushToast('error', '此公会从未铭于卷轴，或已随风消散');
-    else if (reason === 'TIMEOUT') roomStore.pushToast('error', '古咒受阻，请稍候再吟');
-    else roomStore.pushToast('error', `立约失败：${reason}`);
+    if (reason === 'FULL') roomStore.pushToast('warn', '店内 3 个位置已满');
+    else if (reason === 'PLAYING') roomStore.pushToast('warn', '商店已经开张，暂时不能中途加入');
+    else if (reason === 'DUP') roomStore.pushToast('warn', '您已经在这家商店里了');
+    else if (reason === 'NOT_FOUND') roomStore.pushToast('error', '这家商店不存在，或已经关闭');
+    else if (reason === 'TIMEOUT') roomStore.pushToast('error', '加入失败，请稍后重试');
+    else roomStore.pushToast('error', `进入商店失败：${reason}`);
   } finally {
     joining.value = false;
   }
@@ -166,37 +166,31 @@ async function handleJoin(): Promise<void> {
         花栗鼠的神秘商店
       </h1>
       <div class="mt-4 mx-auto max-w-xs rpg-divider" />
-      <p class="mt-3 font-body text-parchment-300/80 text-sm sm:text-base">
-        一位灰袍法师启封群星圣匣，两位守誓骑士护其凯旋归家。
-      </p>
     </header>
 
     <main class="flex-1 flex items-center justify-center px-4 py-6">
       <div class="card rpg-corners card-ornate w-full max-w-md p-7 sm:p-9 animate-slide-up">
         <div class="text-center mb-6">
           <div class="rune-mark text-2xl">⚜</div>
-          <div class="rpg-subtitle text-[10px] mt-1">立下誓约 · 缔结同盟</div>
+          <div class="rpg-subtitle text-[10px] mt-1">填写店名牌 · 进入神秘商店</div>
         </div>
 
         <div class="mb-5">
           <label class="font-serif text-xs tracking-[0.32em] uppercase text-gold-300 mb-2 block">
-            <span class="rune-mark mr-1">❖</span>您的真名
+            <span class="rune-mark mr-1">❖</span>您的昵称
           </label>
           <input
             v-model="nicknameInput"
             class="input"
             maxlength="16"
-            placeholder="于秘银卷轴上铭下真名…"
+            placeholder="请输入店员昵称…"
             @blur="syncNickname"
           />
         </div>
 
         <div class="mb-7">
           <label class="font-serif text-xs tracking-[0.32em] uppercase text-gold-300 mb-2 block">
-            <span class="rune-mark mr-1">❖</span>魔晶库藏
-            <span class="ml-1 normal-case tracking-normal text-parchment-400/70">
-              （仅记于编年史，不左右金币结算）
-            </span>
+            <span class="rune-mark mr-1">❖</span>店铺保底
           </label>
           <div class="relative">
             <input
@@ -214,11 +208,11 @@ async function handleJoin(): Promise<void> {
           </div>
           <p class="text-[11px] mt-2 font-body" :class="guaranteeValid ? 'text-parchment-300/80' : 'text-oxblood-300'">
             <template v-if="guaranteeValid">
-              当前库藏：<span class="text-gold-300 font-bold">{{ guaranteeNumber }}W</span>
-              · 允填 {{ MIN_GUARANTEED_AMOUNT }} ~ {{ MAX_GUARANTEED_AMOUNT }}
+              当前保底：<span class="text-gold-300 font-bold">{{ guaranteeNumber }}W</span>
+              · 可填 {{ MIN_GUARANTEED_AMOUNT }} ~ {{ MAX_GUARANTEED_AMOUNT }}
             </template>
             <template v-else>
-              库藏请填 {{ MIN_GUARANTEED_AMOUNT }} ~ {{ MAX_GUARANTEED_AMOUNT }} 之间的整数。
+              保底请填 {{ MIN_GUARANTEED_AMOUNT }} ~ {{ MAX_GUARANTEED_AMOUNT }} 之间的整数。
             </template>
           </p>
         </div>
@@ -228,8 +222,8 @@ async function handleJoin(): Promise<void> {
           :disabled="creating || !guaranteeValid"
           @click="handleCreate"
         >
-          <span v-if="creating">⚒ 古咒诵读中…</span>
-          <span v-else>⚜ 召集新远征</span>
+          <span v-if="creating">店铺布置中…</span>
+          <span v-else>⚜ 开一家神秘商店</span>
         </button>
 
         <div class="my-7 rpg-divider-text">
@@ -238,7 +232,7 @@ async function handleJoin(): Promise<void> {
 
         <div class="mb-4">
           <label class="font-serif text-xs tracking-[0.32em] uppercase text-gold-300 mb-2 block">
-            <span class="rune-mark mr-1">❖</span>古印密语 · 六位
+            <span class="rune-mark mr-1">❖</span>店铺口令 · 六位
           </label>
           <input
             :value="codeInput"
@@ -256,8 +250,8 @@ async function handleJoin(): Promise<void> {
           :disabled="joining"
           @click="handleJoin"
         >
-          <span v-if="joining">✦ 咏唱中…</span>
-          <span v-else>✶ 投身既有远征</span>
+          <span v-if="joining">正在入店…</span>
+          <span v-else>✶ 进入已有商店</span>
         </button>
       </div>
     </main>

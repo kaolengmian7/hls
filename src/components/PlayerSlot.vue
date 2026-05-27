@@ -35,14 +35,14 @@ const frameClass = computed(() => {
         <span
           v-if="player.ready"
           class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-forest-500 border border-gold-400 text-parchment-50"
-          title="已缔结契约"
+          title="已准备"
         >
           ✓
         </span>
       </div>
       <div class="text-center">
         <div class="font-serif text-base font-semibold text-parchment-50 flex items-center justify-center gap-1.5">
-          <span v-if="player.isHost" title="会长" class="text-gold-300">👑</span>
+          <span v-if="player.isHost" title="房主" class="text-gold-300">👑</span>
           <span class="truncate max-w-[140px]">{{ player.nickname }}</span>
           <span v-if="isSelf" class="badge !text-gold-200 !border-gold-400/60">吾</span>
         </div>
@@ -52,20 +52,20 @@ const frameClass = computed(() => {
       </div>
       <div class="flex gap-2 items-center mt-auto">
         <span class="badge" :class="roleClass">
-          {{ player.role ? ROLE_LABEL[player.role] : '未择阶' }}
+          {{ player.role ? ROLE_LABEL[player.role] : '未选角色' }}
         </span>
         <span
           class="badge"
           :class="player.ready ? '!border-forest-400/70 !text-forest-300' : ''"
         >
-          {{ player.ready ? '已立誓' : '未立誓' }}
+          {{ player.ready ? '已准备' : '未准备' }}
         </span>
       </div>
     </template>
     <template v-else>
       <div class="flex-1 flex flex-col items-center justify-center gap-2 text-parchment-400/70">
         <div class="rune-mark text-2xl animate-flicker">✦</div>
-        <div class="font-serif text-sm tracking-widest">虚位以待…</div>
+        <div class="font-serif text-sm tracking-widest">空位等待加入…</div>
       </div>
     </template>
   </div>

@@ -190,7 +190,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
       <div class="card rpg-corners w-full max-w-2xl max-h-[92vh] flex flex-col animate-slide-up">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gold-500/25">
           <h3 class="rpg-title text-xl">
-            <span class="rune-mark mr-1">⚖</span>战誓裁决
+            <span class="rune-mark mr-1">⚖</span>本轮结算
           </h3>
           <button class="btn-ghost py-1.5 px-3 text-xs" @click="emit('close')">作罢</button>
         </div>
@@ -198,7 +198,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
         <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
           <section>
             <div class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2">
-              <span class="rune-mark mr-1">❖</span>战誓终局
+              <span class="rune-mark mr-1">❖</span>本轮结果
             </div>
             <div class="grid grid-cols-2 gap-3">
               <button
@@ -210,11 +210,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">🛡️</span>
                   <div class="font-display tracking-[0.2em] text-lg uppercase text-forest-300">
-                    凯旋归来
+                    顺利收摊
                   </div>
                 </div>
                 <div class="font-body text-[11px] mt-1 text-parchment-300/85">
-                  库藏 −X · 全员各得 +3 金
+                  保底 -X · 全员各得 +3 金
                 </div>
               </button>
               <button
@@ -226,11 +226,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">💀</span>
                   <div class="font-display tracking-[0.2em] text-lg uppercase text-oxblood-300">
-                    群星陨落
+                    爆单翻车
                   </div>
                 </div>
                 <div class="font-body text-[11px] mt-1 text-parchment-300/85">
-                  库藏 +X · 默认 +60W
+                  保底 +X · 默认 +60W
                 </div>
               </button>
             </div>
@@ -238,7 +238,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 
           <section>
             <label class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2 block">
-              <span class="rune-mark mr-1">❖</span>{{ outcome === 'EVACUATED' ? '库藏扣减（W）' : '库藏增益（W）' }}
+              <span class="rune-mark mr-1">❖</span>{{ outcome === 'EVACUATED' ? '保底扣减（W）' : '保底增加（W）' }}
             </label>
             <div class="flex items-center gap-2">
               <input
@@ -249,7 +249,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 :placeholder="outcome === 'EVACUATED' ? '例如 200' : '60'"
               />
               <span class="font-serif text-sm text-gold-200 whitespace-nowrap">
-                当前库藏 {{ currentGuarantee }}W
+                当前保底 {{ currentGuarantee }}W
               </span>
             </div>
             <div
@@ -257,7 +257,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               class="font-body text-xs mt-2"
               :class="newGuarantee < 0 || newGuarantee > GUARANTEE_MAX ? 'text-oxblood-300' : 'text-parchment-300/85'"
             >
-              裁决后库藏：
+              结算后保底：
               <span class="font-serif font-bold text-parchment-50">{{ newGuarantee }}W</span>
               <span class="ml-1 text-parchment-400/80">
                 ({{ outcome === 'EVACUATED' ? '−' : '+' }}{{ guaranteeDelta }}W)
@@ -267,13 +267,13 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 
           <section>
             <div class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2">
-              <span class="rune-mark mr-1">❖</span>三人征战录
+              <span class="rune-mark mr-1">❖</span>三人本轮记录
             </div>
             <div class="rounded-md overflow-hidden border border-gold-500/30">
               <table class="w-full text-sm">
                 <thead>
                   <tr class="bg-ink-700/80">
-                    <th class="text-left font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2">同袍</th>
+                    <th class="text-left font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2">成员</th>
                     <th
                       v-for="h in STAT_HEADERS"
                       :key="h.key"
@@ -335,13 +335,13 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 
           <section class="rounded-md border border-gold-500/25 bg-ink-700/55 px-4 py-3 text-xs leading-relaxed">
             <div class="font-serif tracking-[0.18em] uppercase text-gold-300/90 mb-1">
-              <span class="rune-mark mr-1">❖</span>裁决律例
+              <span class="rune-mark mr-1">❖</span>结算规则
             </div>
             <div class="font-body text-parchment-200/90">
               斩敌 1 +1 金 · 拾小红 1 +1 金 · 取 6 格遗珍 +2 金 · 取 9+ 格秘藏 +3 金
             </div>
             <div class="font-body text-forest-300/90 mt-0.5">
-              凯旋归来 · 全员各得 +3 金
+              顺利收摊 · 全员各得 +3 金
             </div>
           </section>
         </div>
@@ -357,7 +357,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               :disabled="!canSubmit"
               @click="submit"
             >
-              {{ submitting ? '裁决中…' : '⚖ 落印裁决' }}
+              {{ submitting ? '结算中…' : '⚖ 确认结算' }}
             </button>
           </div>
         </div>

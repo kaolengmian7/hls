@@ -39,14 +39,14 @@ const records = computed(() => roomStore.settlementRecords);
       <div class="card rpg-corners w-full max-w-3xl max-h-[82vh] flex flex-col animate-slide-up">
         <div class="flex items-center justify-between p-5 border-b border-gold-500/25">
           <h3 class="rpg-title text-xl">
-            <span class="rune-mark mr-1">⚜</span>征战编年史
+            <span class="rune-mark mr-1">⚜</span>结算记录
           </h3>
           <button class="btn-ghost py-1.5 px-3" @click="emit('close')">合卷</button>
         </div>
         <div class="flex-1 overflow-y-auto p-5">
           <div v-if="records.length === 0" class="text-center py-10">
             <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
-            <div class="font-body text-parchment-300/75 mt-2">编年史尚未起笔</div>
+            <div class="font-body text-parchment-300/75 mt-2">暂时还没有结算记录</div>
           </div>
           <ul v-else class="space-y-4">
             <li
@@ -67,7 +67,7 @@ const records = computed(() => roomStore.settlementRecords);
                         : '!border-oxblood-300/70 !text-oxblood-300'
                     "
                   >
-                    {{ r.outcome === 'EVACUATED' ? '凯旋归来' : '群星陨落' }}
+                    {{ r.outcome === 'EVACUATED' ? '顺利收摊' : '爆单翻车' }}
                   </span>
                 </div>
                 <div class="font-serif text-xs text-gold-200">
@@ -87,7 +87,7 @@ const records = computed(() => roomStore.settlementRecords);
               <table class="w-full text-xs">
                 <thead>
                   <tr class="text-left">
-                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">同袍</th>
+                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">成员</th>
                     <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">斩敌</th>
                     <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">小红</th>
                     <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">6 格</th>

@@ -51,10 +51,10 @@ function bundledNames(eq: Equipment): string {
   <div class="card rpg-corners p-6">
     <div class="flex items-center justify-between mb-3 gap-2">
       <h3 class="rpg-title text-xl">
-        <span class="rune-mark mr-1">⚔</span>守誓者 · 秘银武库
+        <span class="rune-mark mr-1">⚔</span>护航补给架
       </h3>
       <span class="font-serif text-xs tracking-[0.2em] uppercase text-gold-300">
-        银币囊 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
+        当前金币 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
       </span>
     </div>
     <div class="rpg-divider mb-5" />
@@ -74,7 +74,7 @@ function bundledNames(eq: Equipment): string {
         </div>
 
         <div v-if="eq.bundledIds?.length" class="text-[11px] font-body text-parchment-400/80">
-          套装含：<span class="text-gold-200">{{ bundledNames(eq) }}</span>
+          套装包含：<span class="text-gold-200">{{ bundledNames(eq) }}</span>
         </div>
 
         <div class="flex items-center justify-between mt-1 pt-2 border-t border-gold-500/15">
@@ -86,7 +86,7 @@ function bundledNames(eq: Equipment): string {
             :disabled="!canAfford(eq)"
             @click="startBuy(eq)"
           >
-            {{ needsPick(eq) ? '择器入手' : '请入囊中' }}
+            {{ needsPick(eq) ? '挑一件带走' : '加入背包' }}
           </button>
         </div>
       </div>
@@ -101,7 +101,7 @@ function bundledNames(eq: Equipment): string {
         <div class="card rpg-corners w-full max-w-lg p-5 animate-slide-up">
           <div class="flex items-center justify-between mb-2 gap-2">
             <h4 class="rpg-title text-lg">
-              <span class="rune-mark mr-1">⚔</span>择器 · {{ pickingFor.name }}
+              <span class="rune-mark mr-1">⚔</span>选择搭配 · {{ pickingFor.name }}
               <span class="coin-tag ml-2 text-sm">💰 {{ pickingFor.price }}</span>
             </h4>
             <button class="btn-ghost py-1 px-2 text-[11px]" @click="cancelPick">作罢</button>
@@ -111,7 +111,7 @@ function bundledNames(eq: Equipment): string {
             套装已附：<span class="text-gold-200">{{ bundledNames(pickingFor) }}</span>
           </div>
           <div class="font-serif text-[11px] tracking-[0.32em] uppercase text-gold-300/80 mb-2">
-            ✦ 自瓦兰诸器中择一趁手 ✦
+            ✦ 请选择一件随套装带走 ✦
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[60vh] overflow-y-auto pr-1">
             <button
