@@ -104,7 +104,7 @@ function dismissClosed(): void {
     <div class="card rpg-corners p-10 text-center max-w-sm">
       <div class="rune-mark text-3xl animate-flicker">✶</div>
       <div class="rpg-title text-xl mt-2">重返神秘商店</div>
-      <div class="font-body text-parchment-300/80 mt-2">正在根据店铺口令返回花栗鼠的神秘商店…</div>
+      <div class="font-body text-parchment-300/80 mt-2">正在根据商店口令返回花栗鼠的神秘商店…</div>
       <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
         口令 · {{ code }}
       </div>
@@ -129,7 +129,7 @@ function dismissClosed(): void {
         <div class="flex items-center gap-2 flex-wrap">
           <div
             class="rounded-md px-2.5 py-1 leading-tight text-right border border-gold-500/40 bg-ink-700/70"
-            :title="`店铺保底`"
+            :title="`商店保底`"
           >
             <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
               保底
@@ -190,7 +190,7 @@ function dismissClosed(): void {
                     v-if="p.id === roomStore.selfPlayerId"
                     class="badge !text-gold-200 !border-gold-400/60 text-[10px] shrink-0"
                   >
-                    吾
+                    我
                   </span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-1">

@@ -12,7 +12,7 @@ export const MAX_ESCORTS = 2;
 export const MAX_BOSSES = 1;
 
 export const ROLE_LABEL: Record<Role, string> = {
-  BOSS: '老板',
+  BOSS: '板板',
   ESCORT: '护航',
 };
 

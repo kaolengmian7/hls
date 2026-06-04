@@ -44,7 +44,7 @@ const frameClass = computed(() => {
         <div class="font-serif text-base font-semibold text-parchment-50 flex items-center justify-center gap-1.5">
           <span v-if="player.isHost" title="房主" class="text-gold-300">👑</span>
           <span class="truncate max-w-[140px]">{{ player.nickname }}</span>
-          <span v-if="isSelf" class="badge !text-gold-200 !border-gold-400/60">吾</span>
+          <span v-if="isSelf" class="badge !text-gold-200 !border-gold-400/60">我</span>
         </div>
         <div class="font-serif text-[11px] text-parchment-400/80 mt-1 tracking-wider">
           ✦ {{ (player.id ?? '').slice(-6) }} ✦

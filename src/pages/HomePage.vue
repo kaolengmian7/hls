@@ -25,6 +25,14 @@ const nicknameInput = ref<string>('');
 const guaranteeInput = ref<string>(String(DEFAULT_GUARANTEED_AMOUNT));
 const creating = ref(false);
 const joining = ref(false);
+const nicknamePresets = [
+  '花栗鼠的神秘护卫',
+  '花栗鼠的贴身护航',
+  '板板专属守夜鼠',
+  '护航中的小花栗鼠',
+  '板板麾下神秘鼠',
+  '花栗鼠的星夜护航',
+];
 
 /**
  * 保底金额本地校验：仅允许整数，落在 [MIN, MAX]。
@@ -54,6 +62,11 @@ function syncNickname(): void {
   }
 }
 
+function applyNicknamePreset(name: string): void {
+  nicknameInput.value = name;
+  playerStore.setNickname(name);
+}
+
 function onCodeInput(e: Event): void {
   const target = e.target as HTMLInputElement;
   codeInput.value = target.value.replace(/\D/g, '').slice(0, 6);
@@ -75,7 +88,7 @@ async function handleCreate(): Promise<void> {
   if (!guaranteeValid.value) {
     roomStore.pushToast(
       'warn',
-      `店铺保底请填 ${MIN_GUARANTEED_AMOUNT}~${MAX_GUARANTEED_AMOUNT} 之间的整数`,
+      `商店保底请填 ${MIN_GUARANTEED_AMOUNT}~${MAX_GUARANTEED_AMOUNT} 之间的整数`,
     );
     return;
   }
@@ -113,7 +126,7 @@ async function handleJoin(): Promise<void> {
     return;
   }
   if (!isValidRoomCode(codeInput.value)) {
-    roomStore.pushToast('warn', '请输入 6 位店铺口令');
+    roomStore.pushToast('warn', '请输入 6 位商店口令');
     return;
   }
   joining.value = true;
@@ -186,11 +199,28 @@ async function handleJoin(): Promise<void> {
             placeholder="请输入店员昵称…"
             @blur="syncNickname"
           />
+          <div class="mt-3">
+            <div class="text-[11px] font-serif tracking-[0.2em] text-parchment-300/75 mb-2">
+              预设名牌
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="preset in nicknamePresets"
+                :key="preset"
+                type="button"
+                class="btn-ghost !normal-case !tracking-[0.08em] !px-2.5 !py-1.5 text-[11px]"
+                :class="nicknameInput.trim() === preset ? '!border-gold-400/70 !text-gold-200 !bg-gold-500/10' : ''"
+                @click="applyNicknamePreset(preset)"
+              >
+                {{ preset }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="mb-7">
           <label class="font-serif text-xs tracking-[0.32em] uppercase text-gold-300 mb-2 block">
-            <span class="rune-mark mr-1">❖</span>店铺保底
+            <span class="rune-mark mr-1">❖</span>商店保底
           </label>
           <div class="relative">
             <input
@@ -222,7 +252,7 @@ async function handleJoin(): Promise<void> {
           :disabled="creating || !guaranteeValid"
           @click="handleCreate"
         >
-          <span v-if="creating">店铺布置中…</span>
+          <span v-if="creating">商店布置中…</span>
           <span v-else>⚜ 开一家神秘商店</span>
         </button>
 
@@ -232,7 +262,7 @@ async function handleJoin(): Promise<void> {
 
         <div class="mb-4">
           <label class="font-serif text-xs tracking-[0.32em] uppercase text-gold-300 mb-2 block">
-            <span class="rune-mark mr-1">❖</span>店铺口令 · 六位
+            <span class="rune-mark mr-1">❖</span>商店口令 · 六位
           </label>
           <input
             :value="codeInput"

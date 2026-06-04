@@ -35,12 +35,12 @@ const startReady = computed(() => {
 });
 
 const startHint = computed(() => {
-  if (startReady.value.ok) return '三人已到齐，神秘商店随时可以开张';
+  if (startReady.value.ok) return '三人已到齐，神秘商店随时可以开启';
   switch (startReady.value.reason) {
     case 'NOT_FULL':
-      return '还有空位，等店员到齐再开门';
+      return '还有空位';
     case 'ROLE_INCOMPLETE':
-      return '角色未齐（须 1 个老板 + 2 个护航）';
+      return '角色未齐（须 1 个板板 + 2 个护航）';
     case 'NOT_ALL_READY':
       return '还有人没有准备好';
     default:
@@ -94,7 +94,7 @@ watch(
 async function copyCode(): Promise<void> {
   try {
     await navigator.clipboard.writeText(code.value);
-    roomStore.pushToast('success', '店铺口令已复制');
+    roomStore.pushToast('success', '商店口令已复制');
   } catch {
     roomStore.pushToast('warn', '誊抄失败');
   }
@@ -150,7 +150,7 @@ function dismissHostClosed(): void {
     <div class="card rpg-corners p-10 text-center max-w-sm">
       <div class="rune-mark text-3xl animate-flicker">✶</div>
       <div class="rpg-title text-xl mt-2">重返神秘商店</div>
-      <div class="font-body text-parchment-300/80 mt-2">正在根据店铺口令返回花栗鼠的神秘商店…</div>
+      <div class="font-body text-parchment-300/80 mt-2">正在根据商店口令返回花栗鼠的神秘商店…</div>
       <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
         口令 · {{ code }}
       </div>
@@ -166,7 +166,7 @@ function dismissHostClosed(): void {
       <div class="flex items-center gap-3 flex-wrap">
         <div class="leading-tight">
           <div class="font-serif text-[10px] tracking-[0.32em] uppercase text-gold-300/70">
-            <span class="rune-mark mr-1">⚜</span>店铺口令
+            <span class="rune-mark mr-1">⚜</span>商店口令
           </div>
           <div class="rpg-title text-2xl tracking-[.4em] font-display">{{ code }}</div>
         </div>
@@ -176,10 +176,10 @@ function dismissHostClosed(): void {
       <div class="flex items-center gap-3">
         <div
           class="rounded-md px-3 py-1.5 leading-tight text-right border border-gold-500/40 bg-ink-700/60"
-          :title="`店铺保底`"
+          :title="`商店保底`"
         >
           <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
-            店铺保底
+            商店保底
           </div>
           <div class="text-base font-bold font-serif text-gold-200">
             {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
@@ -189,17 +189,17 @@ function dismissHostClosed(): void {
           <span class="rune-mark mr-1">🐿</span>{{ players.length }} / {{ MAX_PLAYERS }}
         </div>
         <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300" @click="showLeaveConfirm = true">
-          离开店铺
+          离开商店
         </button>
       </div>
     </header>
 
     <main class="flex-1 px-4 sm:px-8 py-8 max-w-4xl mx-auto w-full">
       <div class="text-center mb-6">
-        <h2 class="rpg-title text-2xl sm:text-3xl">角色分配 · 开张准备</h2>
+        <h2 class="rpg-title text-2xl sm:text-3xl">角色分配</h2>
         <div class="mx-auto max-w-md mt-2 rpg-divider" />
         <p class="mt-2 font-body text-parchment-300/80 text-sm">
-          本局固定 3 个角色：1 个老板，2 个护航。
+          本局固定 3 个角色：1 个板板，2 个护航。
         </p>
       </div>
 
@@ -239,7 +239,7 @@ function dismissHostClosed(): void {
             </div>
             <div class="rpg-divider mt-2 mb-2 opacity-70" />
             <p class="font-body text-xs text-parchment-300/85 leading-relaxed">
-              名额 2 · 起始 10 金 · 花费鼠币起装备保护老板
+              名额 2 · 起始 10 金 · 花费鼠币起装备保护板板
             </p>
           </button>
           <button
@@ -254,7 +254,7 @@ function dismissHostClosed(): void {
             <div class="flex items-center gap-2">
               <span class="text-2xl">🧙</span>
               <div class="font-display tracking-[0.2em] text-ember-400 text-xl uppercase">
-                老板
+                板板
               </div>
             </div>
             <div class="rpg-divider mt-2 mb-2 opacity-70" />
@@ -305,11 +305,11 @@ function dismissHostClosed(): void {
 
     <ConfirmDialog
       :open="showLeaveConfirm"
-      :title="isHost ? '关闭商店？' : '离开店铺？'"
+      :title="isHost ? '关闭商店？' : '离开商店？'"
       :message="
         isHost
           ? '您是房主，离开后这家神秘商店会立刻关闭。'
-          : '离开后仍可凭店铺口令再次进入。'
+          : '离开后仍可凭商店口令再次进入。'
       "
       :confirm-text="isHost ? '关闭' : '离开'"
       danger

@@ -33,7 +33,7 @@ watch(
 
 function drawOne(): void {
   if (myCoin.value < SINGLE_DRAW_COST) {
-    roomStore.pushToast('warn', '金币不足，老板暂时开不了神秘货柜');
+    roomStore.pushToast('warn', '鼠币不足，板板暂时开不了神秘货柜');
     return;
   }
   roomStore.sendIntent('DRAW_LOTTERY', { times: 1 });
@@ -51,10 +51,10 @@ function drawOne(): void {
     <div class="relative">
       <div class="flex items-center justify-between mb-4 gap-2">
         <h3 class="rpg-title text-xl">
-          <span class="rune-mark mr-1">⚜</span>老板专属 · 神秘货柜
+          <span class="rune-mark mr-1">⚜</span>板板专属 · 神秘商店
         </h3>
         <span class="badge !border-ember-400/60 !text-ember-300 animate-flicker">
-          <span class="rune-mark mr-1">★</span>仅老板可开启
+          <span class="rune-mark mr-1">★</span>神秘商店
         </span>
       </div>
       <div class="rpg-divider mb-5" />
@@ -78,7 +78,7 @@ function drawOne(): void {
           :class="highlightReveal ? 'animate-slide-up' : ''"
         >
           <div class="font-serif text-xs text-gold-300/80 tracking-[0.32em] uppercase mb-2">
-            ✦ 本次开出的货品 ✦
+            ✦ 本次开出的红 ✦
           </div>
           <div
             class="font-display text-3xl font-bold tracking-wide text-shadow-relic"
@@ -106,7 +106,7 @@ function drawOne(): void {
         <div v-else class="text-center">
           <div class="rune-mark text-3xl text-gold-400/70 animate-flicker">✶</div>
           <div class="font-body text-parchment-300/80 text-sm mt-2">
-            点击开启神秘货柜，看看老板这次摸到什么好货。
+            点击开启神秘货柜，看看板板这次摸到什么好货。
           </div>
         </div>
       </div>
@@ -117,11 +117,11 @@ function drawOne(): void {
           :disabled="myCoin < SINGLE_DRAW_COST"
           @click="drawOne"
         >
-          <span class="rune-mark">🎁</span> 开启神秘货柜 · {{ SINGLE_DRAW_COST }} 金
+          <span class="rune-mark">🎁</span> 开启神秘商店 · {{ SINGLE_DRAW_COST }} 鼠币
         </button>
       </div>
       <p class="font-body text-[12px] text-parchment-300/75 mt-3 leading-relaxed text-center">
-        开柜结果由服务端随机生成并同步给全员，可在「货柜记录」中查看。
+        按照市场价加入保底
       </p>
     </div>
   </div>

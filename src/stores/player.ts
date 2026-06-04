@@ -22,18 +22,7 @@ type SessionRecord = {
   at: number;
 };
 
-const RANDOM_NAMES = [
-  '松果老板', '栗子护航', '仓鼠掌柜', '夜班店员', '盲盒猎人',
-  '小票管家', '补货达人', '橱窗巡逻员', '神秘进货员', '金库看守',
-  '货架整理师', '夜色收银员', '宝藏搬运工', '幸运开柜手',
-];
-
-function pickRandomNickname(): string {
-  return (
-    RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)] +
-    Math.floor(Math.random() * 100)
-  );
-}
+const DEFAULT_NICKNAME = '花栗鼠的板板';
 
 export const usePlayerStore = defineStore('player', () => {
   const playerId = ref<string>('');
@@ -51,7 +40,7 @@ export const usePlayerStore = defineStore('player', () => {
 
     let name = storage.get<string>(STORAGE_KEY_NICKNAME, '');
     if (!name) {
-      name = pickRandomNickname();
+      name = DEFAULT_NICKNAME;
       storage.set(STORAGE_KEY_NICKNAME, name);
     }
     nickname.value = name;

@@ -58,7 +58,7 @@ const events = computed(() => roomStore.feed);
             <span class="font-serif font-semibold text-gold-200">
               「{{ nameOf(asStr(ev.payload.playerId)) }}」
             </span>
-            打开了神秘货柜 -
+            获得了 -
             <span class="font-serif font-bold text-royal-400">
               ‹{{ asStr(ev.payload.itemName) }}›
             </span>
@@ -72,7 +72,7 @@ const events = computed(() => roomStore.feed);
               v-if="Number(ev.payload.guaranteeDelta) > 0"
               class="text-gold-200 ml-1"
             >
-              · 库藏 +{{ Number(ev.payload.guaranteeDelta) }}W
+              · 保底 +{{ Number(ev.payload.guaranteeDelta) }}W
               （{{ Number(ev.payload.guaranteeBefore) }} → {{ Number(ev.payload.guaranteeAfter) }}）
             </span>
           </template>

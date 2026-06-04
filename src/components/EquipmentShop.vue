@@ -54,7 +54,7 @@ function bundledNames(eq: Equipment): string {
         <span class="rune-mark mr-1">⚔</span>护航补给架
       </h3>
       <span class="font-serif text-xs tracking-[0.2em] uppercase text-gold-300">
-        当前金币 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
+        当前鼠币 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
       </span>
     </div>
     <div class="rpg-divider mb-5" />
