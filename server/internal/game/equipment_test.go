@@ -33,8 +33,8 @@ func TestEquipmentList(t *testing.T) {
 func TestEquipmentListIsDefensiveCopy(t *testing.T) {
 	list := EquipmentList()
 	for i := range list {
-		if list[i].ID == EquipmentBundleAW && len(list[i].PickPool) > 0 {
-			list[i].PickPool[0] = "MUTATED"
+		if list[i].ID == EquipmentBundleAW && len(list[i].BundledLabels) > 0 {
+			list[i].BundledLabels[0] = "MUTATED"
 			break
 		}
 	}
@@ -43,7 +43,7 @@ func TestEquipmentListIsDefensiveCopy(t *testing.T) {
 	if again == nil {
 		t.Fatal("BUNDLE_AW not found")
 	}
-	for _, p := range again.PickPool {
+	for _, p := range again.BundledLabels {
 		if p == "MUTATED" {
 			t.Fatal("equipment list mutation leaked into catalog")
 		}
@@ -60,7 +60,7 @@ func TestValidatePurchase(t *testing.T) {
 		wantMsg  string // 失败时期望的错误 Message（成功时忽略）
 	}{
 		{
-			name: "护甲无需 pick",
+			name: "护甲直接购买",
 			eqID: EquipmentArmorL5, pick: "",
 			wantOK: true,
 		},
@@ -70,44 +70,34 @@ func TestValidatePurchase(t *testing.T) {
 			wantCode: errors.CodeInvalidParam, wantMsg: "PICK_NOT_REQUIRED",
 		},
 		{
-			name: "AW 组合可选 M762",
-			eqID: EquipmentBundleAW, pick: WeaponM762,
-			wantOK: true,
-		},
-		{
-			name: "AW 组合不能再 pick AW",
-			eqID: EquipmentBundleAW, pick: WeaponAWM,
-			wantCode: errors.CodeInvalidParam, wantMsg: "INVALID_PICK",
-		},
-		{
-			name: "AW 组合必须 pick",
+			name: "AW 组合直接购买",
 			eqID: EquipmentBundleAW, pick: "",
-			wantCode: errors.CodeInvalidParam, wantMsg: "INVALID_PICK",
+			wantOK: true,
 		},
 		{
-			name: "M7 组合可选 M24",
+			name: "AW 组合不再接受 pick",
+			eqID: EquipmentBundleAW, pick: WeaponM762,
+			wantCode: errors.CodeInvalidParam, wantMsg: "PICK_NOT_REQUIRED",
+		},
+		{
+			name: "M7 组合直接购买",
+			eqID: EquipmentBundleM7, pick: "",
+			wantOK: true,
+		},
+		{
+			name: "M7 组合不再接受 pick",
 			eqID: EquipmentBundleM7, pick: WeaponM24,
+			wantCode: errors.CodeInvalidParam, wantMsg: "PICK_NOT_REQUIRED",
+		},
+		{
+			name: "其他枪直接购买",
+			eqID: EquipmentWeaponOther, pick: "",
 			wantOK: true,
 		},
 		{
-			name: "M7 组合不能 pick AW",
-			eqID: EquipmentBundleM7, pick: WeaponAWM,
-			wantCode: errors.CodeInvalidParam, wantMsg: "INVALID_PICK",
-		},
-		{
-			name: "M7 组合不能 pick 步枪",
-			eqID: EquipmentBundleM7, pick: WeaponM416,
-			wantCode: errors.CodeInvalidParam, wantMsg: "INVALID_PICK",
-		},
-		{
-			name: "其他枪不能 pick AW",
-			eqID: EquipmentWeaponOther, pick: WeaponAWM,
-			wantCode: errors.CodeInvalidParam, wantMsg: "INVALID_PICK",
-		},
-		{
-			name: "其他枪可 pick Kar98K",
+			name: "其他枪不再接受 pick",
 			eqID: EquipmentWeaponOther, pick: WeaponKar98K,
-			wantOK: true,
+			wantCode: errors.CodeInvalidParam, wantMsg: "PICK_NOT_REQUIRED",
 		},
 		{
 			name: "装备不存在",

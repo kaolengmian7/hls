@@ -97,8 +97,6 @@ type CoinChangedPayload struct {
 }
 
 // EquipmentPurchasedPayload 装备购买广播。
-//
-// Pick 与 Intent 中的 Pick 一致：表示武器组合 / 自选单枪类装备的二级选枪结果。
 type EquipmentPurchasedPayload struct {
 	PlayerID    string `json:"playerId"`
 	EquipmentID string `json:"equipmentId"`

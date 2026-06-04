@@ -188,14 +188,14 @@
 | 护甲 | 4 级护甲 | `ARMOR_L4` | 1 | 基础护甲 |
 | 护甲 | 5 级护甲 | `ARMOR_L5` | 2 | 进阶护甲 |
 | 护甲 | 6 级护甲 | `ARMOR_L6` | 3 | 顶级护甲 |
-| 武器组合 | AW + 任意枪 | `BUNDLE_AW` | 3 | 必带 AW（高级狙击），并自选 1 把其他枪；购买时通过 `pick` 字段传入所选枪 ID |
-| 武器组合 | M7 + 任意狙击枪 | `BUNDLE_M7` | 2 | 必带 M7（突击步枪），并自选 1 把狙击枪；购买时通过 `pick` 字段传入所选狙击枪 ID |
-| 单件武器 | 其他枪（自选 1 把） | `WEAPON_SINGLE` | 1 | 购买除 AW 以外的任意单枪；通过 `pick` 字段传入所选枪 ID |
+| 武器组合 | AW + 任意枪 | `BUNDLE_AW` | 3 | AW（高级狙击）+ 任意枪，整组直接购买，无需二级选枪 |
+| 武器组合 | M7 + 任意狙击枪 | `BUNDLE_M7` | 2 | M7（突击步枪）+ 任意狙击枪，整组直接购买，无需二级选枪 |
+| 单件武器 | 其他枪 | `WEAPON_SINGLE` | 1 | 除 AW 以外的任意单枪，直接购买，无需二级选枪 |
 
 > 备注：
 > - 护航初始金币为 10，可任意组合上述装备，**不限购买次数**（受余额约束）。
-> - 含「任意枪 / 任意狙击枪」的组合，客户端在购买前需要先弹出二级选择面板让玩家选择具体枪型，再连同 `equipmentId` 一起作为 `pick` 字段发给服务端；服务端校验枪型是否合法（不在排除清单内），不合法则回 `ACTION_REJECTED { reason: 'INVALID_PICK' }`。
-> - 服务端在 `internal/game/equipment.go` 维护这份清单（价格、`equipmentId`、可选枪池），是装备校验的唯一权威来源。
+> - 上述全部条目均为**直接购买**：客户端只发 `BUY_EQUIPMENT { equipmentId }`，扣费即可，不再弹出二级选枪面板、不再携带 `pick` 字段。服务端若收到多余的 `pick`，回 `ACTION_REJECTED { reason: 'INVALID_PARAM' }`（`PICK_NOT_REQUIRED`）。
+> - 服务端在 `internal/game/equipment.go` 维护这份清单（价格、`equipmentId`），是装备校验的唯一权威来源。
 
 #### 3.2.2 老板视角
 
@@ -433,7 +433,7 @@ type Envelope<T extends string = string, P = unknown> = {
 | `CHANGE_ROLE` | `{ role: 'BOSS' \| 'ESCORT' }` | 选/换角色 |
 | `READY` | `{ ready: boolean }` | 准备/取消 |
 | `START_GAME` | `{}` | 仅房主有效 |
-| `BUY_EQUIPMENT` | `{ equipmentId: string, pick?: string }` | 护航购买装备；含「任意枪 / 任意狙击枪」的组合通过 `pick` 传入所选具体枪 ID |
+| `BUY_EQUIPMENT` | `{ equipmentId: string }` | 护航购买装备；所有条目均直接扣费购买，无需 `pick` |
 | `DRAW_LOTTERY` | `{ times: 1 }` | 老板单次抽奖（消耗 2 币） |
 | `SETTLE_ROUND` | `{ outcome: 'EVACUATED' \| 'BOMBED', guaranteeDelta: number, perPlayer: { playerId: string, kills: number, smallReds: number, sixGrids: number, nineGrids: number }[] }` | 房主结算本局。`guaranteeDelta` 为非负整数（单位 W）；`outcome === 'EVACUATED'` 时表示扣减、`'BOMBED'` 时表示增加。`perPlayer` 必须涵盖房间内全部 3 位玩家。仅 `status === 'PLAYING'` 且发起者为房主时有效。 |
 | `PING` | `{}` | 心跳 |

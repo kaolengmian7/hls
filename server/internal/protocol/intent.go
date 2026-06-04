@@ -31,9 +31,6 @@ type ReadyPayload struct {
 }
 
 // BuyEquipmentPayload 客户端购买装备。
-//
-// Pick 仅在「武器组合 / 自选单枪」类型装备中需要：客户端在购买前先弹出二级选枪面板，
-// 让玩家选择一把具体的枪（武器 ID），与 EquipmentID 一并提交给服务端做合法性校验。
 type BuyEquipmentPayload struct {
 	EquipmentID string `json:"equipmentId"`
 	Pick        string `json:"pick,omitempty"`

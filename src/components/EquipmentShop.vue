@@ -1,17 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import {
-  EQUIPMENT_LIST,
-  getWeapon,
-  needsPick,
-  pickableWeapons,
-  type Equipment,
-} from '@/game/equipment';
+import { computed } from 'vue';
+import { EQUIPMENT_LIST, type Equipment } from '@/game/equipment';
 import { useRoomStore } from '@/stores/room';
 
 const roomStore = useRoomStore();
-
-const pickingFor = ref<Equipment | null>(null);
 
 const myCoin = computed(() => roomStore.me?.coin ?? 0);
 
@@ -21,29 +13,11 @@ function canAfford(eq: Equipment): boolean {
 
 function startBuy(eq: Equipment): void {
   if (!canAfford(eq)) return;
-  if (needsPick(eq)) {
-    pickingFor.value = eq;
-    return;
-  }
   roomStore.sendIntent('BUY_EQUIPMENT', { equipmentId: eq.id });
 }
 
-function confirmPick(weaponId: string): void {
-  const eq = pickingFor.value;
-  if (!eq) return;
-  roomStore.sendIntent('BUY_EQUIPMENT', { equipmentId: eq.id, pick: weaponId });
-  pickingFor.value = null;
-}
-
-function cancelPick(): void {
-  pickingFor.value = null;
-}
-
 function bundledNames(eq: Equipment): string {
-  if (!eq.bundledIds?.length) return '';
-  return eq.bundledIds
-    .map((id) => getWeapon(id)?.name ?? id)
-    .join('、');
+  return eq.bundledLabels?.join('、') ?? '';
 }
 </script>
 
@@ -73,7 +47,7 @@ function bundledNames(eq: Equipment): string {
           </div>
         </div>
 
-        <div v-if="eq.bundledIds?.length" class="text-[11px] font-body text-parchment-400/80">
+        <div v-if="eq.bundledLabels?.length" class="text-[11px] font-body text-parchment-400/80">
           套装包含：<span class="text-gold-200">{{ bundledNames(eq) }}</span>
         </div>
 
@@ -86,53 +60,11 @@ function bundledNames(eq: Equipment): string {
             :disabled="!canAfford(eq)"
             @click="startBuy(eq)"
           >
-            {{ needsPick(eq) ? '挑一件带走' : '加入背包' }}
+            加入背包
           </button>
         </div>
       </div>
     </div>
-
-    <transition name="fade">
-      <div
-        v-if="pickingFor"
-        class="fixed inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-        @click.self="cancelPick"
-      >
-        <div class="card rpg-corners w-full max-w-lg p-5 animate-slide-up">
-          <div class="flex items-center justify-between mb-2 gap-2">
-            <h4 class="rpg-title text-lg">
-              <span class="rune-mark mr-1">⚔</span>选择搭配 · {{ pickingFor.name }}
-              <span class="coin-tag ml-2 text-sm">💰 {{ pickingFor.price }}</span>
-            </h4>
-            <button class="btn-ghost py-1 px-2 text-[11px]" @click="cancelPick">作罢</button>
-          </div>
-          <div class="rpg-divider mb-3" />
-          <div v-if="pickingFor.bundledIds?.length" class="font-body text-xs text-parchment-300/85 mb-3">
-            套装已附：<span class="text-gold-200">{{ bundledNames(pickingFor) }}</span>
-          </div>
-          <div class="font-serif text-[11px] tracking-[0.32em] uppercase text-gold-300/80 mb-2">
-            ✦ 请选择一件随套装带走 ✦
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[60vh] overflow-y-auto pr-1">
-            <button
-              v-for="w in pickableWeapons(pickingFor)"
-              :key="w.id"
-              class="weapon-card rounded-md px-3 py-2 text-left transition-all
-                focus:outline-none focus:ring-1 focus:ring-gold-400/60"
-              @click="confirmPick(w.id)"
-            >
-              <div class="flex items-center gap-2">
-                <span class="text-xl">{{ w.icon }}</span>
-                <div class="min-w-0">
-                  <div class="font-serif text-sm font-semibold text-parchment-50 truncate">{{ w.name }}</div>
-                  <div class="font-body text-[11px] text-parchment-400/80">{{ w.category }}</div>
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
   </div>
 </template>
 
@@ -151,22 +83,5 @@ function bundledNames(eq: Equipment): string {
     inset 0 1px 0 rgba(244, 230, 194, 0.1),
     0 8px 22px -8px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(212, 175, 55, 0.25);
-}
-.weapon-card {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0)), #15100b;
-  border: 1px solid rgba(212, 175, 55, 0.22);
-}
-.weapon-card:hover {
-  border-color: rgba(232, 200, 124, 0.65);
-  background: linear-gradient(180deg, rgba(212, 175, 55, 0.06), rgba(0, 0, 0, 0)), #1c140d;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.18s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

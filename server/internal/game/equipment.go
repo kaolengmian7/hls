@@ -8,29 +8,29 @@ import (
 type EquipmentCategory string
 
 const (
-	// CategoryArmor 护甲（单件，不需要二级选枪）。
+	// CategoryArmor 护甲（单件）。
 	CategoryArmor EquipmentCategory = "ARMOR"
-	// CategoryBundle 武器组合（包含一把固定枪，且需要二级 pick）。
+	// CategoryBundle 武器组合（包含一把固定枪 + 任意搭配，整组直接带走）。
 	CategoryBundle EquipmentCategory = "BUNDLE"
-	// CategoryWeapon 散件武器（自选一把）。
+	// CategoryWeapon 散件武器。
 	CategoryWeapon EquipmentCategory = "WEAPON"
 )
 
 // Equipment 装备元数据。
 //
 // 字段说明：
-//   - BundledIDs 仅 BUNDLE 类使用，表示组合里"必带"的武器 ID。
-//   - PickPool   非空时表示购买时需要二级 pick，且 pick 必须出现在该池中。
-//     ARMOR 类没有 PickPool；BUNDLE/WEAPON 类必有 PickPool。
+//   - BundledLabels 仅 BUNDLE 类使用，表示组合随卡片展示的一组文案。
+//   - PickPool   预留字段：非空时表示购买需要二级 pick。当前所有装备均直接购买，
+//     该字段保持为空（即无需二级选枪）。
 type Equipment struct {
-	ID          string            `json:"id"`
-	Name        string            `json:"name"`
-	Icon        string            `json:"icon"`
-	Price       int               `json:"price"`
-	Category    EquipmentCategory `json:"category"`
-	Description string            `json:"description"`
-	BundledIDs  []string          `json:"bundledIds,omitempty"`
-	PickPool    []string          `json:"pickPool,omitempty"`
+	ID            string            `json:"id"`
+	Name          string            `json:"name"`
+	Icon          string            `json:"icon"`
+	Price         int               `json:"price"`
+	Category      EquipmentCategory `json:"category"`
+	Description   string            `json:"description"`
+	BundledLabels []string          `json:"bundledLabels,omitempty"`
+	PickPool      []string          `json:"pickPool,omitempty"`
 }
 
 // Weapon 武器元数据（用于二级选枪面板）。
@@ -54,6 +54,10 @@ const (
 	WeaponVector = "VECTOR"
 	WeaponS686   = "S686"
 	WeaponS12K   = "S12K"
+	WeaponM7     = "M7"
+	WeaponM14    = "M14"
+	WeaponAsval  = "Asval"
+	WeaponMK47   = "MK47"
 )
 
 // weaponCatalog 是当前局可见的所有武器。
@@ -85,7 +89,7 @@ const (
 
 // equipmentCatalog 是默认装备目录。
 //
-// AW 不进入「其他枪」单买池；M7 与其他狙击枪可单买。
+// 所有条目均为直接购买（扣费即可），无需二级选枪。
 var equipmentCatalog = []Equipment{
 	{
 		ID: EquipmentArmorL4, Name: "4 级护甲", Icon: "🛡️", Price: 1, Category: CategoryArmor,
@@ -100,29 +104,18 @@ var equipmentCatalog = []Equipment{
 		Description: "顶级护甲，最大减伤。",
 	},
 	{
-		ID: EquipmentBundleAW, Name: "AW + 任意枪", Icon: "🎯", Price: 3, Category: CategoryBundle,
-		Description: "必带 AWM，外加自选 1 把其他枪。",
-		BundledIDs:  []string{WeaponAWM},
-		PickPool: []string{
-			WeaponM24, WeaponKar98K,
-			WeaponM762, WeaponM416, WeaponSCARL, WeaponAKM,
-			WeaponUZI, WeaponVector, WeaponS686, WeaponS12K,
-		},
+		ID: EquipmentBundleAW, Name: "AW套装", Icon: "🎯", Price: 3, Category: CategoryBundle,
+		Description:   "AWM + 任意一把枪",
+		BundledLabels: []string{WeaponAWM},
 	},
 	{
-		ID: EquipmentBundleM7, Name: "M7 + 任意狙击枪", Icon: "🔫", Price: 2, Category: CategoryBundle,
-		Description: "必带 M762，外加自选 1 把非 AW 狙击枪。",
-		BundledIDs:  []string{WeaponM762},
-		PickPool:    []string{WeaponM24, WeaponKar98K},
+		ID: EquipmentBundleM7, Name: "T0枪械套装", Icon: "🔫", Price: 2, Category: CategoryBundle,
+		Description:   "T0枪械 + 任意一把狙击枪",
+		BundledLabels: []string{WeaponM7, WeaponM14, WeaponAsval, WeaponMK47},
 	},
 	{
-		ID: EquipmentWeaponOther, Name: "其他枪（自选 1 把）", Icon: "🔫", Price: 1, Category: CategoryWeapon,
-		Description: "除 AW 以外任选 1 把单枪。",
-		PickPool: []string{
-			WeaponM24, WeaponKar98K,
-			WeaponM762, WeaponM416, WeaponSCARL, WeaponAKM,
-			WeaponUZI, WeaponVector, WeaponS686, WeaponS12K,
-		},
+		ID: EquipmentWeaponOther, Name: "其他枪", Icon: "🔫", Price: 1, Category: CategoryWeapon,
+		Description: "除 T0 枪械以外的任意单枪，直接带走。",
 	},
 }
 
@@ -169,8 +162,8 @@ func FindWeapon(id string) *Weapon {
 // 返回值：
 //   - 命中且通过校验：返回装备指针，error 为 nil。
 //   - 装备不存在：返回 CodeItemNotFound。
-//   - PickPool 为空（如护甲）但 caller 多传了 pick：返回 CodeInvalidParam("PICK_NOT_REQUIRED")。
-//   - PickPool 非空但 pick 为空或不在池中：返回 CodeInvalidParam("INVALID_PICK")。
+//   - 当前目录下所有装备都直接购买；若 caller 多传了 pick，返回 CodeInvalidParam("PICK_NOT_REQUIRED")。
+//   - 若未来恢复二级选枪，PickPool 非空但 pick 为空或不在池中时，返回 CodeInvalidParam("INVALID_PICK")。
 func ValidatePurchase(equipmentID, pick string) (*Equipment, error) {
 	eq := FindEquipment(equipmentID)
 	if eq == nil {
@@ -196,8 +189,8 @@ func ValidatePurchase(equipmentID, pick string) (*Equipment, error) {
 // cloneEquipment 拷贝 Equipment 的可变切片字段。
 func cloneEquipment(src Equipment) Equipment {
 	dst := src
-	if src.BundledIDs != nil {
-		dst.BundledIDs = append([]string(nil), src.BundledIDs...)
+	if src.BundledLabels != nil {
+		dst.BundledLabels = append([]string(nil), src.BundledLabels...)
 	}
 	if src.PickPool != nil {
 		dst.PickPool = append([]string(nil), src.PickPool...)
