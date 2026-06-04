@@ -31,9 +31,9 @@ export const RARITY_LABEL: Record<string, string> = {
 };
 
 export const RARITY_COLOR: Record<string, string> = {
-  HIGH: 'text-amber-400',
-  MEDIUM: 'text-purple-400',
-  LOW: 'text-sky-400',
+  HIGH: 'text-red-400',
+  MEDIUM: 'text-gold-400',
+  LOW: 'text-purple-400',
   COMMON: 'text-slate-300',
   RARE: 'text-sky-400',
   EPIC: 'text-purple-400',
