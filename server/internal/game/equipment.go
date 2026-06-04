@@ -62,7 +62,7 @@ const (
 
 // weaponCatalog 是当前局可见的所有武器。
 //
-// 设计约定：AW(AWM) 只能通过 BUNDLE_AW 获得；其他枪可以通过 WEAPON_SINGLE 单买。
+// 设计约定：AW(AWM) 只能通过 BUNDLE_AW 获得；基础枪械与单枪匹马通过各自装备项直接购买。
 var weaponCatalog = []Weapon{
 	{ID: WeaponAWM, Name: "AWM", Icon: "🎯", Category: "SNIPER"},
 	{ID: WeaponM24, Name: "M24", Icon: "🎯", Category: "SNIPER"},
@@ -85,6 +85,7 @@ const (
 	EquipmentBundleAW    = "BUNDLE_AW"
 	EquipmentBundleM7    = "BUNDLE_M7"
 	EquipmentWeaponOther = "WEAPON_SINGLE"
+	EquipmentWeaponLone  = "WEAPON_LONE"
 )
 
 // equipmentCatalog 是默认装备目录。
@@ -104,18 +105,22 @@ var equipmentCatalog = []Equipment{
 		Description: "顶级护甲，最大减伤。",
 	},
 	{
-		ID: EquipmentBundleAW, Name: "AW套装", Icon: "🎯", Price: 3, Category: CategoryBundle,
+		ID: EquipmentBundleAW, Name: "AW套装", Icon: "🎯", Price: 4, Category: CategoryBundle,
 		Description:   "AWM + 任意一把枪",
 		BundledLabels: []string{WeaponAWM},
 	},
 	{
-		ID: EquipmentBundleM7, Name: "T0枪械套装", Icon: "🔫", Price: 2, Category: CategoryBundle,
+		ID: EquipmentBundleM7, Name: "T0枪械套装", Icon: "🔫", Price: 3, Category: CategoryBundle,
 		Description:   "T0枪械 + 任意一把狙击枪",
 		BundledLabels: []string{WeaponM7, WeaponM14, WeaponAsval, WeaponMK47},
 	},
 	{
-		ID: EquipmentWeaponOther, Name: "其他枪", Icon: "🔫", Price: 1, Category: CategoryWeapon,
-		Description: "除 T0 枪械以外的任意单枪，直接带走。",
+		ID: EquipmentWeaponOther, Name: "基础枪械套装", Icon: "🔫", Price: 2, Category: CategoryWeapon,
+		Description: "除 T0 枪械以外的任意单枪 + 任意一把狙击枪（AW 除外）。",
+	},
+	{
+		ID: EquipmentWeaponLone, Name: "单枪匹马", Icon: "🔫", Price: 1, Category: CategoryWeapon,
+		Description: "除 T0 枪械以外的任意单枪。",
 	},
 }
 
