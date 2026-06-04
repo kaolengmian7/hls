@@ -3,7 +3,6 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoomStore } from '@/stores/room';
 import {
   RARITY_COLOR,
-  RARITY_LABEL,
   SINGLE_DRAW_COST,
   formatGuaranteeShift,
   formatValueW,
@@ -274,9 +273,6 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
               >
                 {{ row.name }}
               </div>
-              <div class="text-[10px] mt-1.5 font-serif tracking-[0.28em] uppercase text-parchment-300/70">
-                {{ RARITY_LABEL[row.rarity as Rarity] ?? row.rarity }}
-              </div>
             </div>
           </div>
 
@@ -340,7 +336,7 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
           class="text-[11px] mt-1.5 font-serif text-gold-200 tracking-wider"
         >
           <span class="rune-mark mr-1">⚜</span>
-          库藏
+          保底
           {{
             formatGuaranteeShift(
               result!.guaranteeDelta,
