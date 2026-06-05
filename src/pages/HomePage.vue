@@ -231,10 +231,16 @@ async function handleJoin(): Promise<void> {
           <label class="font-serif text-xs tracking-[0.32em] uppercase text-gold-300 mb-2 block">
             <span class="rune-mark mr-1">❖</span>您的昵称
           </label>
-          <div class="text-[11px] font-serif tracking-[0.2em] text-parchment-300/75 mb-2">
-            1. 先选名牌
-          </div>
-          <div class="flex flex-wrap gap-2">
+          <input
+            :value="customNicknameInput"
+            class="input"
+            :disabled="!nicknamePresetInput"
+            :maxlength="customNicknameMaxLength"
+            :placeholder="nicknamePresetInput ? '请输入自定义昵称…' : '请先选择名牌'"
+            @input="onCustomNicknameInput"
+            @blur="syncNickname"
+          />
+          <div class="mt-4 flex flex-wrap gap-2">
             <button
               v-for="preset in nicknamePresets"
               :key="preset"
@@ -245,20 +251,6 @@ async function handleJoin(): Promise<void> {
             >
               {{ preset }}
             </button>
-          </div>
-          <div class="mt-4">
-            <div class="text-[11px] font-serif tracking-[0.2em] text-parchment-300/75 mb-2">
-              2. 再填自定义昵称
-            </div>
-            <input
-              :value="customNicknameInput"
-              class="input"
-              :disabled="!nicknamePresetInput"
-              :maxlength="customNicknameMaxLength"
-              :placeholder="nicknamePresetInput ? '请输入自定义昵称…' : '请先选择名牌'"
-              @input="onCustomNicknameInput"
-              @blur="syncNickname"
-            />
           </div>
           <div class="mt-3 rounded-md border border-gold-500/20 bg-ink-700/40 px-3 py-2">
             <div class="text-[11px] font-serif tracking-[0.2em] text-parchment-300/75">

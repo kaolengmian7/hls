@@ -26,16 +26,20 @@ type SessionRecord = {
 
 const DEFAULT_NICKNAME = '花栗鼠的板板';
 export const MAX_NICKNAME_LENGTH = 16;
+/** 名牌与自定义昵称之间的分隔符。 */
+export const NICKNAME_SEPARATOR = '-';
 
 export function maxCustomNicknameLength(preset: string): number {
-  return Math.max(0, MAX_NICKNAME_LENGTH - preset.trim().slice(0, MAX_NICKNAME_LENGTH).length);
+  const presetLength = preset.trim().slice(0, MAX_NICKNAME_LENGTH).length;
+  // 预留分隔符占位，确保「名牌 - 昵称」整体不超过 MAX_NICKNAME_LENGTH。
+  return Math.max(0, MAX_NICKNAME_LENGTH - presetLength - NICKNAME_SEPARATOR.length);
 }
 
 export function composeNicknameParts(preset: string, custom: string): string {
   const normalizedPreset = preset.trim().slice(0, MAX_NICKNAME_LENGTH);
   const normalizedCustom = custom.trim().slice(0, maxCustomNicknameLength(normalizedPreset));
   if (!normalizedPreset || !normalizedCustom) return '';
-  return `${normalizedPreset}${normalizedCustom}`;
+  return `${normalizedPreset}${NICKNAME_SEPARATOR}${normalizedCustom}`;
 }
 
 export const usePlayerStore = defineStore('player', () => {
