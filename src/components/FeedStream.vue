@@ -25,7 +25,7 @@ const events = computed(() => roomStore.feed);
   <div class="card rpg-corners p-5 flex flex-col">
     <div class="flex items-center justify-between mb-3">
       <h3 class="rpg-title text-lg">
-        <span class="rune-mark mr-1">⚜</span>店内播报
+        <span class="rune-mark mr-1">⚜</span>神秘商店 · 小报童
       </h3>
       <span class="font-serif text-[11px] tracking-[0.2em] uppercase text-gold-300/70">
         {{ events.length }} 缄
@@ -120,7 +120,7 @@ const events = computed(() => roomStore.feed);
       <div v-if="events.length === 0" class="text-center py-8">
         <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
         <div class="font-body text-parchment-300/70 text-sm mt-2">
-          还没有新的店内播报。
+          还没有新的小报童消息。
         </div>
       </div>
     </div>

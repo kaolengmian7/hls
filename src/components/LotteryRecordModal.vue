@@ -36,9 +36,9 @@ const records = computed(() => roomStore.lotteryRecords);
       <div class="card rpg-corners w-full max-w-2xl max-h-[82vh] flex flex-col animate-slide-up">
         <div class="flex items-center justify-between p-5 border-b border-gold-500/25">
           <h3 class="rpg-title text-xl">
-            <span class="rune-mark mr-1">⚜</span>货柜记录
+            <span class="rune-mark mr-1">⚜</span>抽奖记录
           </h3>
-          <button class="btn-ghost py-1.5 px-3" @click="emit('close')">合卷</button>
+          <button class="btn-ghost py-1.5 px-3" @click="emit('close')">关闭</button>
         </div>
         <div class="flex-1 overflow-y-auto p-5">
           <table class="w-full text-sm">
@@ -79,7 +79,7 @@ const records = computed(() => roomStore.lotteryRecords);
               <tr v-if="records.length === 0">
                 <td colspan="7" class="py-10 text-center">
                   <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
-                  <div class="font-body text-parchment-300/75 mt-2">还没有货柜开启记录</div>
+                  <div class="font-body text-parchment-300/75 mt-2">还没有抽奖记录</div>
                 </td>
               </tr>
             </tbody>

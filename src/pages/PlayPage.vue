@@ -148,7 +148,7 @@ function dismissClosed(): void {
           <button class="btn-ghost text-[11px]" @click="showSettlementHistory = true">
             结算记录
           </button>
-          <button class="btn-ghost text-[11px]" @click="showLottery = true">货柜记录</button>
+          <button class="btn-ghost text-[11px]" @click="showLottery = true">抽奖记录</button>
           <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300 text-[11px]" @click="showLeaveConfirm = true">
             离开
           </button>

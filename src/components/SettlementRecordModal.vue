@@ -41,7 +41,7 @@ const records = computed(() => roomStore.settlementRecords);
           <h3 class="rpg-title text-xl">
             <span class="rune-mark mr-1">⚜</span>结算记录
           </h3>
-          <button class="btn-ghost py-1.5 px-3" @click="emit('close')">合卷</button>
+          <button class="btn-ghost py-1.5 px-3" @click="emit('close')">关闭</button>
         </div>
         <div class="flex-1 overflow-y-auto p-5">
           <div v-if="records.length === 0" class="text-center py-10">
