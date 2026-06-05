@@ -119,19 +119,19 @@ function coinWeight(k: StatKey): number {
 
 const validation = computed<{ ok: boolean; reason: string }>(() => {
   if (guaranteeDelta.value === null) {
-    return { ok: false, reason: '请输入合法的库藏变动（非负整数）' };
+    return { ok: false, reason: '请输入合法的保底变动（非负整数）' };
   }
   if (guaranteeDelta.value > GUARANTEE_MAX) {
-    return { ok: false, reason: `库藏变动不可逾越 ${GUARANTEE_MAX}` };
+    return { ok: false, reason: `保底变动不可逾越 ${GUARANTEE_MAX}` };
   }
   if (newGuarantee.value === null) {
     return { ok: false, reason: '' };
   }
   if (newGuarantee.value < 0) {
-    return { ok: false, reason: '库藏不丰，扣减后不可为负' };
+    return { ok: false, reason: '保底扣减后不可为负' };
   }
   if (newGuarantee.value > GUARANTEE_MAX) {
-    return { ok: false, reason: `裁决后库藏超过上限 ${GUARANTEE_MAX}W` };
+    return { ok: false, reason: `裁决后保底超过上限 ${GUARANTEE_MAX}W` };
   }
   for (const p of players.value) {
     for (const k of STAT_KEYS) {
@@ -173,7 +173,7 @@ function submit(): void {
 }
 
 const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
-  { key: 'kills', label: '斩敌', suffix: '人' },
+  { key: 'kills', label: '击杀', suffix: '人' },
   { key: 'smallReds', label: '小红', suffix: '个' },
   { key: 'sixGrids', label: '6 格', suffix: '件' },
   { key: 'nineGrids', label: '9+ 格', suffix: '件' },
@@ -192,7 +192,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
           <h3 class="rpg-title text-xl">
             <span class="rune-mark mr-1">⚖</span>本轮结算
           </h3>
-          <button class="btn-ghost py-1.5 px-3 text-xs" @click="emit('close')">作罢</button>
+          <button class="btn-ghost py-1.5 px-3 text-xs" @click="emit('close')">取消</button>
         </div>
 
         <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
@@ -210,11 +210,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">🛡️</span>
                   <div class="font-display tracking-[0.2em] text-lg uppercase text-forest-300">
-                    顺利收摊
+                    撤离成功
                   </div>
                 </div>
                 <div class="font-body text-[11px] mt-1 text-parchment-300/85">
-                  保底 -X · 全员各得 +3 金
+                  保底 -X · 全员奖励 3 鼠币
                 </div>
               </button>
               <button
@@ -226,7 +226,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">💀</span>
                   <div class="font-display tracking-[0.2em] text-lg uppercase text-oxblood-300">
-                    爆单翻车
+                    炸单翻车
                   </div>
                 </div>
                 <div class="font-body text-[11px] mt-1 text-parchment-300/85">
@@ -338,10 +338,10 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               <span class="rune-mark mr-1">❖</span>结算规则
             </div>
             <div class="font-body text-parchment-200/90">
-              斩敌 1 +1 金 · 拾小红 1 +1 金 · 取 6 格遗珍 +2 金 · 取 9+ 格秘藏 +3 金
+              击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心，海洋之泪奖励 10 鼠币
             </div>
             <div class="font-body text-forest-300/90 mt-0.5">
-              顺利收摊 · 全员各得 +3 金
+              撤离成功 · 全员奖励 3 鼠币
             </div>
           </section>
         </div>
@@ -351,7 +351,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
             {{ validation.ok ? '' : validation.reason }}
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button class="btn-ghost py-2 px-4" @click="emit('close')">作罢</button>
+            <button class="btn-ghost py-2 px-4" @click="emit('close')">取消</button>
             <button
               class="btn-primary py-2 px-4"
               :disabled="!canSubmit"

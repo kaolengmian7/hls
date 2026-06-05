@@ -67,7 +67,7 @@ const records = computed(() => roomStore.settlementRecords);
                         : '!border-oxblood-300/70 !text-oxblood-300'
                     "
                   >
-                    {{ r.outcome === 'EVACUATED' ? '顺利收摊' : '爆单翻车' }}
+                    {{ r.outcome === 'EVACUATED' ? '撤离成功' : '炸单翻车' }}
                   </span>
                 </div>
                 <div class="font-serif text-xs text-gold-200">
@@ -88,7 +88,7 @@ const records = computed(() => roomStore.settlementRecords);
                 <thead>
                   <tr class="text-left">
                     <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">成员</th>
-                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">斩敌</th>
+                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">击杀</th>
                     <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">小红</th>
                     <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">6 格</th>
                     <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">9+ 格</th>
