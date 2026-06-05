@@ -138,6 +138,17 @@ function dismissClosed(): void {
               {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
             </div>
           </div>
+          <div
+            class="rounded-md px-2.5 py-1 leading-tight text-right border border-forest-400/40 bg-ink-700/70"
+            :title="`历次撤离成功累计扣减额`"
+          >
+            <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-forest-300/70">
+              得吃
+            </div>
+            <div class="text-sm font-bold font-serif text-forest-300">
+              {{ roomStore.evacuatedTotal }}<span class="text-forest-300/80 ml-0.5">W</span>
+            </div>
+          </div>
           <button
             v-if="canSettle"
             class="btn-boss py-1.5 px-3 text-[11px]"
