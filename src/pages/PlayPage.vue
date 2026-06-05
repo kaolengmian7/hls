@@ -194,9 +194,9 @@ function dismissClosed(): void {
                 />
               </div>
               <div class="flex-1 min-w-0">
-                <div class="font-serif font-semibold text-parchment-50 truncate flex items-center gap-1">
+                <div class="font-serif font-semibold text-parchment-50 flex flex-wrap items-center gap-1">
                   <span v-if="p.isHost" class="text-gold-300 shrink-0" title="房主">👑</span>
-                  <span class="truncate">{{ p.nickname }}</span>
+                  <span class="break-all">{{ p.nickname }}</span>
                   <span
                     v-if="p.id === roomStore.selfPlayerId"
                     class="badge !text-gold-200 !border-gold-400/60 text-[10px] shrink-0"
