@@ -15,9 +15,9 @@ import (
 // Hub 全局房间表。线程安全。
 //
 // 仅做三件事：
-//   1. 创建房间（分配 Code、启动 Room.Run goroutine）。
-//   2. 按 Code 查找房间，转交连接。
-//   3. 房间生命结束后释放 Code。
+//  1. 创建房间（分配 Code、启动 Room.Run goroutine）。
+//  2. 按 Code 查找房间，转交连接。
+//  3. 房间生命结束后释放 Code。
 type Hub struct {
 	ctx       context.Context
 	generator *code.Generator
@@ -92,14 +92,20 @@ func (h *Hub) GetRoom(c string) *Room {
 }
 
 // RoomSummary 是给 REST 接口的简要状态。
+//
+// IsMember 表示请求方携带的 playerId 当前是否仍占着该房间的座位（含断线未被 GC 者）。
+// 前端据此决定走"回归（恢复身份/鼠币）"还是"全新加入"：回归不受 PLAYING / 满员限制。
 type RoomSummary struct {
 	Exists      bool                `json:"exists"`
 	Status      protocol.RoomStatus `json:"status,omitempty"`
 	PlayerCount int                 `json:"playerCount,omitempty"`
+	IsMember    bool                `json:"isMember,omitempty"`
 }
 
 // QueryRoom 用于 REST 预检查。
-func (h *Hub) QueryRoom(c string) RoomSummary {
+//
+// playerID 可为空；非空时回填 IsMember，供前端判断是否是"回归本局"的老玩家。
+func (h *Hub) QueryRoom(c, playerID string) RoomSummary {
 	r := h.GetRoom(c)
 	if r == nil {
 		return RoomSummary{Exists: false}
@@ -108,6 +114,7 @@ func (h *Hub) QueryRoom(c string) RoomSummary {
 		Exists:      true,
 		Status:      r.Status(),
 		PlayerCount: r.PlayerCount(),
+		IsMember:    r.HasPlayer(playerID),
 	}
 }
 

@@ -163,18 +163,25 @@ async function handleJoin(): Promise<void> {
   }
   joining.value = true;
   try {
-    const summary = await queryRoom(codeInput.value);
+    const summary = await queryRoom(codeInput.value, playerStore.playerId);
     if (!summary.exists) {
       roomStore.pushToast('error', '这家商店不存在，或已经关闭');
       return;
     }
-    if (summary.status === 'PLAYING') {
-      roomStore.pushToast('warn', '商店已经开张，暂时不能中途加入');
-      return;
-    }
-    if ((summary.playerCount ?? 0) >= 3) {
-      roomStore.pushToast('warn', '店内 3 个位置已满');
-      return;
+
+    // 优先回归：若服务端确认这个 playerId 仍占着该房间的座位（含正在进行中的对局），
+    // 直接走重连/回座路径恢复身份与鼠币，不受 PLAYING / 满员限制。
+    // 否则按全新加入处理。
+    const isMember = summary.isMember === true;
+    if (!isMember) {
+      if (summary.status === 'PLAYING') {
+        roomStore.pushToast('warn', '商店已经开张，暂时不能中途加入');
+        return;
+      }
+      if ((summary.playerCount ?? 0) >= 3) {
+        roomStore.pushToast('warn', '店内 3 个位置已满');
+        return;
+      }
     }
 
     await roomStore.connect({

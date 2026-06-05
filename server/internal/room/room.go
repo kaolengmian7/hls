@@ -80,9 +80,9 @@ type Room struct {
 }
 
 type registration struct {
-	client       *Client
-	playerID     string // 仅 reconnect 时携带；新客户端为空
-	authenticated bool  // sessionToken 已验证
+	client        *Client
+	playerID      string // 仅 reconnect 时携带；新客户端为空
+	authenticated bool   // sessionToken 已验证
 }
 
 // newRoom 创建一个空房间，调用方在外部启动 Run goroutine。
@@ -135,6 +135,17 @@ func (r *Room) Status() protocol.RoomStatus { return r.status }
 
 // PlayerCount 返回当前玩家数（同上：仅作提示）。
 func (r *Room) PlayerCount() int { return len(r.players) }
+
+// HasPlayer 返回该 playerID 当前是否仍占着房间内的座位（含断线未被 GC 的玩家）。
+// 与 Status / PlayerCount 一致：仅在 Run 之外的只读提示场景使用，用于 REST 预检查
+// "这是不是我还能回归的对局"。
+func (r *Room) HasPlayer(playerID string) bool {
+	if playerID == "" {
+		return false
+	}
+	_, ok := r.players[playerID]
+	return ok
+}
 
 // Submit 将 Intent 投递到 Room 处理循环。
 // 非阻塞：满则记录错误并丢弃（避免业务侧背压）。
@@ -348,15 +359,12 @@ func (r *Room) handleJoin(ctx context.Context, it Intent) {
 		return
 	}
 
-	if r.status != protocol.RoomStatusWaiting {
-		c.SendEvent(protocol.EventJoinRejected, protocol.JoinRejectedPayload{
-			Reason: protocol.RejectPlaying,
-		}, it.ReqID)
-		c.Close()
-		return
-	}
-
-	// 房主预占的玩家槽位：playerID 命中且未连接 -> 接入。
+	// 既有座位复用：playerID 命中且当前未连接 -> 直接回座。
+	//
+	// 这里**不**校验房间状态：玩家关浏览器后凭口令 + 本机 playerId 回归时，
+	// 即便对局已经 PLAYING，只要其座位还在（未被 8h 宽限 GC），也应允许重新接入，
+	// 以恢复其身份、角色与鼠币。这是 sessionToken 失效（清缓存 / 超 TTL）时的兜底路径；
+	// 带有效 token 的重连仍走 handleReconnect。
 	if existing, ok := r.players[playerID]; ok {
 		// 已有相同 playerID
 		if existing.Connected {
@@ -390,6 +398,15 @@ func (r *Room) handleJoin(ctx context.Context, it Intent) {
 		logger.Infow("player joined (slot reuse)",
 			logx.Field("code", r.code),
 			logx.Field("playerId", playerID))
+		return
+	}
+
+	// 全新玩家：对局已开始则不允许中途加入。
+	if r.status != protocol.RoomStatusWaiting {
+		c.SendEvent(protocol.EventJoinRejected, protocol.JoinRejectedPayload{
+			Reason: protocol.RejectPlaying,
+		}, it.ReqID)
+		c.Close()
 		return
 	}
 

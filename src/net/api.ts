@@ -33,6 +33,8 @@ export type RoomSummary = {
   exists: boolean;
   status?: RoomStatus;
   playerCount?: number;
+  /** 携带 playerId 查询时回填：该玩家当前是否仍在房间内（可凭口令回归恢复身份/鼠币）。 */
+  isMember?: boolean;
 };
 
 export class ApiError extends Error {
@@ -92,9 +94,10 @@ export function createRoom(payload: {
   return request<CreateRoomResponse>('POST', '/api/rooms', payload);
 }
 
-export async function queryRoom(code: string): Promise<RoomSummary> {
+export async function queryRoom(code: string, playerId?: string): Promise<RoomSummary> {
+  const suffix = playerId ? `?playerId=${encodeURIComponent(playerId)}` : '';
   try {
-    return await request<RoomSummary>('GET', `/api/rooms/${code}`);
+    return await request<RoomSummary>('GET', `/api/rooms/${code}${suffix}`);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
       return { exists: false };

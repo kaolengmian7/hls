@@ -90,7 +90,8 @@ func QueryRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			writeError(w, r, http.StatusBadRequest, "invalid code", nil)
 			return
 		}
-		summary := ctx.Hub.QueryRoom(c)
+		playerID := strings.TrimSpace(r.URL.Query().Get("playerId"))
+		summary := ctx.Hub.QueryRoom(c, playerID)
 		if !summary.Exists {
 			writeError(w, r, http.StatusNotFound, "room not found", nil)
 			return
