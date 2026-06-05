@@ -154,6 +154,8 @@ function tick(ts: number): void {
       offset.value = landTargetOffset;
       phase.value = 'revealed';
       cancelAnim();
+      // 卷轴停稳、老板已看到本次结果 —— 此时才放出小报童对该次抽奖的播报。
+      roomStore.releaseSelfLotteryReveal();
       return;
     }
   }
@@ -212,7 +214,11 @@ watch(
   { deep: false },
 );
 
-onBeforeUnmount(cancelAnim);
+onBeforeUnmount(() => {
+  cancelAnim();
+  // 兜底：若在卷轴动画途中离开（如切换到补给架视图），避免被暂存的播报永久隐藏。
+  roomStore.releaseSelfLotteryReveal();
+});
 
 const revealed = computed(() => phase.value === 'revealed' && result.value !== null);
 </script>
