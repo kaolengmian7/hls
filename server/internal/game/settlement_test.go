@@ -94,6 +94,27 @@ func TestComputeSettlementBombed(t *testing.T) {
 	}
 }
 
+func TestComputeSettlementEvacuatedNegativeGuarantee(t *testing.T) {
+	playerIDs := []string{"a", "b", "c"}
+	result, err := ComputeSettlement(
+		protocol.SettlementOutcomeEvacuated,
+		100,
+		50,
+		[]protocol.SettlePlayerInput{
+			mkInput("a", 0, 0, 0, 0),
+			mkInput("b", 0, 0, 0, 0),
+			mkInput("c", 0, 0, 0, 0),
+		},
+		playerIDs,
+	)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if result.GuaranteeAfter != -50 {
+		t.Errorf("guarantee after=%d want -50", result.GuaranteeAfter)
+	}
+}
+
 func TestComputeSettlementZeroDelta(t *testing.T) {
 	playerIDs := []string{"a", "b", "c"}
 	result, err := ComputeSettlement(
@@ -164,15 +185,6 @@ func TestComputeSettlementInvalid(t *testing.T) {
 			perPlayer:      good,
 			ids:            playerIDs,
 			wantReason:     "INVALID_PARAMS",
-		},
-		{
-			name:           "撤离扣减后保底为负",
-			outcome:        protocol.SettlementOutcomeEvacuated,
-			guaranteeDelta: 100,
-			current:        50,
-			perPlayer:      good,
-			ids:            playerIDs,
-			wantReason:     "INVALID_GUARANTEE",
 		},
 		{
 			name:           "炸单累加超过上限",

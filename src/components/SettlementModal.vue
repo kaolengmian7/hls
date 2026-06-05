@@ -127,9 +127,7 @@ const validation = computed<{ ok: boolean; reason: string }>(() => {
   if (newGuarantee.value === null) {
     return { ok: false, reason: '' };
   }
-  if (newGuarantee.value < 0) {
-    return { ok: false, reason: '保底扣减后不可为负' };
-  }
+  // 撤离扣减允许结算后保底为负数，不做下限校验。
   if (newGuarantee.value > GUARANTEE_MAX) {
     return { ok: false, reason: `裁决后保底超过上限 ${GUARANTEE_MAX}W` };
   }
@@ -255,7 +253,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
             <div
               v-if="newGuarantee !== null"
               class="font-body text-xs mt-2"
-              :class="newGuarantee < 0 || newGuarantee > GUARANTEE_MAX ? 'text-oxblood-300' : 'text-parchment-300/85'"
+              :class="newGuarantee > GUARANTEE_MAX ? 'text-oxblood-300' : 'text-parchment-300/85'"
             >
               结算后保底：
               <span class="font-serif font-bold text-parchment-50">{{ newGuarantee }}W</span>

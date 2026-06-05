@@ -54,7 +54,7 @@ type SettlementResult struct {
 // 校验规则：
 //   - outcome 必须为 EVACUATED 或 BOMBED；
 //   - guaranteeDelta 落在 [0, MaxGuaranteedAmount]；
-//   - 计算后的新保底金额落在 [0, MaxGuaranteedAmount]，越界视为 INVALID_GUARANTEE；
+//   - 计算后的新保底金额不得超过 MaxGuaranteedAmount（撤离扣减允许为负数），越界视为 INVALID_GUARANTEE；
 //   - perPlayer 必须涵盖 playerIDs 中全部 ID 且不重复，每个统计字段落在 [0, 99]。
 //
 // 调用者职责：在调用前完成「房主权限」与「房间状态为 PLAYING」的校验。
@@ -75,11 +75,12 @@ func ComputeSettlement(
 	var newGuarantee int
 	switch outcome {
 	case protocol.SettlementOutcomeEvacuated:
+		// 撤离扣减保底允许结果为负数，不做下限校验。
 		newGuarantee = currentGuarantee - guaranteeDelta
 	case protocol.SettlementOutcomeBombed:
 		newGuarantee = currentGuarantee + guaranteeDelta
 	}
-	if newGuarantee < 0 || newGuarantee > MaxGuaranteedAmount {
+	if newGuarantee > MaxGuaranteedAmount {
 		return SettlementResult{}, errors.NewExposable(errors.CodeInvalidParam, settlementReasonInvalidGuarantee)
 	}
 
