@@ -33,10 +33,16 @@ const GUARANTEE_MAX = 999_999;
 const outcome = ref<SettlementOutcome>('EVACUATED');
 const guaranteeInput = ref<string>('');
 const stats = ref<Record<string, StatRow>>({});
+// 护航专属：是否救助板板（true 时 +1 币）。
+const rescues = ref<Record<string, boolean>>({});
 const submitting = ref(false);
 
 const players = computed(() => roomStore.players);
 const currentGuarantee = computed(() => roomStore.guaranteedAmount);
+
+function isEscort(playerId: string): boolean {
+  return players.value.find((p) => p.id === playerId)?.role === 'ESCORT';
+}
 
 function freshRow(): StatRow {
   return { kills: '0', smallReds: '0', sixGrids: '0', nineGrids: '0' };
@@ -48,10 +54,13 @@ function resetForm(): void {
   guaranteeInput.value = '';
   submitting.value = false;
   const next: Record<string, StatRow> = {};
+  const nextRescues: Record<string, boolean> = {};
   for (const p of players.value) {
     next[p.id] = freshRow();
+    nextRescues[p.id] = false;
   }
   stats.value = next;
+  rescues.value = nextRescues;
 }
 
 watch(
@@ -95,10 +104,19 @@ function statValue(playerId: string, key: StatKey): number {
 
 function previewCoinDelta(playerId: string): number | null {
   let delta = 0;
-  for (const k of STAT_KEYS) {
-    const v = statValue(playerId, k);
-    if (v < 0 || v > STAT_MAX) return null;
-    delta += v * coinWeight(k);
+  if (isEscort(playerId)) {
+    // 护航：仅击杀 + 救助板板计币，不再通过小红 / 6 格 / 9 格获得币。
+    const kills = statValue(playerId, 'kills');
+    if (kills < 0 || kills > STAT_MAX) return null;
+    delta = kills * coinWeight('kills');
+    if (rescues.value[playerId]) delta += 1;
+  } else {
+    // 板板（老板）：完整战绩计币。
+    for (const k of STAT_KEYS) {
+      const v = statValue(playerId, k);
+      if (v < 0 || v > STAT_MAX) return null;
+      delta += v * coinWeight(k);
+    }
   }
   if (outcome.value === 'EVACUATED') delta += 3;
   return delta;
@@ -159,13 +177,18 @@ function submit(): void {
   roomStore.sendIntent('SETTLE_ROUND', {
     outcome: outcome.value,
     guaranteeDelta: guaranteeDelta.value!,
-    perPlayer: players.value.map((p) => ({
-      playerId: p.id,
-      kills: statValue(p.id, 'kills'),
-      smallReds: statValue(p.id, 'smallReds'),
-      sixGrids: statValue(p.id, 'sixGrids'),
-      nineGrids: statValue(p.id, 'nineGrids'),
-    })),
+    perPlayer: players.value.map((p) => {
+      const escort = isEscort(p.id);
+      return {
+        playerId: p.id,
+        kills: statValue(p.id, 'kills'),
+        // 护航不再通过小红 / 6 格 / 9 格计币，统一上报 0。
+        smallReds: escort ? 0 : statValue(p.id, 'smallReds'),
+        sixGrids: escort ? 0 : statValue(p.id, 'sixGrids'),
+        nineGrids: escort ? 0 : statValue(p.id, 'nineGrids'),
+        rescue: escort ? !!rescues.value[p.id] : false,
+      };
+    }),
   });
   emit('close');
 }
@@ -309,14 +332,47 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                         </div>
                       </div>
                     </td>
-                    <td v-for="h in STAT_HEADERS" :key="h.key" class="px-2 py-2">
-                      <input
-                        v-model="stats[p.id][h.key]"
-                        inputmode="numeric"
-                        pattern="[0-9]*"
-                        class="stat-input"
-                      />
-                    </td>
+                    <template v-if="p.role === 'ESCORT'">
+                      <td class="px-2 py-2">
+                        <input
+                          v-model="stats[p.id].kills"
+                          inputmode="numeric"
+                          pattern="[0-9]*"
+                          class="stat-input"
+                        />
+                      </td>
+                      <td colspan="3" class="px-2 py-2">
+                        <div class="flex items-center justify-center gap-2">
+                          <span class="font-serif text-[11px] text-parchment-300/80 whitespace-nowrap">救助板板</span>
+                          <button
+                            type="button"
+                            class="rescue-toggle"
+                            :class="rescues[p.id] ? 'is-yes' : ''"
+                            @click="rescues[p.id] = true"
+                          >
+                            是
+                          </button>
+                          <button
+                            type="button"
+                            class="rescue-toggle"
+                            :class="!rescues[p.id] ? 'is-no' : ''"
+                            @click="rescues[p.id] = false"
+                          >
+                            否
+                          </button>
+                        </div>
+                      </td>
+                    </template>
+                    <template v-else>
+                      <td v-for="h in STAT_HEADERS" :key="h.key" class="px-2 py-2">
+                        <input
+                          v-model="stats[p.id][h.key]"
+                          inputmode="numeric"
+                          pattern="[0-9]*"
+                          class="stat-input"
+                        />
+                      </td>
+                    </template>
                     <td class="px-3 py-2 text-right font-serif font-bold">
                       <template v-if="previewCoinDelta(p.id) === null">
                         <span class="text-oxblood-300 text-xs">逆数</span>
@@ -335,8 +391,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
             <div class="font-serif tracking-[0.18em] uppercase text-gold-300/90 mb-1">
               <span class="rune-mark mr-1">❖</span>结算规则
             </div>
-            <div class="font-body text-parchment-200/90">
-              击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心，海洋之泪奖励 10 鼠币
+            <div class="font-body text-ember-300/90">
+              <span class="font-serif tracking-wide">板板</span>：击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心 / 海洋之泪奖励 10 鼠币
+            </div>
+            <div class="font-body text-sapphire-300/90 mt-0.5">
+              <span class="font-serif tracking-wide">护航</span>：击杀 1 人奖励 1 鼠币，救助板板奖励 1 鼠币（不再通过小红 / 6 格 / 9 格获得鼠币）
             </div>
             <div class="font-body text-forest-300/90 mt-0.5">
               撤离成功 · 全员奖励 3 鼠币
@@ -398,6 +457,44 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
     inset 0 1px 0 rgba(193, 58, 58, 0.2),
     0 0 0 1px rgba(160, 35, 35, 0.55),
     0 0 18px -4px rgba(160, 35, 35, 0.5);
+}
+
+.rescue-toggle {
+  min-width: 44px;
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-family: 'Cinzel', 'Cardo', 'Noto Serif SC', serif;
+  font-size: 0.85rem;
+  color: #cbb78a;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #1a0f0a, #120804);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
+  transition: all 0.18s ease;
+}
+.rescue-toggle:hover {
+  border-color: rgba(232, 200, 124, 0.7);
+}
+.rescue-toggle.is-yes {
+  color: #bfe0a0;
+  border-color: rgba(90, 122, 50, 0.85);
+  background:
+    linear-gradient(180deg, rgba(90, 122, 50, 0.22), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #14200a, #0a1505);
+  box-shadow:
+    inset 0 1px 0 rgba(136, 160, 79, 0.18),
+    0 0 0 1px rgba(90, 122, 50, 0.5);
+}
+.rescue-toggle.is-no {
+  color: #e6c0c0;
+  border-color: rgba(160, 35, 35, 0.7);
+  background:
+    linear-gradient(180deg, rgba(160, 35, 35, 0.18), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #2a0c0c, #1a0606);
+  box-shadow:
+    inset 0 1px 0 rgba(193, 58, 58, 0.18),
+    0 0 0 1px rgba(160, 35, 35, 0.45);
 }
 
 .stat-input {

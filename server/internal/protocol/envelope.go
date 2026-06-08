@@ -95,12 +95,17 @@ const (
 )
 
 // SettlementPerPlayer 单次本局结算中某位玩家的明细，含服务端最终计算的 CoinDelta。
+//
+// Role 记录结算时该玩家的角色，便于客户端按角色区分展示（板板看战绩、护航看救助）。
+// Rescue 仅对护航有意义：true 表示本局救助了板板，额外计 1 币。
 type SettlementPerPlayer struct {
 	PlayerID  string `json:"playerId"`
+	Role      Role   `json:"role,omitempty"`
 	Kills     int    `json:"kills"`
 	SmallReds int    `json:"smallReds"`
 	SixGrids  int    `json:"sixGrids"`
 	NineGrids int    `json:"nineGrids"`
+	Rescue    bool   `json:"rescue,omitempty"`
 	CoinDelta int    `json:"coinDelta"`
 }
 

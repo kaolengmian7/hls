@@ -783,9 +783,13 @@ func (r *Room) handleSettleRound(ctx context.Context, it Intent) {
 		return
 	}
 
+	roleByID := make(map[string]protocol.Role, len(r.players))
+	for pid, pl := range r.players {
+		roleByID[pid] = pl.Role
+	}
 	result, err := game.ComputeSettlement(
 		p.Outcome, p.GuaranteeDelta, r.guaranteedAmount,
-		p.PerPlayer, append([]string(nil), r.playerOrder...),
+		p.PerPlayer, append([]string(nil), r.playerOrder...), roleByID,
 	)
 	if err != nil {
 		// game 包通过 .Error() 返回 INVALID_PARAMS / INVALID_GUARANTEE。

@@ -17,6 +17,12 @@ function nameOf(playerId: string): string {
   return roomStore.players.find((p) => p.id === playerId)?.nickname ?? playerId.slice(-4);
 }
 
+function isEscort(pp: { role?: string; playerId: string }): boolean {
+  // 优先用记录里冻结的角色；历史记录无该字段时回落到当前房间角色。
+  const role = pp.role ?? roomStore.players.find((p) => p.id === pp.playerId)?.role;
+  return role === 'ESCORT';
+}
+
 function pad(n: number): string {
   return String(n).padStart(2, '0');
 }
@@ -103,9 +109,20 @@ const records = computed(() => roomStore.settlementRecords);
                   >
                     <td class="py-1.5 font-serif text-parchment-100">{{ nameOf(pp.playerId) }}</td>
                     <td class="py-1.5 text-parchment-300/90">{{ pp.kills }}</td>
-                    <td class="py-1.5 text-parchment-300/90">{{ pp.smallReds }}</td>
-                    <td class="py-1.5 text-parchment-300/90">{{ pp.sixGrids }}</td>
-                    <td class="py-1.5 text-parchment-300/90">{{ pp.nineGrids }}</td>
+                    <template v-if="isEscort(pp)">
+                      <td colspan="3" class="py-1.5 text-parchment-300/90">
+                        <span class="badge !border-sapphire-300/50 !text-sapphire-300 text-[10px] mr-1">护航</span>
+                        救助板板：
+                        <span :class="pp.rescue ? 'text-forest-300' : 'text-parchment-400/70'">
+                          {{ pp.rescue ? '是 (+1)' : '否' }}
+                        </span>
+                      </td>
+                    </template>
+                    <template v-else>
+                      <td class="py-1.5 text-parchment-300/90">{{ pp.smallReds }}</td>
+                      <td class="py-1.5 text-parchment-300/90">{{ pp.sixGrids }}</td>
+                      <td class="py-1.5 text-parchment-300/90">{{ pp.nineGrids }}</td>
+                    </template>
                     <td
                       class="py-1.5 text-right font-serif font-bold"
                       :class="pp.coinDelta > 0 ? 'text-forest-300' : 'text-parchment-400/70'"

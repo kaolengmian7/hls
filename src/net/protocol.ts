@@ -55,13 +55,20 @@ export type LotteryRecord = {
 /** 本局结算结果枚举：撤离成功（扣减保底）/ 炸单（增加保底）。 */
 export type SettlementOutcome = 'EVACUATED' | 'BOMBED';
 
-/** 单次本局结算中某位玩家的明细（含服务端最终计算的 coinDelta）。 */
+/**
+ * 单次本局结算中某位玩家的明细（含服务端最终计算的 coinDelta）。
+ *
+ * `role` 为结算时的角色；`rescue` 仅对护航有意义（true 表示救助板板 +1 币）。
+ * 服务端按角色区分计币：板板看战绩（小红 / 6 格 / 9 格），护航看击杀与救助。
+ */
 export type SettlementPerPlayer = {
   playerId: string;
+  role?: Role;
   kills: number;
   smallReds: number;
   sixGrids: number;
   nineGrids: number;
+  rescue?: boolean;
   coinDelta: number;
 };
 
@@ -132,6 +139,8 @@ export type SettlePlayerInput = {
   smallReds: number;
   sixGrids: number;
   nineGrids: number;
+  /** 仅护航生效：是否救助板板（true 时 +1 币）。 */
+  rescue?: boolean;
 };
 
 export type IntentMap = {

@@ -7,24 +7,33 @@ import (
 
 // 本局结算金币计算常量。
 //
-// 金币计算公式（每位玩家）：
+// 金币计算按角色区分（每位玩家）：
 //
-//	coinDelta = kills*SettlementCoinKill
-//	          + smallReds*SettlementCoinSmallRed
-//	          + sixGrids*SettlementCoinSixGrid
-//	          + nineGrids*SettlementCoinNineGrid
-//	          + (outcome == EVACUATED ? SettlementEvacuationBonus : 0)
+//	板板（老板）：
+//	  coinDelta = kills*SettlementCoinKill
+//	            + smallReds*SettlementCoinSmallRed
+//	            + sixGrids*SettlementCoinSixGrid
+//	            + nineGrids*SettlementCoinNineGrid
+//	            + (outcome == EVACUATED ? SettlementEvacuationBonus : 0)
+//
+//	护航：
+//	  coinDelta = kills*SettlementCoinKill
+//	            + (rescue ? SettlementCoinRescue : 0)
+//	            + (outcome == EVACUATED ? SettlementEvacuationBonus : 0)
+//	  （护航不再通过小红 / 6 格 / 9 格获得币）
 const (
 	// SettlementEvacuationBonus 撤离成功时每位玩家额外获得的基础币（适用于全部 3 位玩家）。
 	SettlementEvacuationBonus = 3
 	// SettlementCoinKill 每击杀 1 人获得的金币。
 	SettlementCoinKill = 1
-	// SettlementCoinSmallRed 每摸 1 个小红获得的金币。
+	// SettlementCoinSmallRed 每摸 1 个小红获得的金币（仅板板）。
 	SettlementCoinSmallRed = 1
-	// SettlementCoinSixGrid 每摸 1 个 6 格获得的金币。
+	// SettlementCoinSixGrid 每摸 1 个 6 格获得的金币（仅板板）。
 	SettlementCoinSixGrid = 2
-	// SettlementCoinNineGrid 每摸 1 个 9 格及以上获得的金币。
+	// SettlementCoinNineGrid 每摸 1 个 9 格及以上获得的金币（仅板板）。
 	SettlementCoinNineGrid = 3
+	// SettlementCoinRescue 护航救助板板获得的金币。
+	SettlementCoinRescue = 1
 
 	// MinSettlementStat / MaxSettlementStat 每位玩家明细字段的合法范围（含端点）。
 	MinSettlementStat = 0
@@ -57,6 +66,9 @@ type SettlementResult struct {
 //   - 计算后的新保底金额不得超过 MaxGuaranteedAmount（撤离扣减允许为负数），越界视为 INVALID_GUARANTEE；
 //   - perPlayer 必须涵盖 playerIDs 中全部 ID 且不重复，每个统计字段落在 [0, 99]。
 //
+// roleByID 提供每位玩家结算时的角色，用于区分计币规则（板板看战绩、护航看救助）。
+// 缺省（无对应条目）按板板规则计算。
+//
 // 调用者职责：在调用前完成「房主权限」与「房间状态为 PLAYING」的校验。
 func ComputeSettlement(
 	outcome protocol.SettlementOutcome,
@@ -64,6 +76,7 @@ func ComputeSettlement(
 	currentGuarantee int,
 	perPlayer []protocol.SettlePlayerInput,
 	playerIDs []string,
+	roleByID map[string]protocol.Role,
 ) (SettlementResult, error) {
 	if outcome != protocol.SettlementOutcomeEvacuated && outcome != protocol.SettlementOutcomeBombed {
 		return SettlementResult{}, errors.NewExposable(errors.CodeInvalidParam, settlementReasonInvalidParams)
@@ -105,13 +118,16 @@ func ComputeSettlement(
 		if !ok {
 			return SettlementResult{}, errors.NewExposable(errors.CodeInvalidParam, settlementReasonInvalidParams)
 		}
+		role := roleByID[pid]
 		out = append(out, protocol.SettlementPerPlayer{
 			PlayerID:  pid,
+			Role:      role,
 			Kills:     in.Kills,
 			SmallReds: in.SmallReds,
 			SixGrids:  in.SixGrids,
 			NineGrids: in.NineGrids,
-			CoinDelta: computeCoinDelta(outcome, in),
+			Rescue:    in.Rescue,
+			CoinDelta: computeCoinDelta(outcome, role, in),
 		})
 	}
 
@@ -124,11 +140,22 @@ func ComputeSettlement(
 	}, nil
 }
 
-func computeCoinDelta(outcome protocol.SettlementOutcome, in protocol.SettlePlayerInput) int {
-	delta := in.Kills*SettlementCoinKill +
-		in.SmallReds*SettlementCoinSmallRed +
-		in.SixGrids*SettlementCoinSixGrid +
-		in.NineGrids*SettlementCoinNineGrid
+func computeCoinDelta(outcome protocol.SettlementOutcome, role protocol.Role, in protocol.SettlePlayerInput) int {
+	var delta int
+	switch role {
+	case protocol.RoleEscort:
+		// 护航：仅击杀与「救助板板」计币，不再通过小红 / 6 格 / 9 格获得币。
+		delta = in.Kills * SettlementCoinKill
+		if in.Rescue {
+			delta += SettlementCoinRescue
+		}
+	default:
+		// 板板（老板）及兜底：保留完整战绩计币规则。
+		delta = in.Kills*SettlementCoinKill +
+			in.SmallReds*SettlementCoinSmallRed +
+			in.SixGrids*SettlementCoinSixGrid +
+			in.NineGrids*SettlementCoinNineGrid
+	}
 	if outcome == protocol.SettlementOutcomeEvacuated {
 		delta += SettlementEvacuationBonus
 	}

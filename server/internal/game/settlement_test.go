@@ -17,6 +17,16 @@ func mkInput(pid string, k, sr, sg, ng int) protocol.SettlePlayerInput {
 	}
 }
 
+// rolesAllBoss 为给定 id 列表构造「全部按板板规则计币」的角色表，
+// 用于复用历史用例对完整战绩计币的期望。
+func rolesAllBoss(ids ...string) map[string]protocol.Role {
+	m := make(map[string]protocol.Role, len(ids))
+	for _, id := range ids {
+		m[id] = protocol.RoleBoss
+	}
+	return m
+}
+
 func TestComputeSettlementEvacuated(t *testing.T) {
 	playerIDs := []string{"a", "b", "c"}
 	result, err := ComputeSettlement(
@@ -29,6 +39,7 @@ func TestComputeSettlementEvacuated(t *testing.T) {
 			mkInput("b", 0, 2, 0, 0),
 		},
 		playerIDs,
+		rolesAllBoss(playerIDs...),
 	)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -74,6 +85,7 @@ func TestComputeSettlementBombed(t *testing.T) {
 			mkInput("c", 0, 0, 0, 0),
 		},
 		playerIDs,
+		rolesAllBoss(playerIDs...),
 	)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -94,6 +106,55 @@ func TestComputeSettlementBombed(t *testing.T) {
 	}
 }
 
+func TestComputeSettlementRoleDifferentiated(t *testing.T) {
+	playerIDs := []string{"boss", "e1", "e2"}
+	roleByID := map[string]protocol.Role{
+		"boss": protocol.RoleBoss,
+		"e1":   protocol.RoleEscort,
+		"e2":   protocol.RoleEscort,
+	}
+	// e1 救助板板（+1），e2 未救助。护航的小红 / 6 格 / 9 格不计币。
+	e1 := mkInput("e1", 1, 5, 5, 5)
+	e1.Rescue = true
+	e2 := mkInput("e2", 0, 9, 9, 9)
+
+	result, err := ComputeSettlement(
+		protocol.SettlementOutcomeEvacuated,
+		0,
+		2500,
+		[]protocol.SettlePlayerInput{
+			mkInput("boss", 1, 2, 1, 1),
+			e1,
+			e2,
+		},
+		playerIDs,
+		roleByID,
+	)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	// 撤离成功每人 +3 基础。
+	// boss : 1 + 2 + 1*2 + 1*3 + 3 = 11
+	// e1   : 1(击杀) + 1(救助) + 3 = 5（小红/6格/9格不计）
+	// e2   : 0 + 0 + 3 = 3
+	wantCoins := []int{11, 5, 3}
+	for i, want := range wantCoins {
+		if result.PerPlayer[i].CoinDelta != want {
+			t.Errorf("perPlayer[%d].CoinDelta=%d want %d",
+				i, result.PerPlayer[i].CoinDelta, want)
+		}
+	}
+	if result.PerPlayer[0].Role != protocol.RoleBoss {
+		t.Errorf("boss role not recorded: %v", result.PerPlayer[0].Role)
+	}
+	if result.PerPlayer[1].Role != protocol.RoleEscort || !result.PerPlayer[1].Rescue {
+		t.Errorf("escort rescue not recorded: %#v", result.PerPlayer[1])
+	}
+	if result.PerPlayer[2].Rescue {
+		t.Errorf("e2 should not be marked rescued")
+	}
+}
+
 func TestComputeSettlementEvacuatedNegativeGuarantee(t *testing.T) {
 	playerIDs := []string{"a", "b", "c"}
 	result, err := ComputeSettlement(
@@ -106,6 +167,7 @@ func TestComputeSettlementEvacuatedNegativeGuarantee(t *testing.T) {
 			mkInput("c", 0, 0, 0, 0),
 		},
 		playerIDs,
+		rolesAllBoss(playerIDs...),
 	)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -127,6 +189,7 @@ func TestComputeSettlementZeroDelta(t *testing.T) {
 			mkInput("c", 0, 0, 0, 0),
 		},
 		playerIDs,
+		rolesAllBoss(playerIDs...),
 	)
 	if err != nil {
 		t.Fatalf("unexpected err: %v", err)
@@ -262,7 +325,7 @@ func TestComputeSettlementInvalid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := ComputeSettlement(tt.outcome, tt.guaranteeDelta, tt.current, tt.perPlayer, tt.ids)
+			_, err := ComputeSettlement(tt.outcome, tt.guaranteeDelta, tt.current, tt.perPlayer, tt.ids, rolesAllBoss(tt.ids...))
 			if err == nil {
 				t.Fatalf("expected error, got nil")
 			}

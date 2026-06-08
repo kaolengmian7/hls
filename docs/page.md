@@ -305,31 +305,36 @@
   - `EVACUATED`：要求 `currentGuarantee - delta >= 0`，否则按钮置灰并行内提示"保底金额不足"。
   - `BOMBED`：要求 `currentGuarantee + delta <= 999999`，否则置灰并提示"超出保底上限"。
 
-##### B. 三位玩家结算明细（必填表格）
+##### B. 三位玩家结算明细（必填表格，按角色区分录入）
+
+**板板（老板）行**：录入完整战绩。
 
 | 玩家（昵称 + 角色徽标） | 击杀（人） | 小红（个） | 6 格（个） | 9 格及以上（个） |
 | --- | --- | --- | --- | --- |
-| 玩家 A（皇冠图标 = 房主） | 输入 | 输入 | 输入 | 输入 |
-| 玩家 B | 输入 | 输入 | 输入 | 输入 |
-| 玩家 C | 输入 | 输入 | 输入 | 输入 |
+| 板板 | 输入 | 输入 | 输入 | 输入 |
 
-- 默认全部为 `0`。
-- 校验：每格必须为非负整数，范围 `0 ~ 99`；非法时按钮置灰并行内高亮该单元格。
+**护航行**：仅录入击杀，并以「救助板板：是 / 否」开关替代小红 / 6 格 / 9 格三列。
+
+| 玩家（昵称 + 角色徽标） | 击杀（人） | 救助板板 |
+| --- | --- | --- |
+| 护航 | 输入 | 是 / 否 |
+
+- 默认击杀为 `0`，救助默认为「否」。
+- 校验：数值格必须为非负整数，范围 `0 ~ 99`；非法时按钮置灰并行内高亮该单元格。
 - 行序按 `STATE_SNAPSHOT.players` 顺序渲染，便于房主对照实际玩家。
 - 表格需覆盖房间内**全部 3 位玩家**，不能遗漏（漏填即视为 0）。
 
 ##### C. 奖励规则提示卡片（只读）
 
-- 击杀 1 人 → +1 币
-- 摸 1 个小红 → +1 币
-- 摸 1 个 6 格 → +2 币
-- 摸 1 个 9 格及以上 → +3 币
-- 撤离成功额外 +3 币 / 人
+- **板板**：击杀 1 人 +1 币，摸 1 个小红 +1 币，摸 1 个 6 格 +2 币，摸 1 个 9 格及以上 +3 币。
+- **护航**：击杀 1 人 +1 币，救助板板 +1 币（**不再通过小红 / 6 格 / 9 格获得币**）。
+- 撤离成功额外 +3 币 / 人（板板与护航通用）。
 
 ##### D. 底部预览栏（实时计算，纯前端展示）
 
 - 实时显示三位玩家本次结算预计获得的金币（**仅前端预览，最终以服务端 `ROUND_SETTLED` 为准**）。
-  - 公式：`coinDelta = kills*1 + smallReds*1 + sixGrids*2 + nineGrids*3 + (outcome === 'EVACUATED' ? 3 : 0)`
+  - 板板：`coinDelta = kills*1 + smallReds*1 + sixGrids*2 + nineGrids*3 + (outcome === 'EVACUATED' ? 3 : 0)`
+  - 护航：`coinDelta = kills*1 + (rescue ? 1 : 0) + (outcome === 'EVACUATED' ? 3 : 0)`
 - 实时显示新的保底金额（`currentGuarantee ± delta`）与变化量。
 
 ##### E. 操作按钮
@@ -436,7 +441,7 @@ type Envelope<T extends string = string, P = unknown> = {
 | `START_GAME` | `{}` | 仅房主有效 |
 | `BUY_EQUIPMENT` | `{ equipmentId: string }` | 护航购买装备；所有条目均直接扣费购买，无需 `pick` |
 | `DRAW_LOTTERY` | `{ times: 1 }` | 老板单次抽奖（消耗 2 币） |
-| `SETTLE_ROUND` | `{ outcome: 'EVACUATED' \| 'BOMBED', guaranteeDelta: number, perPlayer: { playerId: string, kills: number, smallReds: number, sixGrids: number, nineGrids: number }[] }` | 房主结算本局。`guaranteeDelta` 为非负整数（单位 W）；`outcome === 'EVACUATED'` 时表示扣减、`'BOMBED'` 时表示增加。`perPlayer` 必须涵盖房间内全部 3 位玩家。仅 `status === 'PLAYING'` 且发起者为房主时有效。 |
+| `SETTLE_ROUND` | `{ outcome: 'EVACUATED' \| 'BOMBED', guaranteeDelta: number, perPlayer: { playerId: string, kills: number, smallReds: number, sixGrids: number, nineGrids: number, rescue?: boolean }[] }` | 房主结算本局。`guaranteeDelta` 为非负整数（单位 W）；`outcome === 'EVACUATED'` 时表示扣减、`'BOMBED'` 时表示增加。`perPlayer` 必须涵盖房间内全部 3 位玩家。服务端按角色区分计币：板板看战绩，护航看击杀与 `rescue`（救助板板 +1 币，护航不再通过小红 / 6 格 / 9 格获得币）。仅 `status === 'PLAYING'` 且发起者为房主时有效。 |
 | `PING` | `{}` | 心跳 |
 
 #### Server → Client（Event / Ack）

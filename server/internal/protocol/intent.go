@@ -50,8 +50,12 @@ type DrawLotteryPayload struct {
 //   - SmallReds  摸小红数量 (0 ~ 99)
 //   - SixGrids   摸 6 格数量 (0 ~ 99)
 //   - NineGrids  摸 9 格及以上数量 (0 ~ 99)
+//   - Rescue     是否救助板板（仅护航生效，true 时 +1 币）
 //
-// 服务端按 Kills*1 + SmallReds*1 + SixGrids*2 + NineGrids*3 计算金币奖励，
+// 服务端按角色区分计币规则：
+//   - 板板（老板）：Kills*1 + SmallReds*1 + SixGrids*2 + NineGrids*3。
+//   - 护航：Kills*1 + (Rescue ? 1 : 0)；不再通过小红 / 6 格 / 9 格获得币。
+//
 // EVACUATED 结果再额外为每位玩家追加 3 币基础奖励。
 type SettlePlayerInput struct {
 	PlayerID  string `json:"playerId"`
@@ -59,6 +63,7 @@ type SettlePlayerInput struct {
 	SmallReds int    `json:"smallReds"`
 	SixGrids  int    `json:"sixGrids"`
 	NineGrids int    `json:"nineGrids"`
+	Rescue    bool   `json:"rescue,omitempty"`
 }
 
 // SettleRoundPayload 客户端发起本局结算（仅房主在 PLAYING 状态有效）。
