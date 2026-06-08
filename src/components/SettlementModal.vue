@@ -395,7 +395,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               <span class="font-serif tracking-wide">板板</span>：击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心 / 海洋之泪奖励 10 鼠币
             </div>
             <div class="font-body text-sapphire-300/90 mt-0.5">
-              <span class="font-serif tracking-wide">护航</span>：击杀 1 人奖励 1 鼠币，救助板板奖励 1 鼠币（不再通过小红 / 6 格 / 9 格获得鼠币）
+              <span class="font-serif tracking-wide">护航</span>：击杀 1 人奖励 1 鼠币，救助板板奖励 1 鼠币
             </div>
             <div class="font-body text-forest-300/90 mt-0.5">
               撤离成功 · 全员奖励 3 鼠币
