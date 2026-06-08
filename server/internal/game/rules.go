@@ -16,7 +16,7 @@ const (
 	// MaxBosses 老板名额。
 	MaxBosses = 1
 	// EscortInitialCoin 护航初始金币。
-	EscortInitialCoin = 10
+	EscortInitialCoin = 12
 	// BossInitialCoin 老板初始金币。
 	BossInitialCoin = 0
 

@@ -194,7 +194,7 @@
 | 单件武器 | 单枪匹马 | `WEAPON_LONE` | 1 | 除 T0 枪械以外的任意单枪，直接购买，无需二级选枪 |
 
 > 备注：
-> - 护航初始金币为 10，可任意组合上述装备，**不限购买次数**（受余额约束）。
+> - 护航初始金币为 12，可任意组合上述装备，**不限购买次数**（受余额约束）。
 > - 上述全部条目均为**直接购买**：客户端只发 `BUY_EQUIPMENT { equipmentId }`，扣费即可，不再弹出二级选枪面板、不再携带 `pick` 字段。服务端若收到多余的 `pick`，回 `ACTION_REJECTED { reason: 'INVALID_PARAM' }`（`PICK_NOT_REQUIRED`）。
 > - 服务端在 `internal/game/equipment.go` 维护这份清单（价格、`equipmentId`），是装备校验的唯一权威来源。
 
