@@ -27,7 +27,7 @@ const (
 	// DefaultGuaranteedAmount 为客户端未指定时的服务端兜底默认值。
 	MinGuaranteedAmount     = 1
 	MaxGuaranteedAmount     = 999_999
-	DefaultGuaranteedAmount = 2500
+	DefaultGuaranteedAmount = 3188
 )
 
 // NormalizeGuaranteedAmount 规范化客户端传入的保底金额：

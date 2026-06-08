@@ -21,7 +21,7 @@ export type CreateRoomResponse = {
  * 保底金额（单位 W）默认值，与后端 game.DefaultGuaranteedAmount 对齐。
  * 客户端 UI 默认填入此值；如需自定义，需经本地校验后再发起请求。
  */
-export const DEFAULT_GUARANTEED_AMOUNT = 2500;
+export const DEFAULT_GUARANTEED_AMOUNT = 3188;
 export const MIN_GUARANTEED_AMOUNT = 1;
 export const MAX_GUARANTEED_AMOUNT = 999_999;
 

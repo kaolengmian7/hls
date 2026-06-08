@@ -116,7 +116,7 @@ func TestNormalizeGuaranteedAmount(t *testing.T) {
 		{"零回落到默认值", 0, DefaultGuaranteedAmount, false},
 		{"下限", MinGuaranteedAmount, MinGuaranteedAmount, false},
 		{"上限", MaxGuaranteedAmount, MaxGuaranteedAmount, false},
-		{"常规默认", 2500, 2500, false},
+		{"常规默认", 3188, 3188, false},
 		{"常规自定义", 5000, 5000, false},
 		{"负数", -1, 0, true},
 		{"超过上限", MaxGuaranteedAmount + 1, 0, true},
