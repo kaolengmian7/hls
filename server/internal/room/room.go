@@ -5,6 +5,7 @@ import (
 	stdrand "crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -37,6 +38,8 @@ const (
 	idleRoomTimeout    = 8 * time.Hour
 	tickInterval       = 30 * time.Second
 	feedCapacity       = 50
+	// maxNicknameRunes 昵称最大长度（按 Unicode 字符计），与前端 MAX_NICKNAME_LENGTH 对齐。
+	maxNicknameRunes = 16
 )
 
 // playerState 是房间为每个玩家维护的运行时状态（不直接外泄到快照）。
@@ -298,6 +301,8 @@ func (r *Room) dispatch(ctx context.Context, it Intent) {
 		r.handleDismiss(ctx, it.From.playerID)
 	case protocol.IntentChangeRole:
 		r.handleChangeRole(ctx, it)
+	case protocol.IntentChangeNickname:
+		r.handleChangeNickname(ctx, it)
 	case protocol.IntentReady:
 		r.handleReady(ctx, it)
 	case protocol.IntentStartGame:
@@ -542,6 +547,49 @@ func (r *Room) handleChangeRole(ctx context.Context, it Intent) {
 		logx.Field("code", r.code),
 		logx.Field("playerId", pid),
 		logx.Field("role", p.Role))
+}
+
+// handleChangeNickname 处理准备阶段的昵称修改（含可选名牌）。
+//
+// 行为：
+//   - 仅在房间 WAITING 时允许；PLAYING / CLOSED 一律拒绝（INVALID_STATE）。
+//   - 昵称去除首尾空白后不能为空；超出 maxNicknameRunes 时按字符截断。
+//   - 仅更新该玩家的展示昵称，不影响角色 / 准备状态；随后广播快照对账。
+func (r *Room) handleChangeNickname(ctx context.Context, it Intent) {
+	if r.status != protocol.RoomStatusWaiting {
+		r.rejectAction(it.From, it.ReqID, "INVALID_STATE", "")
+		return
+	}
+	var p protocol.ChangeNicknamePayload
+	if err := json.Unmarshal(it.Payload, &p); err != nil {
+		r.rejectAction(it.From, it.ReqID, "INVALID_PARAM", "")
+		return
+	}
+	nickname := strings.TrimSpace(p.Nickname)
+	if nickname == "" {
+		r.rejectAction(it.From, it.ReqID, "INVALID_PARAM", "昵称不能为空")
+		return
+	}
+	if runes := []rune(nickname); len(runes) > maxNicknameRunes {
+		nickname = string(runes[:maxNicknameRunes])
+	}
+	pid := it.From.playerID
+	player, ok := r.players[pid]
+	if !ok {
+		return
+	}
+	if player.Nickname == nickname {
+		return
+	}
+	player.Nickname = nickname
+	if c := r.clients[pid]; c != nil {
+		c.nickname = nickname
+	}
+	r.broadcastSnapshot()
+	logx.WithContext(ctx).Infow("nickname changed",
+		logx.Field("code", r.code),
+		logx.Field("playerId", pid),
+		logx.Field("nickname", nickname))
 }
 
 func (r *Room) handleReady(ctx context.Context, it Intent) {

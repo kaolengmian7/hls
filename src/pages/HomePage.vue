@@ -2,12 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { isValidRoomCode } from '@/utils/id';
-import {
-  MAX_NICKNAME_LENGTH,
-  composeNicknameParts,
-  maxCustomNicknameLength,
-  usePlayerStore,
-} from '@/stores/player';
+import { MAX_NICKNAME_LENGTH, usePlayerStore } from '@/stores/player';
 import { useRoomStore } from '@/stores/room';
 import {
   createRoom,
@@ -26,28 +21,11 @@ const playerStore = usePlayerStore();
 const roomStore = useRoomStore();
 
 const codeInput = ref<string>('');
-const nicknamePresetInput = ref<string>('');
-const customNicknameInput = ref<string>('');
+const nicknameInput = ref<string>('');
 const guaranteeInput = ref<string>(String(DEFAULT_GUARANTEED_AMOUNT));
 const creating = ref(false);
 const joining = ref(false);
-const nicknamePresets = [
-  '花栗鼠的可爱板板',
-  '花栗鼠的尊贵板板',
-  '花栗鼠的月光小护卫',
-  '花栗鼠的星尘护航使',
-  '花栗鼠的秘境萌骑士',
-  '花栗鼠的糖霜守望者',
-  '花栗鼠的宝匣小勇者',
-  '花栗鼠的幻梦护航团',
-];
-const customNicknameMaxLength = computed(() =>
-  nicknamePresetInput.value ? maxCustomNicknameLength(nicknamePresetInput.value) : MAX_NICKNAME_LENGTH,
-);
-const nicknamePreview = computed(() =>
-  composeNicknameParts(nicknamePresetInput.value, customNicknameInput.value),
-);
-const nicknameReady = computed(() => !!nicknamePreview.value);
+const nicknameReady = computed(() => !!nicknameInput.value.trim());
 
 /**
  * 保底金额本地校验：仅允许整数，落在 [MIN, MAX]。
@@ -64,43 +42,30 @@ const guaranteeValid = computed(() => guaranteeNumber.value !== null);
 
 onMounted(() => {
   playerStore.ensureIdentity();
-  nicknamePresetInput.value = playerStore.nicknamePreset;
-  customNicknameInput.value = playerStore.nicknameCustom;
+  nicknameInput.value = playerStore.nicknameCustom;
   const queryCode = (route.query.code as string | undefined) ?? '';
   if (queryCode && isValidRoomCode(queryCode)) {
     codeInput.value = queryCode;
   }
 });
 
-function syncNickname(): boolean {
-  if (!nicknamePresetInput.value || !customNicknameInput.value.trim()) return false;
-  playerStore.setNicknameParts(nicknamePresetInput.value, customNicknameInput.value);
-  nicknamePresetInput.value = playerStore.nicknamePreset;
-  customNicknameInput.value = playerStore.nicknameCustom;
-  return true;
-}
-
-function applyNicknamePreset(name: string): void {
-  nicknamePresetInput.value = name;
-  customNicknameInput.value = customNicknameInput.value.slice(0, customNicknameMaxLength.value);
-  if (customNicknameInput.value.trim()) {
-    syncNickname();
-  }
-}
-
-function onCustomNicknameInput(e: Event): void {
+function onNicknameInput(e: Event): void {
   const target = e.target as HTMLInputElement;
-  customNicknameInput.value = target.value.slice(0, customNicknameMaxLength.value);
+  nicknameInput.value = target.value.slice(0, MAX_NICKNAME_LENGTH);
 }
 
+/**
+ * 校验并落库昵称。首页只需填昵称即可（名牌为选填，进店后在准备页再选）。
+ * 这里会保留玩家此前可能选过的名牌前缀，仅更新自定义昵称部分。
+ */
 function ensureNicknameReady(): boolean {
-  if (syncNickname()) return true;
-  if (!nicknamePresetInput.value) {
-    roomStore.pushToast('warn', '请先选择名牌');
+  if (!nicknameInput.value.trim()) {
+    roomStore.pushToast('warn', '请先填写昵称');
     return false;
   }
-  roomStore.pushToast('warn', '请填写自定义昵称');
-  return false;
+  playerStore.setNicknameCustom(nicknameInput.value);
+  nicknameInput.value = playerStore.nicknameCustom;
+  return true;
 }
 
 function onCodeInput(e: Event): void {
@@ -224,7 +189,7 @@ async function handleJoin(): Promise<void> {
       <div class="card rpg-corners card-ornate w-full max-w-md p-7 sm:p-9 animate-slide-up">
         <div class="text-center mb-6">
           <div class="rune-mark text-2xl">⚜</div>
-          <div class="rpg-subtitle text-[10px] mt-1">填写店名牌 · 进入神秘商店</div>
+          <div class="rpg-subtitle text-[10px] mt-1">填写昵称 · 进入神秘商店</div>
         </div>
 
         <div class="mb-5">
@@ -232,43 +197,20 @@ async function handleJoin(): Promise<void> {
             <span class="rune-mark mr-1">❖</span>您的昵称
           </label>
           <input
-            :value="customNicknameInput"
+            :value="nicknameInput"
             class="input"
-            :disabled="!nicknamePresetInput"
-            :maxlength="customNicknameMaxLength"
-            :placeholder="nicknamePresetInput ? '请输入自定义昵称…' : '请先选择名牌'"
-            @input="onCustomNicknameInput"
-            @blur="syncNickname"
+            :maxlength="MAX_NICKNAME_LENGTH"
+            placeholder="请输入昵称…"
+            @input="onNicknameInput"
           />
-          <div class="mt-4 flex flex-wrap gap-2">
-            <button
-              v-for="preset in nicknamePresets"
-              :key="preset"
-              type="button"
-              class="btn-ghost !normal-case !tracking-[0.08em] !px-2.5 !py-1.5 text-[11px]"
-              :class="nicknamePresetInput === preset ? '!border-gold-400/70 !text-gold-200 !bg-gold-500/10' : ''"
-              @click="applyNicknamePreset(preset)"
-            >
-              {{ preset }}
-            </button>
-          </div>
-          <div class="mt-3 rounded-md border border-gold-500/20 bg-ink-700/40 px-3 py-2">
-            <div class="text-[11px] font-serif tracking-[0.2em] text-parchment-300/75">
-              当前昵称预览
-            </div>
-            <div class="mt-1 font-serif text-base text-parchment-50 break-all">
-              {{ nicknamePreview || '请选择名牌并填写自定义昵称' }}
-            </div>
-            <div class="mt-1 text-[11px] font-body" :class="nicknameReady ? 'text-parchment-300/75' : 'text-oxblood-300'">
-              <template v-if="nicknamePresetInput">
-                最终昵称最多 {{ MAX_NICKNAME_LENGTH }} 字，自定义昵称还可输入
-                {{ Math.max(0, customNicknameMaxLength - customNicknameInput.trim().length) }} 字
-              </template>
-              <template v-else>
-                需要先选择名牌，再填写自定义昵称
-              </template>
-            </div>
-          </div>
+          <p class="text-[11px] mt-2 font-body" :class="nicknameReady ? 'text-parchment-300/75' : 'text-oxblood-300'">
+            <template v-if="nicknameReady">
+              最多 {{ MAX_NICKNAME_LENGTH }} 字 · 进店后可在准备页挑选名牌（选填）
+            </template>
+            <template v-else>
+              填写昵称即可开始，名牌可进店后再选。
+            </template>
+          </p>
         </div>
 
         <div class="mb-7">

@@ -2,22 +2,30 @@ package protocol
 
 // Intent 枚举：客户端 → 服务端。
 const (
-	IntentJoin         = "JOIN"
-	IntentLeave        = "LEAVE"
-	IntentDismissRoom  = "DISMISS_ROOM"
-	IntentChangeRole   = "CHANGE_ROLE"
-	IntentReady        = "READY"
-	IntentStartGame    = "START_GAME"
-	IntentBuyEquipment = "BUY_EQUIPMENT"
-	IntentDrawLottery  = "DRAW_LOTTERY"
-	IntentSettleRound  = "SETTLE_ROUND"
-	IntentPing         = "PING"
+	IntentJoin           = "JOIN"
+	IntentLeave          = "LEAVE"
+	IntentDismissRoom    = "DISMISS_ROOM"
+	IntentChangeRole     = "CHANGE_ROLE"
+	IntentChangeNickname = "CHANGE_NICKNAME"
+	IntentReady          = "READY"
+	IntentStartGame      = "START_GAME"
+	IntentBuyEquipment   = "BUY_EQUIPMENT"
+	IntentDrawLottery    = "DRAW_LOTTERY"
+	IntentSettleRound    = "SETTLE_ROUND"
+	IntentPing           = "PING"
 )
 
 // JoinPayload 客户端 JOIN 首帧。
 type JoinPayload struct {
 	Nickname string `json:"nickname"`
 	Avatar   string `json:"avatar,omitempty"`
+}
+
+// ChangeNicknamePayload 客户端在准备阶段修改昵称（含可选名牌前缀）。
+//
+// 仅房间处于 WAITING 时允许；Nickname 为拼接后的最终昵称（如「名牌-自定义」或纯自定义）。
+type ChangeNicknamePayload struct {
+	Nickname string `json:"nickname"`
 }
 
 // ChangeRolePayload 客户端切换角色。

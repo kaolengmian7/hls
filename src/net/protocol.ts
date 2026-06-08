@@ -148,6 +148,11 @@ export type IntentMap = {
   LEAVE: Record<string, never>;
   DISMISS_ROOM: Record<string, never>;
   CHANGE_ROLE: { role: Role };
+  /**
+   * 准备阶段修改昵称（含可选名牌前缀）。
+   * `nickname` 为拼接后的最终昵称；仅房间处于 WAITING 时服务端接受。
+   */
+  CHANGE_NICKNAME: { nickname: string };
   READY: { ready: boolean };
   START_GAME: Record<string, never>;
   BUY_EQUIPMENT: { equipmentId: string; pick?: string };
