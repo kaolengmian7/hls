@@ -35,10 +35,20 @@ func (r *AuthStateRepo) Create(ctx context.Context, state string) error {
 
 // SetJWT stores the signed JWT for a state after successful WeChat callback.
 func (r *AuthStateRepo) SetJWT(ctx context.Context, state, jwtStr string) error {
-	_, err := r.db.ExecCtx(ctx,
+	result, err := r.db.ExecCtx(ctx,
 		"UPDATE auth_states SET jwt = ? WHERE state = ? AND expires_at > NOW()",
 		jwtStr, state)
-	return err
+	if err != nil {
+		return err
+	}
+	n, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return sqlx.ErrNotFound
+	}
+	return nil
 }
 
 // Get returns the auth state, cleaning up expired records first.
