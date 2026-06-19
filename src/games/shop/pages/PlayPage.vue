@@ -65,7 +65,7 @@ onMounted(async () => {
 
   // 已连接（或刚恢复连接），根据服务端权威状态决定停留还是回到准备页。
   if (roomStore.snapshot?.status !== 'PLAYING') {
-    router.replace({ name: 'room', params: { code: targetCode } });
+    router.replace({ name: 'shop-room', params: { code: targetCode } });
   }
 });
 
