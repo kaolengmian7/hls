@@ -19,7 +19,9 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@shop/*": ["src/games/shop/*"],
+      "@shared/*": ["src/shared/*"]
     },
     "types": ["vite/client"]
   },
