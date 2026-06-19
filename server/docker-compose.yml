@@ -25,12 +25,22 @@ services:
     container_name: hls-gameserver
     restart: unless-stopped
     init: true
+    depends_on:
+      mysql:
+        condition: service_healthy
     environment:
       HLS_HOST: 0.0.0.0
       HLS_MODE: ${HLS_MODE:-prod}
       HLS_SESSION_SECRET: ${HLS_SESSION_SECRET:?set HLS_SESSION_SECRET in server/.env}
       HLS_SESSION_TTL_MINUTES: ${HLS_SESSION_TTL_MINUTES:-1440}
       HLS_CORS_ALLOW_ORIGINS: ${HLS_CORS_ALLOW_ORIGINS:?set HLS_CORS_ALLOW_ORIGINS in server/.env}
+      HLS_DB_DSN: ${HLS_DB_DSN:?set HLS_DB_DSN in server/.env}
+      HLS_JWT_SECRET: ${HLS_JWT_SECRET:?set HLS_JWT_SECRET in server/.env}
+      HLS_JWT_TTL_DAYS: ${HLS_JWT_TTL_DAYS:-7}
+      HLS_WECHAT_OPEN_APP_ID: ${HLS_WECHAT_OPEN_APP_ID:?set HLS_WECHAT_OPEN_APP_ID in server/.env}
+      HLS_WECHAT_OPEN_APP_SECRET: ${HLS_WECHAT_OPEN_APP_SECRET:?set HLS_WECHAT_OPEN_APP_SECRET in server/.env}
+      HLS_WECHAT_OPEN_CALLBACK_DOMAIN: ${HLS_WECHAT_OPEN_CALLBACK_DOMAIN:?set HLS_WECHAT_OPEN_CALLBACK_DOMAIN in server/.env}
+      HLS_WECHAT_OPEN_FRONTEND_URL: ${HLS_WECHAT_OPEN_FRONTEND_URL:?set HLS_WECHAT_OPEN_FRONTEND_URL in server/.env}
     expose:
       - "8088"
     healthcheck:
@@ -41,6 +51,26 @@ services:
       start_period: 10s
     stop_grace_period: 20s
 
+  mysql:
+    image: mysql:8.0
+    container_name: hls-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in server/.env}
+      MYSQL_DATABASE: hls
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    ports:
+      - "127.0.0.1:3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 volumes:
   caddy_data:
   caddy_config:
+  mysql_data:
