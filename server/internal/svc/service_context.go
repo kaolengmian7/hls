@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"hls.dev/server/internal/auth"
 	"hls.dev/server/internal/config"
@@ -38,13 +39,18 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 	ttl := time.Duration(cfg.Session.TTLMinutes) * time.Minute
 	signer := token.NewSigner(cfg.Session.Secret, ttl)
 	hub := room.NewHub(rootCtx, gen, signer, logx.WithContext(rootCtx))
+	conn := sqlx.NewMysql(cfg.DB.DSN)
 	return &ServiceContext{
-		Config:     cfg,
-		Hub:        hub,
-		Generator:  gen,
-		Signer:     signer,
-		RootCtx:    rootCtx,
-		RootCancel: cancel,
+		Config:        cfg,
+		Hub:           hub,
+		Generator:     gen,
+		Signer:        signer,
+		RootCtx:       rootCtx,
+		RootCancel:    cancel,
+		UserRepo:      repo.NewUserRepo(conn),
+		AuthStateRepo: repo.NewAuthStateRepo(conn),
+		JWTSigner:     auth.NewJWTSigner(cfg.JWT.Secret, cfg.JWT.TTLDays),
+		WechatClient:  auth.NewWechatClient(cfg.WechatOpen.AppID, cfg.WechatOpen.AppSecret),
 	}
 }
 

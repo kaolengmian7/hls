@@ -18,3 +18,16 @@ Log:
   Mode: console
   Encoding: plain
   Level: info
+
+DB:
+  DSN: "root:change-me@tcp(localhost:3306)/hls?parseTime=true"
+
+JWT:
+  Secret: please-change-me-in-prod
+  TTLDays: 7
+
+WechatOpen:
+  AppID: ""
+  AppSecret: ""
+  CallbackDomain: "localhost:8088"
+  FrontendURL: "http://localhost:5173"
