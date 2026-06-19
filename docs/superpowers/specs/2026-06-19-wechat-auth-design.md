@@ -22,7 +22,9 @@
 |------|------|
 | 登录方式 | 微信开放平台网站应用（PC + 移动端统一扫码） |
 | Token 策略 | 单个 JWT，7 天有效期，存 localStorage |
-| 数据库 | MySQL，加入现有 docker-compose |
+| 数据库 | MySQL，自建于 DMIT 服务器，Docker Compose 管理 |
+| DB 连接 | localhost，零网络延迟，无额外费用 |
+| 数据备份 | 每日 `mysqldump` cron job，上传腾讯云 COS |
 | 架构 | 新增路由挂在现有 `gameserver`，不新建服务 |
 | 服务器 | 香港 DMIT，无需备案 |
 
@@ -199,6 +201,38 @@ axios 响应拦截器：收到 401 → `auth.logout()`（清 token，跳 /login�
 3. 审核通过后获取 `AppID` 和 `AppSecret`
 4. 在应用详情填写**授权回调域**：填 `api.hls-club.com`（不带协议和路径）
 5. 将 `AppID`、`AppSecret` 写入服务器环境变量
+
+---
+
+## 数据库部署方案
+
+MySQL 运行在 DMIT 服务器的 Docker 容器中，与 `gameserver` 同机，通过 `localhost` 连接。
+
+**docker-compose.yml 新增 service：**
+
+```yaml
+mysql:
+  image: mysql:8.0
+  restart: always
+  environment:
+    MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    MYSQL_DATABASE: hls
+  volumes:
+    - mysql_data:/var/lib/mysql
+  ports:
+    - "127.0.0.1:3306:3306"   # 只绑定本机，不对外暴露
+
+volumes:
+  mysql_data:
+```
+
+**备份方案：** 服务器上添加每日 cron job，执行 `mysqldump` 并将备份文件上传至腾讯云 COS。COS 费用极低（约 ¥0.1/GB/月），实现异地容灾。
+
+**选择自建而非腾讯云 MySQL 的原因：**
+- 当前用户规模小，无高可用需求
+- 自建节省约 ¥1800+/年
+- localhost 连接延迟 < 0.1ms，优于任何云数据库
+- Docker 管理维护成本极低
 
 ---
 
