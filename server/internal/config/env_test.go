@@ -38,6 +38,40 @@ func TestApplyEnvOverrides(t *testing.T) {
 	if !reflect.DeepEqual(cfg.Cors.AllowOrigins, wantOrigins) {
 		t.Fatalf("Cors.AllowOrigins = %#v, want %#v", cfg.Cors.AllowOrigins, wantOrigins)
 	}
+
+	t.Setenv(envDBDSN, "root:pass@tcp(localhost:3306)/hls?parseTime=true")
+	t.Setenv(envJWTSecret, "jwt-secret")
+	t.Setenv(envJWTTTLDays, "14")
+	t.Setenv(envWechatOpenAppID, "wx123")
+	t.Setenv(envWechatOpenAppSecret, "opensecret")
+	t.Setenv(envWechatOpenCallbackDomain, "api.hls-club.com")
+	t.Setenv(envWechatOpenFrontendURL, "https://hls-club.com")
+
+	if err := ApplyEnvOverrides(&cfg); err != nil {
+		t.Fatalf("ApplyEnvOverrides() error = %v", err)
+	}
+
+	if cfg.DB.DSN != "root:pass@tcp(localhost:3306)/hls?parseTime=true" {
+		t.Fatalf("DB.DSN = %q", cfg.DB.DSN)
+	}
+	if cfg.JWT.Secret != "jwt-secret" {
+		t.Fatalf("JWT.Secret = %q", cfg.JWT.Secret)
+	}
+	if cfg.JWT.TTLDays != 14 {
+		t.Fatalf("JWT.TTLDays = %d, want 14", cfg.JWT.TTLDays)
+	}
+	if cfg.WechatOpen.AppID != "wx123" {
+		t.Fatalf("WechatOpen.AppID = %q", cfg.WechatOpen.AppID)
+	}
+	if cfg.WechatOpen.AppSecret != "opensecret" {
+		t.Fatalf("WechatOpen.AppSecret = %q", cfg.WechatOpen.AppSecret)
+	}
+	if cfg.WechatOpen.CallbackDomain != "api.hls-club.com" {
+		t.Fatalf("WechatOpen.CallbackDomain = %q", cfg.WechatOpen.CallbackDomain)
+	}
+	if cfg.WechatOpen.FrontendURL != "https://hls-club.com" {
+		t.Fatalf("WechatOpen.FrontendURL = %q", cfg.WechatOpen.FrontendURL)
+	}
 }
 
 func TestApplyEnvOverridesInvalidIntegers(t *testing.T) {
