@@ -9,7 +9,7 @@ import (
 	"hls.dev/server/internal/handler"
 )
 
-func TestQrStatusExpired(t *testing.T) {
+func TestQrStatusHandler_EmptyState_ReturnsBadRequest(t *testing.T) {
 	// QrStatusHandler with a nil ServiceContext returns 400 for empty state.
 	req := httptest.NewRequest(http.MethodGet, "/api/auth/wechat/qr/status?state=", nil)
 	w := httptest.NewRecorder()

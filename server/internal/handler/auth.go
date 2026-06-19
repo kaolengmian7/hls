@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -92,7 +93,9 @@ func QrCallbackHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		if err := ctx.AuthStateRepo.SetJWT(r.Context(), state, jwtStr); err != nil {
-			logx.WithContext(r.Context()).Infow("set jwt in state", logx.Field("err", err))
+			logx.WithContext(r.Context()).Errorw("set jwt in state", logx.Field("err", err))
+			http.Redirect(w, r, frontendURL+"/login?error=server_error", http.StatusFound)
+			return
 		}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -110,7 +113,7 @@ func QrStatusHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		as, err := ctx.AuthStateRepo.Get(r.Context(), state)
-		if err == sqlx.ErrNotFound {
+		if errors.Is(err, sqlx.ErrNotFound) {
 			httpx.OkJsonCtx(r.Context(), w, QrStatusResponse{Status: "expired"})
 			return
 		}
@@ -124,7 +127,9 @@ func QrStatusHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		tok := as.JWT.String
-		_ = ctx.AuthStateRepo.Delete(r.Context(), state)
+		if err := ctx.AuthStateRepo.Delete(r.Context(), state); err != nil {
+			logx.WithContext(r.Context()).Errorw("delete auth state", logx.Field("err", err))
+		}
 		httpx.OkJsonCtx(r.Context(), w, QrStatusResponse{Status: "done", Token: tok})
 	}
 }
@@ -146,7 +151,7 @@ func MeHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		user, err := ctx.UserRepo.FindByID(r.Context(), userID)
-		if err == sqlx.ErrNotFound {
+		if errors.Is(err, sqlx.ErrNotFound) {
 			writeError(w, r, http.StatusUnauthorized, "user not found", nil)
 			return
 		}
