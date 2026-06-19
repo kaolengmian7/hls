@@ -1,0 +1,137 @@
+<h2>首页布局方向</h2>
+<p class="subtitle">花栗鼠俱乐部官方主页 · 选择你偏好的整体结构</p>
+
+<div class="cards" style="gap:24px;margin-top:24px">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="card-image" style="padding:0;overflow:hidden;background:#0d0d12;border-radius:8px 8px 0 0;">
+      <div style="font-family:monospace;padding:16px 20px;background:#0d0d12;color:#c9a84c;font-size:11px;line-height:1.8">
+        <div style="text-align:center;border-bottom:1px solid #333;padding-bottom:10px;margin-bottom:10px;color:#e8d5a0">
+          ✦ 花栗鼠俱乐部 ✦<br>
+          <span style="font-size:9px;color:#aaa">开一家最有温度的三角洲陪玩店</span>
+        </div>
+        <div style="text-align:center;padding:10px 0;color:#e8d5a0;font-size:14px">
+          花 栗 鼠 俱 乐 部
+        </div>
+        <div style="text-align:center;font-size:9px;color:#888;margin-bottom:12px">
+          原创 1V1 定制教学单 · 神秘商店趣味单
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+          <div style="background:#1a1a24;border:1px solid #c9a84c55;border-radius:4px;padding:8px;text-align:center">
+            <div style="font-size:9px;color:#c9a84c">🎲</div>
+            <div style="font-size:9px;color:#ddd;margin-top:2px">神秘商店</div>
+          </div>
+          <div style="background:#1a1a24;border:1px solid #55555580;border-radius:4px;padding:8px;text-align:center">
+            <div style="font-size:9px;color:#c9a84c">🎓</div>
+            <div style="font-size:9px;color:#ddd;margin-top:2px">1V1教学</div>
+          </div>
+          <div style="background:#1a1a24;border:1px solid #55555580;border-radius:4px;padding:8px;text-align:center">
+            <div style="font-size:9px;color:#c9a84c">🎵</div>
+            <div style="font-size:9px;color:#ddd;margin-top:2px">试音</div>
+          </div>
+          <div style="background:#1a1a24;border:1px solid #55555580;border-radius:4px;padding:8px;text-align:center">
+            <div style="font-size:9px;color:#c9a84c">🃏</div>
+            <div style="font-size:9px;color:#ddd;margin-top:2px">摸红扑克牌</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 游戏大厅</h3>
+      <p>品牌 Logo + 口号，下方直接是玩法卡片网格。<br>
+      <strong>优点：</strong>直接、跳转快，主要用途是导航进入玩法。<br>
+      <strong>适合：</strong>老用户为主，不需要太多介绍。</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="card-image" style="padding:0;overflow:hidden;background:#0d0d12;border-radius:8px 8px 0 0;">
+      <div style="font-family:monospace;padding:16px 20px;background:#0d0d12;color:#c9a84c;font-size:11px;line-height:1.8">
+        <div style="text-align:center;padding:12px 0 8px">
+          <div style="font-size:18px;color:#e8d5a0">花栗鼠俱乐部</div>
+          <div style="font-size:9px;color:#888;margin-top:4px">Chipmunk Club · 三角洲</div>
+          <div style="margin:8px auto;width:40px;border-top:1px solid #c9a84c44"></div>
+          <div style="font-size:9px;color:#c9a84c">开一家最有温度的三角洲陪玩店</div>
+          <div style="font-size:8px;color:#666;margin-top:4px">原创 1V1 定制教学单 · 神秘商店趣味单</div>
+        </div>
+        <div style="background:#1a1a24;border:1px solid #c9a84c44;border-radius:4px;padding:8px;margin:8px 0;font-size:9px;color:#aaa">
+          📋 关于我们：花栗鼠俱乐部是一家专注三角洲行动的原创陪玩工作室，致力于…
+        </div>
+        <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px">
+          <div style="min-width:52px;background:#1a1a24;border:1px solid #c9a84c;border-radius:4px;padding:6px;text-align:center">
+            <div style="font-size:9px;color:#c9a84c">🎲</div>
+            <div style="font-size:8px;color:#fff;margin-top:2px">神秘商店</div>
+          </div>
+          <div style="min-width:52px;background:#1a1a24;border:1px solid #444;border-radius:4px;padding:6px;text-align:center">
+            <div style="font-size:9px;color:#888">🎓</div>
+            <div style="font-size:8px;color:#888;margin-top:2px">1V1教学</div>
+          </div>
+          <div style="min-width:52px;background:#1a1a24;border:1px solid #444;border-radius:4px;padding:6px;text-align:center">
+            <div style="font-size:9px;color:#888">🎵</div>
+            <div style="font-size:8px;color:#888;margin-top:2px">试音</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 官网 + 大厅</h3>
+      <p>顶部 Hero 区有品牌介绍/口号，中间有一段"关于我们"，底部是玩法入口卡片。<br>
+      <strong>优点：</strong>有品牌感，适合对外展示和新用户。<br>
+      <strong>适合：</strong>需要一定"门面"效果。</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)" style="cursor:pointer">
+    <div class="card-image" style="padding:0;overflow:hidden;background:#0d0d12;border-radius:8px 8px 0 0;">
+      <div style="font-family:monospace;padding:16px 20px;background:#0d0d12;color:#c9a84c;font-size:11px;line-height:1.8">
+        <div style="text-align:center;padding:8px 0;border-bottom:1px solid #222;margin-bottom:10px">
+          <span style="color:#888;font-size:9px">花栗鼠俱乐部</span>
+          <span style="color:#333;margin:0 8px">|</span>
+          <span style="color:#888;font-size:9px">玩法</span>
+          <span style="color:#333;margin:0 8px">|</span>
+          <span style="color:#888;font-size:9px">关于</span>
+        </div>
+        <div style="text-align:center;padding:16px 0 12px">
+          <div style="font-size:22px;color:#e8d5a0;letter-spacing:3px">花栗鼠俱乐部</div>
+          <div style="font-size:9px;color:#c9a84c;margin-top:6px;letter-spacing:1px">开一家最有温度的三角洲陪玩店</div>
+          <div style="margin:10px auto;width:30px;border-top:1px solid #c9a84c44"></div>
+          <div style="display:inline-block;background:#c9a84c22;border:1px solid #c9a84c55;border-radius:20px;padding:4px 12px;font-size:8px;color:#c9a84c">▼ 查看所有玩法</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="background:#1a1a24;border:1px solid #c9a84c;border-radius:4px;padding:8px;text-align:center">
+            <div style="font-size:11px;color:#c9a84c">🎲</div>
+            <div style="font-size:8px;color:#fff;margin-top:2px;font-weight:bold">神秘商店</div>
+            <div style="font-size:7px;color:#888;margin-top:2px">趣味单 · 立即开始</div>
+          </div>
+          <div style="background:#161620;border:1px solid #333;border-radius:4px;padding:8px;text-align:center;opacity:0.7">
+            <div style="font-size:11px;color:#666">🎓</div>
+            <div style="font-size:8px;color:#888;margin-top:2px">1V1教学</div>
+            <div style="font-size:7px;color:#555;margin-top:2px">即将推出</div>
+          </div>
+          <div style="background:#161620;border:1px solid #333;border-radius:4px;padding:8px;text-align:center;opacity:0.7">
+            <div style="font-size:11px;color:#666">🎵</div>
+            <div style="font-size:8px;color:#888;margin-top:2px">试音</div>
+            <div style="font-size:7px;color:#555;margin-top:2px">即将推出</div>
+          </div>
+          <div style="background:#161620;border:1px solid #333;border-radius:4px;padding:8px;text-align:center;opacity:0.7">
+            <div style="font-size:11px;color:#666">🃏</div>
+            <div style="font-size:8px;color:#888;margin-top:2px">摸红扑克牌</div>
+            <div style="font-size:7px;color:#555;margin-top:2px">即将推出</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · 全屏 Hero + 玩法卡片</h3>
+      <p>顶部有导航栏，中央大 Hero 区展示品牌，向下滚动进入玩法卡片区（未上线的显示"即将推出"）。<br>
+      <strong>优点：</strong>视觉冲击强，层次分明，扩展性最好。<br>
+      <strong>适合：</strong>希望首页有"门面"同时也承担导航功能。</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:20px;font-size:12px">点击选择你偏好的方向，也可以在下方对话框补充想法</p>

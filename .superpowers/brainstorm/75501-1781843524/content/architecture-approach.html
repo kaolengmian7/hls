@@ -1,0 +1,100 @@
+<h2>目录结构 · 三种方案对比</h2>
+<p class="subtitle">核心问题：随着玩法增多，代码如何组织才最清晰、最好扩展？</p>
+
+<div class="options" style="margin-top:24px">
+
+  <!-- Option A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>扁平分层 · 最小改动</h3>
+      <p>保持现有目录，仅把当前 <code>pages/</code> 里的文件挪一挪，新加一个首页。</p>
+      <pre style="background:#0d0d12;padding:12px;border-radius:4px;font-size:11px;line-height:1.7;margin-top:8px;overflow:auto">src/
+├── pages/
+│   ├── LandingPage.vue       ← 新首页 /
+│   ├── shop/
+│   │   ├── ShopHomePage.vue  ← 原 HomePage → /shop
+│   │   ├── RoomPage.vue      ← /shop/room/:code
+│   │   └── PlayPage.vue      ← /shop/room/:code/play
+│   ├── TeachPage.vue         ← /teach（占位）
+│   ├── AuditionPage.vue      ← /audition（占位）
+│   └── PokerPage.vue         ← /poker（占位）
+├── components/               ← 所有组件混放（现状不变）
+├── stores/
+├── net/
+└── router/index.ts</pre>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>优点</h4><ul><li>改动量最小</li><li>现有结构基本不动</li></ul></div>
+        <div class="cons"><h4>缺点</h4><ul><li>游戏变多后 components/ 越来越乱</li><li>神秘商店和其他玩法的组件混在一起</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>按玩法模块化 · 推荐 ✦</h3>
+      <p>每个玩法是一个独立目录（页面 + 组件 + 逻辑），共用的东西放顶层。</p>
+      <pre style="background:#0d0d12;padding:12px;border-radius:4px;font-size:11px;line-height:1.7;margin-top:8px;overflow:auto">src/
+├── pages/
+│   └── LandingPage.vue       ← 新首页 /
+├── games/
+│   ├── shop/                 ← 神秘商店整体搬进来
+│   │   ├── pages/
+│   │   │   ├── ShopHomePage.vue   /shop
+│   │   │   ├── RoomPage.vue       /shop/room/:code
+│   │   │   └── PlayPage.vue       /shop/room/:code/play
+│   │   ├── components/       ← 商店专属组件
+│   │   ├── stores/           ← 商店专属 store（可选）
+│   │   └── router.ts         ← 商店路由定义
+│   ├── teach/
+│   │   └── pages/TeachPage.vue    /teach
+│   ├── audition/
+│   │   └── pages/AuditionPage.vue /audition
+│   └── poker/
+│       └── pages/PokerPage.vue    /poker
+├── components/               ← 仅放真正跨玩法的公共组件
+├── stores/                   ← 仅放全局 store（player 身份等）
+├── net/                      ← 网络层（共用）
+└── router/index.ts           ← 聚合各玩法 router.ts</pre>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>优点</h4><ul><li>每个玩法自成一体，加新玩法只需新建目录</li><li>商店相关代码和未来新玩法不会混</li><li>路由按玩法拆分，主 router 只负责聚合</li></ul></div>
+        <div class="cons"><h4>缺点</h4><ul><li>改动量中等（需移动现有文件）</li><li>需要思考哪些东西"真正共用"</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>组件也按玩法拆 · 最彻底</h3>
+      <p>在方案 B 基础上，把 net/（网络层）也按玩法拆分，每个玩法有自己的 ws/api/protocol。</p>
+      <pre style="background:#0d0d12;padding:12px;border-radius:4px;font-size:11px;line-height:1.7;margin-top:8px;overflow:auto">src/
+├── pages/LandingPage.vue
+├── games/
+│   └── shop/
+│       ├── pages/
+│       ├── components/
+│       ├── net/              ← 商店专属 ws/api/protocol
+│       ├── stores/
+│       └── router.ts
+├── shared/                   ← 真正通用的跨玩法代码
+│   ├── net/                  ← 基础 WebSocket 封装
+│   ├── stores/player.ts
+│   └── components/
+└── router/index.ts</pre>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>优点</h4><ul><li>完全解耦，每个玩法可独立演进协议</li><li>未来某个玩法协议变化不影响其他</li></ul></div>
+        <div class="cons"><h4>缺点</h4><ul><li>现阶段过度设计，当前只有一个有 WebSocket 的玩法</li><li>改动量最大</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:20px;font-size:12px">
+  我推荐 <strong>B · 按玩法模块化</strong>——在可扩展性和改动量之间取得最好平衡。<br>
+  点击选择，或在对话框说明你的想法。
+</p>
