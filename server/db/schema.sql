@@ -8,11 +8,11 @@ CREATE TABLE IF NOT EXISTS users (
   avatar_url   VARCHAR(512) NOT NULL DEFAULT '',
   created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS auth_states (
   state      VARCHAR(64) NOT NULL PRIMARY KEY,
-  jwt        TEXT        NULL,
+  jwt        TEXT        NULL,    -- NULL until WeChat callback populates it (two-phase write)
   expires_at DATETIME    NOT NULL,
   INDEX idx_expires_at (expires_at)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
