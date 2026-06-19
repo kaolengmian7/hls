@@ -12,6 +12,16 @@ export const router = createRouter({
       name: 'home',
       component: () => import('@/pages/LandingPage.vue'),
     },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/pages/LoginPage.vue'),
+    },
+    {
+      path: '/auth/callback',
+      name: 'auth-callback',
+      component: () => import('@/pages/AuthCallbackPage.vue'),
+    },
     ...shopRoutes,
     ...teachRoutes,
     ...auditionRoutes,
