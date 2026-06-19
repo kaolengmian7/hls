@@ -1,27 +1,21 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
-
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    name: 'home',
-    component: () => import('@/pages/HomePage.vue'),
-  },
-  {
-    path: '/room/:code',
-    name: 'room',
-    component: () => import('@/pages/RoomPage.vue'),
-    props: true,
-  },
-  {
-    path: '/room/:code/play',
-    name: 'play',
-    component: () => import('@/pages/PlayPage.vue'),
-    props: true,
-  },
-  { path: '/:catchAll(.*)', redirect: '/' },
-];
+import { createRouter, createWebHistory } from 'vue-router';
+import shopRoutes from '@/games/shop/router';
+import teachRoutes from '@/games/teach/router';
+import auditionRoutes from '@/games/audition/router';
+import pokerRoutes from '@/games/poker/router';
 
 export const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: () => import('@/pages/LandingPage.vue'),
+    },
+    ...shopRoutes,
+    ...teachRoutes,
+    ...auditionRoutes,
+    ...pokerRoutes,
+    { path: '/:catchAll(.*)', redirect: '/' },
+  ],
 });
