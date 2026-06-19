@@ -7,7 +7,9 @@ import (
 
 	"github.com/zeromicro/go-zero/core/logx"
 
+	"hls.dev/server/internal/auth"
 	"hls.dev/server/internal/config"
+	"hls.dev/server/internal/repo"
 	"hls.dev/server/internal/room"
 	"hls.dev/server/pkg/code"
 	"hls.dev/server/pkg/token"
@@ -15,12 +17,18 @@ import (
 
 // ServiceContext 是 HTTP / WS handler 共享的依赖容器。
 type ServiceContext struct {
-	Config    config.Config
-	Hub       *room.Hub
-	Generator *code.Generator
-	Signer    *token.Signer
-	RootCtx   context.Context
+	Config     config.Config
+	Hub        *room.Hub
+	Generator  *code.Generator
+	Signer     *token.Signer
+	RootCtx    context.Context
 	RootCancel context.CancelFunc
+
+	// Auth fields — wired in Task 7.
+	AuthStateRepo *repo.AuthStateRepo
+	UserRepo      *repo.UserRepo
+	JWTSigner     *auth.JWTSigner
+	WechatClient  *auth.WechatClient
 }
 
 // NewServiceContext 构建依赖。
