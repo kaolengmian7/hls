@@ -12,6 +12,7 @@ import SettlementModal from '../components/SettlementModal.vue';
 import SettlementRecordModal from '../components/SettlementRecordModal.vue';
 import ConfirmDialog from '@shared/components/ConfirmDialog.vue';
 import ToastContainer from '../components/ToastContainer.vue';
+import AppHeader from '@shared/components/AppHeader.vue';
 import { usePlayerStore } from '@shared/stores/player';
 
 const router = useRouter();
@@ -99,19 +100,22 @@ function dismissClosed(): void {
 </script>
 
 <template>
-  <div v-if="restoring || !roomStore.snapshot" class="flex-1 flex items-center justify-center min-h-screen">
-    <ToastContainer />
-    <div class="card rpg-corners p-10 text-center max-w-sm">
-      <div class="rune-mark text-3xl animate-flicker">✶</div>
-      <div class="rpg-title text-xl mt-2">重返神秘商店</div>
-      <div class="font-body text-parchment-300/80 mt-2">正在根据商店口令返回花栗鼠的神秘商店…</div>
-      <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
-        口令 · {{ code }}
+  <div class="flex-1 flex flex-col min-h-screen">
+    <AppHeader />
+
+    <div v-if="restoring || !roomStore.snapshot" class="flex-1 flex items-center justify-center">
+      <ToastContainer />
+      <div class="card rpg-corners p-10 text-center max-w-sm">
+        <div class="rune-mark text-3xl animate-flicker">✶</div>
+        <div class="rpg-title text-xl mt-2">重返神秘商店</div>
+        <div class="font-body text-parchment-300/80 mt-2">正在根据商店口令返回花栗鼠的神秘商店…</div>
+        <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
+          口令 · {{ code }}
+        </div>
       </div>
     </div>
-  </div>
 
-  <div v-else class="flex-1 flex flex-col min-h-screen">
+    <div v-else class="flex-1 flex flex-col">
     <ToastContainer />
 
     <header class="px-4 sm:px-8 py-3 sticky top-0 z-10 backdrop-blur bg-ink-700/80 border-b border-gold-500/25">
@@ -279,5 +283,6 @@ function dismissClosed(): void {
       @confirm="dismissClosed"
       @cancel="dismissClosed"
     />
+    </div>
   </div>
 </template>
