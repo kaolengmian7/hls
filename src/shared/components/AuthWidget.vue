@@ -36,7 +36,7 @@ onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
       >
         <Avatar :seed="String(auth.user.id)" :name="auth.user.nickname" size="sm" />
         <span class="font-serif text-xs text-parchment-300 tracking-wide max-w-[80px] truncate">
-          {{ auth.user.nickname }}
+          {{ auth.user.nickname || '用户' }}
         </span>
       </button>
 
