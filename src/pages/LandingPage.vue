@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import AppHeader from '@shared/components/AppHeader.vue';
 
 const router = useRouter();
 
@@ -43,13 +44,12 @@ const games = [
   <div class="min-h-screen flex flex-col">
 
     <!-- 顶部导航 -->
-    <nav class="flex justify-between items-center px-6 py-4 border-b border-white/5">
-      <span class="rpg-subtitle text-sm tracking-widest text-gold-300">✦ 花栗鼠俱乐部</span>
+    <AppHeader>
       <div class="flex gap-6 font-serif text-xs tracking-widest text-parchment-400/60">
         <a href="#games" class="hover:text-gold-300 transition-colors">玩法</a>
         <span>微信服务号</span>
       </div>
-    </nav>
+    </AppHeader>
 
     <!-- Hero -->
     <header class="flex-none px-6 pt-14 pb-10 text-center select-none border-b border-white/5">
