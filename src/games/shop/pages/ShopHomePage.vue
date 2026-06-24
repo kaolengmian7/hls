@@ -13,6 +13,7 @@ import {
   MIN_GUARANTEED_AMOUNT,
   isValidGuaranteedAmount,
 } from '../net/api';
+import AppHeader from '@shared/components/AppHeader.vue';
 import ToastContainer from '../components/ToastContainer.vue';
 
 const router = useRouter();
@@ -173,6 +174,7 @@ async function handleJoin(): Promise<void> {
 
 <template>
   <div class="flex-1 flex flex-col">
+    <AppHeader />
     <ToastContainer />
 
     <header class="px-6 pt-12 pb-4 text-center select-none">
