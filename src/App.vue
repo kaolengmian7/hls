@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { usePlayerStore } from '@/shared/stores/player';
+import { useAuthStore } from '@/stores/auth';
 
 const playerStore = usePlayerStore();
+const auth = useAuthStore();
 
 onMounted(() => {
   playerStore.ensureIdentity();
+  auth.init();
 });
 </script>
 
