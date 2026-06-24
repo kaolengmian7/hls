@@ -100,7 +100,7 @@ function dismissClosed(): void {
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col min-h-screen">
+  <div class="flex-1 flex flex-col">
     <AppHeader />
 
     <div v-if="restoring || !roomStore.snapshot" class="flex-1 flex items-center justify-center">
@@ -116,173 +116,173 @@ function dismissClosed(): void {
     </div>
 
     <div v-else class="flex-1 flex flex-col">
-    <ToastContainer />
+      <ToastContainer />
 
-    <header class="px-4 sm:px-8 py-3 sticky top-0 z-10 backdrop-blur bg-ink-700/80 border-b border-gold-500/25">
-      <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="rune-mark text-2xl animate-flicker">⚜</div>
-          <div class="min-w-0">
-            <div class="rpg-title text-base sm:text-lg leading-tight">花栗鼠的神秘商店</div>
-            <div class="font-serif text-[10px] tracking-[0.3em] uppercase text-gold-300/70 mt-0.5">
-              口令 · {{ code }}
+      <header class="px-4 sm:px-8 py-3 sticky top-0 z-10 backdrop-blur bg-ink-700/80 border-b border-gold-500/25">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="rune-mark text-2xl animate-flicker">⚜</div>
+            <div class="min-w-0">
+              <div class="rpg-title text-base sm:text-lg leading-tight">花栗鼠的神秘商店</div>
+              <div class="font-serif text-[10px] tracking-[0.3em] uppercase text-gold-300/70 mt-0.5">
+                口令 · {{ code }}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
-          <div
-            class="rounded-md px-2.5 py-1 leading-tight text-right border border-gold-500/40 bg-ink-700/70"
-            :title="`商店保底`"
-          >
-            <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
-              保底
-            </div>
-            <div class="text-sm font-bold font-serif text-gold-200">
-              {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
-            </div>
-          </div>
-          <div
-            class="rounded-md px-2.5 py-1 leading-tight text-right border border-forest-400/40 bg-ink-700/70"
-            :title="`历次撤离成功累计扣减额`"
-          >
-            <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-forest-300/70">
-              得吃
-            </div>
-            <div class="text-sm font-bold font-serif text-forest-300">
-              {{ roomStore.evacuatedTotal }}<span class="text-forest-300/80 ml-0.5">W</span>
-            </div>
-          </div>
-          <button
-            v-if="canSettle"
-            class="btn-boss py-1.5 px-3 text-[11px]"
-            @click="showSettlement = true"
-          >
-            ⚖ 本轮结算
-          </button>
-          <button class="btn-ghost text-[11px]" @click="showSettlementHistory = true">
-            结算记录
-          </button>
-          <button class="btn-ghost text-[11px]" @click="showLottery = true">抽奖记录</button>
-          <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300 text-[11px]" @click="showLeaveConfirm = true">
-            离开
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <main class="flex-1 px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-[260px_1fr_340px] gap-6 max-w-7xl mx-auto w-full">
-      <aside class="order-2 lg:order-1">
-        <div class="card rpg-corners p-4 lg:sticky lg:top-24">
-          <h3 class="rpg-title text-base flex items-center gap-2">
-            <span class="rune-mark">⚜</span>店内成员
-          </h3>
-          <div class="rpg-divider my-3" />
-          <div class="space-y-2.5">
+          <div class="flex items-center gap-2 flex-wrap">
             <div
-              v-for="p in roster"
-              :key="p.id"
-              class="rounded-md p-2.5 flex items-center gap-3 border transition-colors"
-              :class="
-                p.id === roomStore.selfPlayerId
-                  ? 'border-gold-400/70 bg-gold-500/10'
-                  : 'border-gold-500/25 bg-ink-700/60'
-              "
+              class="rounded-md px-2.5 py-1 leading-tight text-right border border-gold-500/40 bg-ink-700/70"
+              :title="`商店保底`"
             >
-              <div class="relative shrink-0">
-                <Avatar :seed="p.id" :name="p.nickname" size="md" />
-                <span
-                  v-if="!p.connected"
-                  class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-oxblood-500 border border-ink-700"
-                  title="失联中"
-                />
+              <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
+                保底
               </div>
-              <div class="flex-1 min-w-0">
-                <div class="font-serif font-semibold text-parchment-50 flex flex-wrap items-center gap-1">
-                  <span v-if="p.isHost" class="text-gold-300 shrink-0" title="房主">👑</span>
-                  <span class="break-all">{{ p.nickname }}</span>
-                  <span
-                    v-if="p.id === roomStore.selfPlayerId"
-                    class="badge !text-gold-200 !border-gold-400/60 text-[10px] shrink-0"
-                  >
-                    我
-                  </span>
-                </div>
-                <div class="flex items-center gap-1.5 mt-1">
-                  <span
-                    class="badge text-[10px]"
-                    :class="
-                      p.role === 'BOSS'
-                        ? '!border-ember-400/60 !text-ember-300'
-                        : '!border-sapphire-300/60 !text-sapphire-300'
-                    "
-                  >
-                    {{ p.role ? ROLE_LABEL[p.role] : '未择阶' }}
-                  </span>
-                </div>
-                <div class="coin-tag text-sm mt-1.5">
-                  <span>💰</span> {{ p.coin }}
-                </div>
+              <div class="text-sm font-bold font-serif text-gold-200">
+                {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
               </div>
             </div>
+            <div
+              class="rounded-md px-2.5 py-1 leading-tight text-right border border-forest-400/40 bg-ink-700/70"
+              :title="`历次撤离成功累计扣减额`"
+            >
+              <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-forest-300/70">
+                得吃
+              </div>
+              <div class="text-sm font-bold font-serif text-forest-300">
+                {{ roomStore.evacuatedTotal }}<span class="text-forest-300/80 ml-0.5">W</span>
+              </div>
+            </div>
+            <button
+              v-if="canSettle"
+              class="btn-boss py-1.5 px-3 text-[11px]"
+              @click="showSettlement = true"
+            >
+              ⚖ 本轮结算
+            </button>
+            <button class="btn-ghost text-[11px]" @click="showSettlementHistory = true">
+              结算记录
+            </button>
+            <button class="btn-ghost text-[11px]" @click="showLottery = true">抽奖记录</button>
+            <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300 text-[11px]" @click="showLeaveConfirm = true">
+              离开
+            </button>
           </div>
         </div>
-      </aside>
+      </header>
 
-      <section class="order-1 lg:order-2 space-y-5">
-        <template v-if="me?.role === 'BOSS'">
-          <LotteryPanel />
-        </template>
-
-        <template v-else-if="me?.role === 'ESCORT'">
-          <EquipmentShop />
-        </template>
-
-        <template v-else>
-          <div class="card rpg-corners p-10 text-center">
-            <div class="rune-mark text-3xl animate-flicker">⚜</div>
-            <div class="font-serif text-parchment-300 mt-2">
-              正在确认您的店内角色…
+      <main class="flex-1 px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-[260px_1fr_340px] gap-6 max-w-7xl mx-auto w-full">
+        <aside class="order-2 lg:order-1">
+          <div class="card rpg-corners p-4 lg:sticky lg:top-24">
+            <h3 class="rpg-title text-base flex items-center gap-2">
+              <span class="rune-mark">⚜</span>店内成员
+            </h3>
+            <div class="rpg-divider my-3" />
+            <div class="space-y-2.5">
+              <div
+                v-for="p in roster"
+                :key="p.id"
+                class="rounded-md p-2.5 flex items-center gap-3 border transition-colors"
+                :class="
+                  p.id === roomStore.selfPlayerId
+                    ? 'border-gold-400/70 bg-gold-500/10'
+                    : 'border-gold-500/25 bg-ink-700/60'
+                "
+              >
+                <div class="relative shrink-0">
+                  <Avatar :seed="p.id" :name="p.nickname" size="md" />
+                  <span
+                    v-if="!p.connected"
+                    class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-oxblood-500 border border-ink-700"
+                    title="失联中"
+                  />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-serif font-semibold text-parchment-50 flex flex-wrap items-center gap-1">
+                    <span v-if="p.isHost" class="text-gold-300 shrink-0" title="房主">👑</span>
+                    <span class="break-all">{{ p.nickname }}</span>
+                    <span
+                      v-if="p.id === roomStore.selfPlayerId"
+                      class="badge !text-gold-200 !border-gold-400/60 text-[10px] shrink-0"
+                    >
+                      我
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-1.5 mt-1">
+                    <span
+                      class="badge text-[10px]"
+                      :class="
+                        p.role === 'BOSS'
+                          ? '!border-ember-400/60 !text-ember-300'
+                          : '!border-sapphire-300/60 !text-sapphire-300'
+                      "
+                    >
+                      {{ p.role ? ROLE_LABEL[p.role] : '未择阶' }}
+                    </span>
+                  </div>
+                  <div class="coin-tag text-sm mt-1.5">
+                    <span>💰</span> {{ p.coin }}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </template>
-      </section>
+        </aside>
 
-      <aside class="order-3">
-        <FeedStream />
-      </aside>
-    </main>
+        <section class="order-1 lg:order-2 space-y-5">
+          <template v-if="me?.role === 'BOSS'">
+            <LotteryPanel />
+          </template>
 
-    <LotteryRecordModal :open="showLottery" @close="showLottery = false" />
-    <SettlementModal :open="showSettlement" @close="showSettlement = false" />
-    <SettlementRecordModal
-      :open="showSettlementHistory"
-      @close="showSettlementHistory = false"
-    />
+          <template v-else-if="me?.role === 'ESCORT'">
+            <EquipmentShop />
+          </template>
 
-    <ConfirmDialog
-      :open="showLeaveConfirm"
-      :title="roomStore.isHost ? '关闭商店？' : '中途离开？'"
-      :message="
-        roomStore.isHost
-          ? '您是房主，离开后这家神秘商店会立刻关闭。'
-          : '中途离开后，本局记录不会继续跟随您，确认离开吗？'
-      "
-      :confirm-text="roomStore.isHost ? '关闭' : '离开'"
-      danger
-      @confirm="confirmLeave"
-      @cancel="showLeaveConfirm = false"
-    />
+          <template v-else>
+            <div class="card rpg-corners p-10 text-center">
+              <div class="rune-mark text-3xl animate-flicker">⚜</div>
+              <div class="font-serif text-parchment-300 mt-2">
+                正在确认您的店内角色…
+              </div>
+            </div>
+          </template>
+        </section>
 
-    <ConfirmDialog
-      :open="showClosedDialog"
-      title="商店已关闭"
-      :message="`商店已关闭（${closedReason || 'CLOSED'}），3 秒后返回首页。`"
-      confirm-text="返回首页"
-      cancel-text="稍候"
-      @confirm="dismissClosed"
-      @cancel="dismissClosed"
-    />
+        <aside class="order-3">
+          <FeedStream />
+        </aside>
+      </main>
+
+      <LotteryRecordModal :open="showLottery" @close="showLottery = false" />
+      <SettlementModal :open="showSettlement" @close="showSettlement = false" />
+      <SettlementRecordModal
+        :open="showSettlementHistory"
+        @close="showSettlementHistory = false"
+      />
+
+      <ConfirmDialog
+        :open="showLeaveConfirm"
+        :title="roomStore.isHost ? '关闭商店？' : '中途离开？'"
+        :message="
+          roomStore.isHost
+            ? '您是房主，离开后这家神秘商店会立刻关闭。'
+            : '中途离开后，本局记录不会继续跟随您，确认离开吗？'
+        "
+        :confirm-text="roomStore.isHost ? '关闭' : '离开'"
+        danger
+        @confirm="confirmLeave"
+        @cancel="showLeaveConfirm = false"
+      />
+
+      <ConfirmDialog
+        :open="showClosedDialog"
+        title="商店已关闭"
+        :message="`商店已关闭（${closedReason || 'CLOSED'}），3 秒后返回首页。`"
+        confirm-text="返回首页"
+        cancel-text="稍候"
+        @confirm="dismissClosed"
+        @cancel="dismissClosed"
+      />
     </div>
   </div>
 </template>
