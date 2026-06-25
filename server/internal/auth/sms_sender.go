@@ -25,28 +25,31 @@ type TencentSmsSender struct {
 }
 
 // NewTencentSmsSender creates a TencentSmsSender from config.
-func NewTencentSmsSender(cfg config.TencentSMSConfig) *TencentSmsSender {
+func NewTencentSmsSender(cfg config.TencentSMSConfig) (*TencentSmsSender, error) {
 	cred := common.NewCredential(cfg.SecretID, cfg.SecretKey)
 	cpf := profile.NewClientProfile()
-	client, _ := sms.NewClient(cred, "ap-guangzhou", cpf)
+	client, err := sms.NewClient(cred, "ap-guangzhou", cpf)
+	if err != nil {
+		return nil, fmt.Errorf("tencent sms client init: %w", err)
+	}
 	return &TencentSmsSender{
 		client:     client,
 		sdkAppID:   cfg.SmsSdkAppID,
 		signName:   cfg.SignName,
 		templateID: cfg.TemplateID,
-	}
+	}, nil
 }
 
 // Send sends a 6-digit code to the given phone number (without country prefix).
-func (s *TencentSmsSender) Send(_ context.Context, phone, code string) error {
+func (s *TencentSmsSender) Send(ctx context.Context, phone, code string) error {
 	req := sms.NewSendSmsRequest()
 	req.SmsSdkAppId = common.StringPtr(s.sdkAppID)
 	req.SignName = common.StringPtr(s.signName)
 	req.TemplateId = common.StringPtr(s.templateID)
-	req.TemplateParamSet = common.StringPtrs([]string{code, "10"})
+	req.TemplateParamSet = common.StringPtrs([]string{code, "10"}) // "10" = validity minutes in template
 	req.PhoneNumberSet = common.StringPtrs([]string{"+86" + phone})
 
-	resp, err := s.client.SendSms(req)
+	resp, err := s.client.SendSmsWithContext(ctx, req)
 	if err != nil {
 		return fmt.Errorf("tencent sms send: %w", err)
 	}
