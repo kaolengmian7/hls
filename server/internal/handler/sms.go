@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -43,6 +45,8 @@ func SmsSendHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			writeSmsError(w, http.StatusBadRequest, "invalid_phone", 0)
 			return
 		}
+		// Frontend-only captcha: we only verify the field is non-empty.
+		// Server-side rate limits (CheckAndSend) are the real abuse protection.
 		if strings.TrimSpace(req.Captcha) == "" {
 			writeSmsError(w, http.StatusBadRequest, "missing_captcha", 0)
 			return
@@ -51,11 +55,15 @@ func SmsSendHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		ip := clientIP(r)
 		code, retryAfter, errKey := ctx.SmsStore.CheckAndSend(req.Phone, ip, smsMaxPhone, smsMaxIP, smsMaxGlobal)
 		if errKey != "" {
-			status := http.StatusTooManyRequests
-			if errKey == "global_limit" {
-				status = http.StatusServiceUnavailable
+			switch errKey {
+			case "global_limit":
+				writeSmsError(w, http.StatusServiceUnavailable, errKey, retryAfter)
+			case "internal":
+				logx.WithContext(r.Context()).Error("sms store crypto/rand failure")
+				writeSmsError(w, http.StatusInternalServerError, "server_error", 0)
+			default:
+				writeSmsError(w, http.StatusTooManyRequests, errKey, retryAfter)
 			}
-			writeSmsError(w, status, errKey, retryAfter)
 			return
 		}
 
@@ -79,8 +87,16 @@ func SmsVerifyHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 		req.Phone = strings.TrimSpace(req.Phone)
 		req.Code = strings.TrimSpace(req.Code)
-		if !phoneRe.MatchString(req.Phone) || req.Code == "" {
-			writeSmsError(w, http.StatusBadRequest, "invalid_body", 0)
+		if !phoneRe.MatchString(req.Phone) {
+			writeSmsError(w, http.StatusBadRequest, "invalid_phone", 0)
+			return
+		}
+		if req.Code == "" {
+			writeSmsError(w, http.StatusBadRequest, "missing_code", 0)
+			return
+		}
+		if len(req.Code) != 6 {
+			writeSmsError(w, http.StatusBadRequest, "invalid_code_format", 0)
 			return
 		}
 
@@ -107,26 +123,23 @@ func SmsVerifyHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	}
 }
 
-// clientIP extracts the real client IP from the request, checking X-Forwarded-For first.
+// clientIP returns the TCP peer address for rate-limiting purposes.
+// Use only the TCP peer address to prevent X-Forwarded-For spoofing.
+// If this server runs behind a trusted reverse proxy, replace with
+// proxy-aware logic that validates the peer before trusting XFF headers.
 func clientIP(r *http.Request) string {
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		if idx := strings.IndexByte(xff, ','); idx >= 0 {
-			return strings.TrimSpace(xff[:idx])
-		}
-		return strings.TrimSpace(xff)
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
 	}
-	if rip := r.Header.Get("X-Real-Ip"); rip != "" {
-		return strings.TrimSpace(rip)
-	}
-	addr := r.RemoteAddr
-	if idx := strings.LastIndexByte(addr, ':'); idx >= 0 {
-		return addr[:idx]
-	}
-	return addr
+	return host
 }
 
 func writeSmsError(w http.ResponseWriter, status int, errKey string, retryAfter int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if retryAfter > 0 {
+		w.Header().Set("Retry-After", strconv.Itoa(retryAfter))
+	}
 	w.WriteHeader(status)
 	resp := map[string]any{"error": errKey}
 	if retryAfter > 0 {
