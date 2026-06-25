@@ -17,6 +17,7 @@ interface VerifyResp {
 }
 
 const ERROR_LABELS: Record<string, string> = {
+  cooldown:     '请稍后再试',
   phone_limit:  '该号码今日发送已达上限',
   ip_limit:     '操作过于频繁，请明日再试',
   global_limit: '服务繁忙，请明日再试',
