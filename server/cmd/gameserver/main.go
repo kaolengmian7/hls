@@ -55,6 +55,8 @@ func main() {
 		{Method: http.MethodGet, Path: "/api/auth/wechat/qr/callback", Handler: handler.QrCallbackHandler(ctx)},
 		{Method: http.MethodGet, Path: "/api/auth/wechat/qr/status", Handler: handler.QrStatusHandler(ctx)},
 		{Method: http.MethodGet, Path: "/api/auth/me", Handler: handler.MeHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/auth/sms/send", Handler: handler.SmsSendHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/auth/sms/verify", Handler: handler.SmsVerifyHandler(ctx)},
 	})
 
 	logx.Infof("gameserver starting at %s:%d", cfg.Host, cfg.Port)

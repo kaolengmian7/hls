@@ -44,6 +44,10 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 	signer := token.NewSigner(cfg.Session.Secret, ttl)
 	hub := room.NewHub(rootCtx, gen, signer, logx.WithContext(rootCtx))
 	conn := sqlx.NewMysql(cfg.DB.DSN)
+	smsSender, err := auth.NewTencentSmsSender(cfg.TencentSMS)
+	if err != nil {
+		logx.Must(err)
+	}
 	return &ServiceContext{
 		Config:        cfg,
 		Hub:           hub,
@@ -55,6 +59,8 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 		AuthStateRepo: repo.NewAuthStateRepo(conn),
 		JWTSigner:     auth.NewJWTSigner(cfg.JWT.Secret, cfg.JWT.TTLDays),
 		WechatClient:  auth.NewWechatClient(cfg.WechatOpen.AppID, cfg.WechatOpen.AppSecret),
+		SmsStore:      NewSmsStore(),
+		SmsSender:     smsSender,
 	}
 }
 

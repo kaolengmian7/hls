@@ -20,7 +20,7 @@ Log:
   Level: info
 
 DB:
-  DSN: "root:change-me@tcp(localhost:3306)/hls?parseTime=true"
+  DSN: "root@tcp(localhost:3306)/hls?parseTime=true"
 
 JWT:
   Secret: please-change-me-in-prod
@@ -31,3 +31,10 @@ WechatOpen:
   AppSecret: ""
   CallbackDomain: "localhost:8088"
   FrontendURL: "http://localhost:5173"
+
+TencentSMS:
+  SecretID: ""
+  SecretKey: ""
+  SmsSdkAppID: ""
+  SignName: ""
+  TemplateID: ""
