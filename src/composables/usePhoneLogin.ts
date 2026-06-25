@@ -117,6 +117,12 @@ export function usePhoneLogin() {
     return p.slice(0, 3) + '****' + p.slice(7)
   }
 
+  function backToPhone() {
+    step.value = 'phone'
+    code.value = ''
+    error.value = ''
+  }
+
   return {
     step,
     phone,
@@ -128,5 +134,6 @@ export function usePhoneLogin() {
     sendCode,
     verifyCode,
     maskedPhone,
+    backToPhone,
   }
 }
