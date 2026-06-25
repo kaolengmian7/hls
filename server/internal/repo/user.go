@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -13,11 +14,12 @@ type User struct {
 	OpenOpenID sql.NullString `db:"open_openid"`
 	MpOpenID   sql.NullString `db:"mp_openid"`
 	UnionID    sql.NullString `db:"union_id"`
+	Phone      sql.NullString `db:"phone"`
 	Nickname   string         `db:"nickname"`
 	AvatarURL  string         `db:"avatar_url"`
 }
 
-const userCols = "id, open_openid, mp_openid, union_id, nickname, avatar_url"
+const userCols = "id, open_openid, mp_openid, union_id, phone, nickname, avatar_url"
 
 // UserRepo provides database access for users.
 type UserRepo struct {
@@ -103,4 +105,42 @@ func nullStr(s string) sql.NullString {
 		return sql.NullString{}
 	}
 	return sql.NullString{String: s, Valid: true}
+}
+
+// UpsertByPhone finds an existing user by phone or creates a new one.
+func (r *UserRepo) UpsertByPhone(ctx context.Context, phone string) (*User, error) {
+	u, err := r.findBy(ctx, "phone", phone)
+	if err == nil {
+		return u, nil
+	}
+	if err != sqlx.ErrNotFound {
+		return nil, err
+	}
+	nickname := "小小花栗鼠" + randSuffix()
+	return r.insertByPhone(ctx, phone, nickname)
+}
+
+func (r *UserRepo) insertByPhone(ctx context.Context, phone, nickname string) (*User, error) {
+	result, err := r.db.ExecCtx(ctx,
+		"INSERT INTO users (phone, nickname, avatar_url) VALUES (?, ?, '')",
+		phone, nickname)
+	if err != nil {
+		return nil, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	return r.FindByID(ctx, id)
+}
+
+func randSuffix() string {
+	const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+	b := make([]byte, 4)
+	_, _ = rand.Read(b)
+	out := make([]byte, 4)
+	for i, c := range b {
+		out[i] = chars[int(c)%len(chars)]
+	}
+	return string(out)
 }
