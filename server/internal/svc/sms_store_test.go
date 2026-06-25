@@ -98,7 +98,7 @@ func TestSmsStore_Verify_Success(t *testing.T) {
 func TestSmsStore_Verify_WrongCode(t *testing.T) {
 	s := svc.NewSmsStore()
 	s.CheckAndSend("13800138031", "1.2.3.4", 5, 10, 200)
-	errKey := s.Verify("13800138031", "000000")
+	errKey := s.Verify("13800138031", "XXXXXX")
 	if errKey != "invalid_code" {
 		t.Fatalf("errKey = %q, want \"invalid_code\"", errKey)
 	}
@@ -108,10 +108,10 @@ func TestSmsStore_Verify_MaxFailsInvalidates(t *testing.T) {
 	s := svc.NewSmsStore()
 	s.CheckAndSend("13800138032", "1.2.3.4", 5, 10, 200)
 	for i := 0; i < 5; i++ {
-		s.Verify("13800138032", "000000")
+		s.Verify("13800138032", "XXXXXX")
 	}
 	// After 5 failures, code is deleted — subsequent verify returns invalid_code too.
-	errKey := s.Verify("13800138032", "000000")
+	errKey := s.Verify("13800138032", "XXXXXX")
 	if errKey != "invalid_code" {
 		t.Fatalf("errKey = %q, want \"invalid_code\"", errKey)
 	}
@@ -136,5 +136,16 @@ func TestSmsStore_Verify_DeletedAfterSuccess(t *testing.T) {
 	errKey := s.Verify("13800138034", code)
 	if errKey != "invalid_code" {
 		t.Fatalf("errKey = %q, want \"invalid_code\"", errKey)
+	}
+}
+
+func TestSmsStore_CheckAndSend_CooldownAfterVerify(t *testing.T) {
+	s := svc.NewSmsStore()
+	code, _, _ := s.CheckAndSend("13800138040", "1.2.3.4", 5, 10, 200)
+	s.Verify("13800138040", code) // successful verify clears the code
+	// New send within 60s should still be blocked by cooldown
+	_, _, errKey := s.CheckAndSend("13800138040", "1.2.3.4", 5, 10, 200)
+	if errKey != "cooldown" {
+		t.Fatalf("errKey = %q, want \"cooldown\"", errKey)
 	}
 }

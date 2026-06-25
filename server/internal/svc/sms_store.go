@@ -10,7 +10,6 @@ import (
 type codeEntry struct {
 	code      string
 	expiresAt time.Time
-	sentAt    time.Time
 	failCount int
 }
 
@@ -20,6 +19,7 @@ type SmsStore struct {
 	nowFn      func() time.Time
 	mu         sync.Mutex
 	codes      map[string]*codeEntry // key: phone
+	lastSentAt map[string]time.Time  // key: phone; persists across verifies for cooldown
 	phoneCount map[string]int        // key: "phone|YYYYMMDD"
 	ipCount    map[string]int        // key: "ip|YYYYMMDD"
 	globalDay  string
@@ -31,6 +31,7 @@ func NewSmsStore() *SmsStore {
 	return &SmsStore{
 		nowFn:      time.Now,
 		codes:      make(map[string]*codeEntry),
+		lastSentAt: make(map[string]time.Time),
 		phoneCount: make(map[string]int),
 		ipCount:    make(map[string]int),
 	}
@@ -65,9 +66,9 @@ func (s *SmsStore) CheckAndSend(phone, ip string, maxPhone, maxIP, maxGlobal int
 	}
 
 	// 60-second cooldown per phone
-	if e, ok := s.codes[phone]; ok {
-		remaining := int(e.sentAt.Add(60 * time.Second).Sub(s.nowFn()).Seconds())
-		if remaining > 0 {
+	if sentAt, ok := s.lastSentAt[phone]; ok {
+		if until := sentAt.Add(60 * time.Second); s.nowFn().Before(until) {
+			remaining := int(until.Sub(s.nowFn()).Seconds()) + 1
 			return "", remaining, "cooldown"
 		}
 	}
@@ -89,11 +90,12 @@ func (s *SmsStore) CheckAndSend(phone, ip string, maxPhone, maxIP, maxGlobal int
 		return "", 0, "internal"
 	}
 
+	now := s.nowFn()
 	s.codes[phone] = &codeEntry{
 		code:      newCode,
-		expiresAt: s.nowFn().Add(10 * time.Minute),
-		sentAt:    s.nowFn(),
+		expiresAt: now.Add(10 * time.Minute),
 	}
+	s.lastSentAt[phone] = now
 	s.phoneCount[pk]++
 	s.ipCount[ik]++
 	s.globalCnt++
