@@ -1,7 +1,8 @@
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import http from '../http'
+import axios from 'axios'
 
 export type LoginStep = 'phone' | 'code'
 
@@ -52,6 +53,10 @@ export function usePhoneLogin() {
     }, 1000)
   }
 
+  onUnmounted(() => {
+    if (cooldownTimer) clearInterval(cooldownTimer)
+  })
+
   async function sendCode(captchaPassed: boolean) {
     error.value = ''
     if (!captchaPassed) return
@@ -64,12 +69,16 @@ export function usePhoneLogin() {
       step.value = 'code'
       startCooldown(60)
     } catch (e: unknown) {
-      const data = (e as { response?: { data?: SendResp } }).response?.data
-      if (data?.error === 'cooldown' && data.retry_after) {
-        startCooldown(data.retry_after)
-        error.value = `请 ${data.retry_after} 秒后再试`
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as SendResp | undefined
+        if (data?.error === 'cooldown' && data.retry_after) {
+          startCooldown(data.retry_after)
+          error.value = `请 ${data.retry_after} 秒后再试`
+        } else {
+          error.value = ERROR_LABELS[data?.error ?? ''] ?? '发送失败，请稍后重试'
+        }
       } else {
-        error.value = ERROR_LABELS[data?.error ?? ''] ?? '发送失败，请稍后重试'
+        error.value = '发送失败，请稍后重试'
       }
     } finally {
       sending.value = false
@@ -86,12 +95,18 @@ export function usePhoneLogin() {
       })
       if (res.data.token) {
         auth.setToken(res.data.token)
-        await auth.init()
+        try { await auth.init() } catch { /* token valid, profile fetch failed — navigate anyway */ }
         router.push('/')
+      } else {
+        error.value = '登录失败，请重试'
       }
     } catch (e: unknown) {
-      const data = (e as { response?: { data?: VerifyResp } }).response?.data
-      error.value = ERROR_LABELS[data?.error ?? ''] ?? '登录失败，请重试'
+      if (axios.isAxiosError(e)) {
+        const data = e.response?.data as VerifyResp | undefined
+        error.value = ERROR_LABELS[data?.error ?? ''] ?? '登录失败，请重试'
+      } else {
+        error.value = '登录失败，请重试'
+      }
     } finally {
       verifying.value = false
     }
