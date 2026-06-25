@@ -12,6 +12,7 @@ type Config struct {
 	DB         DBConfig
 	JWT        JWTConfig
 	WechatOpen WechatOpenConfig
+	TencentSMS TencentSMSConfig
 }
 
 // SessionConfig sessionToken 相关（游戏房间断线重连）。
@@ -42,4 +43,13 @@ type WechatOpenConfig struct {
 	AppSecret      string `json:",optional"`
 	CallbackDomain string `json:",optional"`
 	FrontendURL    string `json:",optional"`
+}
+
+// TencentSMSConfig 腾讯云短信配置。
+type TencentSMSConfig struct {
+	SecretID    string `json:",optional"`
+	SecretKey   string `json:",optional"`
+	SmsSdkAppID string `json:",optional"`
+	SignName    string `json:",optional"`
+	TemplateID  string `json:",optional"`
 }
