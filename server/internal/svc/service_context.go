@@ -30,6 +30,10 @@ type ServiceContext struct {
 	UserRepo      *repo.UserRepo
 	JWTSigner     *auth.JWTSigner
 	WechatClient  *auth.WechatClient
+
+	// SMS fields — wired in Task 5.
+	SmsStore  *SmsStore
+	SmsSender auth.SmsSender
 }
 
 // NewServiceContext 构建依赖。
