@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Run this migration on existing databases:
--- ALTER TABLE users ADD COLUMN phone VARCHAR(20) NULL UNIQUE AFTER avatar_url;
+-- ALTER TABLE users ADD COLUMN phone VARCHAR(20) NULL UNIQUE AFTER union_id;
 
 CREATE TABLE IF NOT EXISTS auth_states (
   state      VARCHAR(64) NOT NULL PRIMARY KEY,
