@@ -16,3 +16,4 @@ dist-ssr
 !.env.example
 !.env.production
 .vercel
+shop-background.png
