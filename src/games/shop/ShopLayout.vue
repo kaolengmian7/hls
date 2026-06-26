@@ -11,6 +11,5 @@
     url('/shop-bg.webp');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
 }
 </style>
