@@ -130,40 +130,7 @@ function dismissClosed(): void {
             </div>
           </div>
 
-          <div class="flex items-center gap-2 flex-wrap">
-            <div
-              class="rounded-md px-2.5 py-1 leading-tight text-right border border-gold-500/40 bg-ink-700/70"
-              :title="`商店保底`"
-            >
-              <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
-                保底
-              </div>
-              <div class="text-sm font-bold font-serif text-gold-200">
-                {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
-              </div>
-            </div>
-            <div
-              class="rounded-md px-2.5 py-1 leading-tight text-right border border-forest-400/40 bg-ink-700/70"
-              :title="`历次撤离成功累计扣减额`"
-            >
-              <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-forest-300/70">
-                得吃
-              </div>
-              <div class="text-sm font-bold font-serif text-forest-300">
-                {{ roomStore.evacuatedTotal }}<span class="text-forest-300/80 ml-0.5">W</span>
-              </div>
-            </div>
-            <button
-              v-if="canSettle"
-              class="btn-boss py-1.5 px-3 text-[11px]"
-              @click="showSettlement = true"
-            >
-              ⚖ 本轮结算
-            </button>
-            <button class="btn-ghost text-[11px]" @click="showSettlementHistory = true">
-              结算记录
-            </button>
-            <button class="btn-ghost text-[11px]" @click="showLottery = true">抽奖记录</button>
+          <div class="flex items-center gap-2">
             <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300 text-[11px]" @click="showLeaveConfirm = true">
               离开
             </button>
