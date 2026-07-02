@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useRoomStore } from '../stores/room';
 import {
-  RARITY_COLOR,
   SINGLE_DRAW_COST,
   formatGuaranteeShift,
   formatValueW,
-  type Rarity,
 } from '../game/lottery';
 import type { LotteryItem, LotteryRecord } from '../net/protocol';
 
@@ -65,6 +63,7 @@ const phase = ref<Phase>('idle');
 const rows = ref<LotteryItem[]>([]);
 const offset = ref(0); // 卷轴向上滚动的像素位移
 const result = ref<LotteryRecord | null>(null);
+const failedImages = reactive(new Set<string>());
 
 const myCoin = computed(() => roomStore.me?.coin ?? 0);
 const canDraw = computed(
@@ -282,14 +281,21 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
             <div
               v-for="(row, idx) in rows"
               :key="idx"
-              class="flex flex-col items-center justify-center"
+              class="flex items-center justify-center"
               :style="{ height: ITEM_H + 'px' }"
             >
+              <img
+                v-if="row.imageUrl && !failedImages.has(row.imageUrl)"
+                :src="row.imageUrl"
+                :alt="row.name"
+                style="width:64px;height:64px;border-radius:10px;object-fit:contain;"
+                @error="row.imageUrl && failedImages.add(row.imageUrl)"
+              />
               <div
-                class="font-display text-2xl font-bold tracking-wide text-shadow-relic leading-none"
-                :class="RARITY_COLOR[row.rarity as Rarity] ?? 'text-parchment-100'"
+                v-else
+                style="width:64px;height:64px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:30px;"
               >
-                {{ row.name }}
+                🎁
               </div>
             </div>
           </div>
