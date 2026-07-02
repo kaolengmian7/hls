@@ -14,7 +14,7 @@ const roomStore = useRoomStore();
 
 /* ------------------------------ 老虎机参数 ------------------------------ */
 
-const ITEM_H = 84; // 每格高度（px）
+const ITEM_H = 96; // 每格高度（px）
 const VISIBLE_ROWS = 3; // 窗口可见行数（奇数，中间行为结果行）
 const CENTER_ROW = Math.floor(VISIBLE_ROWS / 2);
 const VIEWPORT_H = ITEM_H * VISIBLE_ROWS;
@@ -31,18 +31,30 @@ const RESULT_TIMEOUT_MS = 6000; // 抽奖被拒/无响应的安全复位
  * 历史抽奖记录里的真实奖品会优先用于填充，装饰条目作为新房间的兜底。
  */
 const DECOR_FILLERS: LotteryItem[] = [
-  { id: 'decor-1', name: '海洋之泪', rarity: 'HIGH', value: 0 },
-  { id: 'decor-2', name: '非洲之心', rarity: 'HIGH', value: 0 },
-  { id: 'decor-3', name: '便携军用雷达', rarity: 'HIGH', value: 0 },
-  { id: 'decor-4', name: '万金泪冠', rarity: 'HIGH', value: 0 },
-  { id: 'decor-5', name: '军用无人机', rarity: 'MEDIUM', value: 0 },
-  { id: 'decor-6', name: '万足金条', rarity: 'MEDIUM', value: 0 },
-  { id: 'decor-7', name: '医疗机器人', rarity: 'MEDIUM', value: 0 },
-  { id: 'decor-8', name: '笔记本电脑', rarity: 'MEDIUM', value: 0 },
-  { id: 'decor-9', name: '劳力士', rarity: 'LOW', value: 0 },
-  { id: 'decor-10', name: '鱼子酱', rarity: 'LOW', value: 0 },
-  { id: 'decor-11', name: '鎏金卡牌', rarity: 'LOW', value: 0 },
-  { id: 'decor-12', name: '恒星敏感器', rarity: 'LOW', value: 0 },
+  { id: 'decor-1', name: '海洋之泪', rarity: 'HIGH', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/tear-of-the-ocean.webp' },
+  { id: 'decor-2', name: '非洲之心', rarity: 'HIGH', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/heart-of-africa.webp' },
+  { id: 'decor-3', name: '便携军用雷达', rarity: 'HIGH', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/radar-portable.webp' },
+  { id: 'decor-4', name: '万金泪冠', rarity: 'HIGH', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/golden-crown-of-tears.webp' },
+  { id: 'decor-5', name: '军用无人机', rarity: 'MEDIUM', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/mil-drone.webp' },
+  { id: 'decor-6', name: '万足金条', rarity: 'MEDIUM', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/gold-bar.webp' },
+  { id: 'decor-7', name: '医疗机器人', rarity: 'MEDIUM', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/medical-robot.webp' },
+  { id: 'decor-8', name: '笔记本电脑', rarity: 'MEDIUM', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/laptop.webp' },
+  { id: 'decor-9', name: '劳力士', rarity: 'LOW', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/rolex.webp' },
+  { id: 'decor-10', name: '鱼子酱', rarity: 'LOW', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/caviar.webp' },
+  { id: 'decor-11', name: '鎏金卡牌', rarity: 'LOW', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/gilt-card.webp' },
+  { id: 'decor-12', name: '恒星敏感器', rarity: 'LOW', value: 0,
+    imageUrl: 'https://your-bucket.file.myqcloud.com/prizes/star-sensor.webp' },
 ];
 
 /* ------------------------------ 响应式状态 ------------------------------ */
