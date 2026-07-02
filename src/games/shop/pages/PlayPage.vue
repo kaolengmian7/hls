@@ -12,7 +12,6 @@ import SettlementModal from '../components/SettlementModal.vue';
 import SettlementRecordModal from '../components/SettlementRecordModal.vue';
 import ConfirmDialog from '@shared/components/ConfirmDialog.vue';
 import ToastContainer from '../components/ToastContainer.vue';
-import AppHeader from '@shared/components/AppHeader.vue';
 import { usePlayerStore } from '@shared/stores/player';
 
 const router = useRouter();
@@ -101,8 +100,6 @@ function dismissClosed(): void {
 
 <template>
   <div class="flex-1 flex flex-col">
-    <AppHeader />
-
     <div v-if="restoring || !roomStore.snapshot" class="flex-1 flex items-center justify-center">
       <ToastContainer />
       <div class="card rpg-corners p-10 text-center max-w-sm">
