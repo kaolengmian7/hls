@@ -32,6 +32,7 @@ export type LotteryItem = {
   name: string;
   rarity: string;
   value: number;
+  imageUrl?: string;
 };
 
 /**
