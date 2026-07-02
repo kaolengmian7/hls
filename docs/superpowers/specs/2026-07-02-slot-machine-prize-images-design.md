@@ -24,7 +24,7 @@
 
 ## 协议变更
 
-`LotteryItem`（`src/games/shop/net/protocol.ts`）加可选字段：
+**前端**：`src/games/shop/net/protocol.ts`，第 30-35 行 `LotteryItem` 类型加可选字段：
 
 ```ts
 export type LotteryItem = {
@@ -36,7 +36,19 @@ export type LotteryItem = {
 };
 ```
 
-字段为可选，旧数据（无 imageUrl）自动走 fallback，前后端兼容。
+**后端**：`server/internal/protocol/envelope.go`，第 63-68 行 `Item` 结构体加字段：
+
+```go
+type Item struct {
+    ID       string `json:"id"`
+    Name     string `json:"name"`
+    Rarity   string `json:"rarity"`
+    Value    int    `json:"value"`
+    ImageURL string `json:"imageUrl,omitempty"` // 新增
+}
+```
+
+字段均为可选，旧数据（无 imageUrl）自动走 fallback，前后端兼容。
 
 ## 前端变更
 
@@ -63,19 +75,41 @@ export type LotteryItem = {
 
 ## Go 后端变更
 
-奖品配置结构体（`internal/game/lottery.go` 或对应配置文件）加 `imageUrl` 字段：
+需改动三处：
+
+**1. `server/internal/game/lottery.go`，第 31-37 行 — `LotteryItem` 结构体加字段**
 
 ```go
 type LotteryItem struct {
-    ID       string `json:"id"`
-    Name     string `json:"name"`
-    Rarity   string `json:"rarity"`
-    Value    int    `json:"value"`
-    ImageURL string `json:"imageUrl,omitempty"`
+    ID       string
+    Name     string
+    Rarity   string
+    Value    int
+    Weight   float64
+    ImageURL string // 新增，腾讯云 CDN 地址，空串时前端走 🎁 fallback
 }
 ```
 
-11 件奖品各自配置对应 CDN URL，空串时前端自动走 🎁 fallback。
+**2. `server/internal/game/lottery.go`，第 53-105 行 — `lotteryPool` 数组填入 CDN URL**
+
+共 51 件奖品，每条加 `ImageURL` 字段，例：
+
+```go
+{ID: "TEAR_OF_THE_OCEAN", Name: "海洋之泪", Rarity: rarityHigh, Value: 2800, Weight: 0.05,
+ ImageURL: "https://xxx.file.myqcloud.com/prizes/tear-of-ocean.webp"},
+```
+
+**3. `server/internal/game/lottery.go`，第 149-158 行 — 构造 `protocol.Item` 时传入 `ImageURL`**
+
+```go
+Item: protocol.Item{
+    ID:       item.ID,
+    Name:     item.Name,
+    Rarity:   item.Rarity,
+    Value:    item.Value,
+    ImageURL: item.ImageURL, // 新增
+},
+```
 
 ## Fallback 策略
 
