@@ -115,7 +115,7 @@ func TestDrawLotteryRollbackOnOverflow(t *testing.T) {
 }
 
 func TestLotteryPoolDefinition(t *testing.T) {
-	// 文档约定的 11 件奖品全部齐备：prizeId 唯一、Value > 0、Weight > 0。
+	// 奖品池共 51 件：prizeId 唯一、Value > 0、Weight > 0。
 	if len(lotteryPool) != 51 {
 		t.Fatalf("expect 51 prizes in pool, got %d", len(lotteryPool))
 	}
