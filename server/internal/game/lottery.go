@@ -29,11 +29,12 @@ const (
 // Value 为奖品估值（单位 W = 万），正整数。抽中后服务端会把 Value
 // 累加到房间 GuaranteedAmount，参见 DrawLottery。
 type LotteryItem struct {
-	ID     string
-	Name   string
-	Rarity string
-	Value  int
-	Weight float64
+	ID       string
+	Name     string
+	Rarity   string
+	Value    int
+	Weight   float64
+	ImageURL string
 }
 
 // 稀有度档位常量。Weight 是后端权重，仅服务端可见。
@@ -151,10 +152,11 @@ func DrawLottery(playerID string, times int, currentGuarantee int) ([]protocol.L
 			PlayerID: playerID,
 			Cost:     cost,
 			Item: protocol.Item{
-				ID:     item.ID,
-				Name:   item.Name,
-				Rarity: item.Rarity,
-				Value:  item.Value,
+				ID:       item.ID,
+				Name:     item.Name,
+				Rarity:   item.Rarity,
+				Value:    item.Value,
+				ImageURL: item.ImageURL,
 			},
 			GuaranteeDelta:  item.Value,
 			GuaranteeBefore: before,

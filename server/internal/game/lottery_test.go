@@ -116,8 +116,8 @@ func TestDrawLotteryRollbackOnOverflow(t *testing.T) {
 
 func TestLotteryPoolDefinition(t *testing.T) {
 	// 文档约定的 11 件奖品全部齐备：prizeId 唯一、Value > 0、Weight > 0。
-	if len(lotteryPool) != 11 {
-		t.Fatalf("expect 11 prizes in pool, got %d", len(lotteryPool))
+	if len(lotteryPool) != 51 {
+		t.Fatalf("expect 51 prizes in pool, got %d", len(lotteryPool))
 	}
 	seen := make(map[string]bool, len(lotteryPool))
 	for _, it := range lotteryPool {
@@ -157,6 +157,27 @@ func TestLotteryPoolDefinition(t *testing.T) {
 		if got[id] != v {
 			t.Errorf("prize %s value=%d, want %d", id, got[id], v)
 		}
+	}
+}
+
+func TestDrawLotteryPropagatesImageURL(t *testing.T) {
+	// 给每件奖品设可预测的 URL，保证无论 roll 到哪件都能断言。
+	for i := range lotteryPool {
+		lotteryPool[i].ImageURL = "https://cdn.example.com/prizes/" + lotteryPool[i].ID + ".webp"
+	}
+	t.Cleanup(func() {
+		for i := range lotteryPool {
+			lotteryPool[i].ImageURL = ""
+		}
+	})
+
+	records, _, err := DrawLottery("player-test", 1, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	wantURL := "https://cdn.example.com/prizes/" + records[0].Item.ID + ".webp"
+	if records[0].Item.ImageURL != wantURL {
+		t.Errorf("ImageURL mismatch: got %q, want %q", records[0].Item.ImageURL, wantURL)
 	}
 }
 
