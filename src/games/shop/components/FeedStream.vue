@@ -22,7 +22,7 @@ const events = computed(() => roomStore.feed);
 </script>
 
 <template>
-  <div class="card rpg-corners p-5 flex flex-col">
+  <div class="card rpg-corners p-5 flex flex-col lg:sticky lg:top-24">
     <div class="flex items-center justify-between mb-3">
       <h3 class="rpg-title text-lg">
         <span class="rune-mark mr-1">⚜</span>神秘商店 · 小报童
@@ -32,7 +32,7 @@ const events = computed(() => roomStore.feed);
       </span>
     </div>
     <div class="rpg-divider mb-3" />
-    <div class="flex-1 overflow-y-auto max-h-[420px] pr-1 space-y-2">
+    <div class="flex-1 overflow-y-auto max-h-[60vh] lg:max-h-[calc(100vh-8rem)] pr-1 space-y-2">
       <transition-group name="feed">
         <div
           v-for="ev in events"
