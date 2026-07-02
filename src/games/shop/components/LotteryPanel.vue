@@ -289,7 +289,7 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
                 :src="row.imageUrl"
                 :alt="row.name"
                 style="width:64px;height:64px;border-radius:10px;object-fit:contain;"
-                @error="row.imageUrl && failedImages.add(row.imageUrl)"
+                @error="failedImages.add(row.imageUrl!)"
               />
               <div
                 v-else
