@@ -61,10 +61,11 @@ type Player struct {
 // 服务端会在裁决抽奖的同 tick 内把 Value 累加到房间 GuaranteedAmount。
 // Value == 0 视为"无价值奖品"，不会推高保底；当前奖品池不使用该形态。
 type Item struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Rarity string `json:"rarity"`
-	Value  int    `json:"value"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Rarity   string `json:"rarity"`
+	Value    int    `json:"value"`
+	ImageURL string `json:"imageUrl,omitempty"`
 }
 
 // LotteryRecord 抽奖结果记录。
