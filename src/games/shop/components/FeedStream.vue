@@ -22,7 +22,7 @@ const events = computed(() => roomStore.feed);
 </script>
 
 <template>
-  <div class="card rpg-corners p-5 flex flex-col lg:sticky lg:top-24">
+  <div class="card rpg-corners p-5 flex flex-col lg:sticky lg:top-24 lg:h-full">
     <div class="flex items-center justify-between mb-3">
       <h3 class="rpg-title text-lg">
         <span class="rune-mark mr-1">⚜</span>神秘商店 · 小报童
