@@ -137,7 +137,7 @@ function dismissClosed(): void {
 
       <main class="flex-1 px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-[220px_1fr_260px] gap-6 max-w-7xl mx-auto w-full">
         <aside class="order-2 lg:order-1">
-          <div class="card rpg-corners p-4 lg:sticky lg:top-24 flex flex-col gap-4">
+          <div class="card rpg-corners p-4 lg:sticky lg:top-24 lg:h-full flex flex-col gap-4">
 
             <!-- 本局数据 -->
             <div>
