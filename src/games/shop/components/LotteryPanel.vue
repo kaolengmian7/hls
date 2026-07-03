@@ -279,7 +279,7 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
 
           <!-- 中间结果指示线 -->
           <div
-            class="pointer-events-none absolute inset-x-0 transition-all duration-300"
+            class="pointer-events-none absolute inset-x-0 transition-[border-color,background-color] duration-300"
             :class="{ 'lottery-reveal-pulse': revealed }"
             :style="{
               top: CENTER_ROW * ITEM_H + 'px',
