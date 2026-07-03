@@ -55,26 +55,22 @@ const events = computed(() => roomStore.feed);
             离开了神秘商店。
           </template>
           <template v-else-if="ev.kind === 'LOTTERY'">
-            <span class="font-serif font-semibold text-gold-200">
-              「{{ nameOf(asStr(ev.payload.playerId)) }}」
-            </span>
-            获得了 -
-            <span class="font-serif font-bold text-royal-400">
-              ‹{{ asStr(ev.payload.itemName) }}›
-            </span>
-            <span
-              v-if="Number(ev.payload.itemValue) > 0"
-              class="text-forest-300 ml-1"
+            <div>
+              <span class="font-serif font-semibold text-gold-200">「{{ nameOf(asStr(ev.payload.playerId)) }}」</span>
+              获得了
+              <span class="font-serif font-bold text-royal-400">‹{{ asStr(ev.payload.itemName) }}›</span>
+            </div>
+            <div
+              v-if="Number(ev.payload.itemValue) > 0 || Number(ev.payload.guaranteeDelta) > 0"
+              class="flex flex-wrap gap-x-3 mt-1 text-[11px] text-parchment-300/70"
             >
-              · 价值 {{ Number(ev.payload.itemValue) }}W
-            </span>
-            <span
-              v-if="Number(ev.payload.guaranteeDelta) > 0"
-              class="text-gold-200 ml-1"
-            >
-              · 保底 +{{ Number(ev.payload.guaranteeDelta) }}W
-              （{{ Number(ev.payload.guaranteeBefore) }} → {{ Number(ev.payload.guaranteeAfter) }}）
-            </span>
+              <span v-if="Number(ev.payload.itemValue) > 0" class="text-forest-300">
+                价值 {{ Number(ev.payload.itemValue) }}W
+              </span>
+              <span v-if="Number(ev.payload.guaranteeDelta) > 0" class="text-gold-200/80">
+                保底 +{{ Number(ev.payload.guaranteeDelta) }}W · {{ Number(ev.payload.guaranteeBefore) }} → {{ Number(ev.payload.guaranteeAfter) }}
+              </span>
+            </div>
           </template>
           <template v-else-if="ev.kind === 'PURCHASE'">
             <span class="font-serif font-semibold text-sapphire-300">
