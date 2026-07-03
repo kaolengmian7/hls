@@ -14,11 +14,13 @@ import type {
   EventType,
   IntentMap,
   IntentType,
+  LotteryItem,
   LotteryRecord,
   Player,
   RoomSnapshot,
 } from '../net/protocol';
 import { usePlayerStore } from '@shared/stores/player';
+import { fetchLotteryPool } from '../net/api';
 
 export type Toast = {
   id: string;
@@ -32,6 +34,7 @@ let toastSeq = 0;
 
 export const useRoomStore = defineStore('room', () => {
   const snapshot = shallowRef<RoomSnapshot | null>(null);
+  const lotteryPool = ref<LotteryItem[]>([]);
   const latestLotteryReveal = shallowRef<LotteryRecord[]>([]);
   /**
    * 老板本人抽奖时被"延迟播报"的 feed 事件 id 集合。
@@ -138,6 +141,15 @@ export const useRoomStore = defineStore('room', () => {
   function sendIntent<T extends IntentType>(type: T, payload: IntentMap[T]): string {
     if (!client) return '';
     return client.send(type, payload);
+  }
+
+  async function loadLotteryPool(): Promise<void> {
+    if (lotteryPool.value.length > 0) return;
+    try {
+      lotteryPool.value = await fetchLotteryPool();
+    } catch {
+      // 装饰用，失败静默；LotteryPanel 回退用历史记录
+    }
   }
 
   /**
@@ -327,11 +339,13 @@ export const useRoomStore = defineStore('room', () => {
     roomStatus,
     guaranteedAmount,
     evacuatedTotal,
+    lotteryPool,
     connect,
     sendIntent,
     leaveRoom,
     pushToast,
     tryRestoreSession,
     releaseSelfLotteryReveal,
+    loadLotteryPool,
   };
 });
