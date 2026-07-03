@@ -51,7 +51,7 @@ const events = computed(() => roomStore.feed);
           </template>
 
           <template v-else-if="ev.kind === 'LOTTERY'">
-            <div><span class="font-serif font-semibold text-gold-200">「{{ nameOf(asStr(ev.payload.playerId)) }}」</span>获得了 <span class="font-serif font-bold text-royal-400">‹{{ asStr(ev.payload.itemName) }}›</span></div>
+            <div><span class="font-serif font-semibold text-ember-300">板板</span>从货柜摸出了 <span class="font-serif font-bold text-royal-400">‹{{ asStr(ev.payload.itemName) }}›</span></div>
             <div v-if="Number(ev.payload.itemValue) > 0 || Number(ev.payload.guaranteeDelta) > 0" class="feed-detail">
               <span v-if="Number(ev.payload.itemValue) > 0" class="text-forest-300">价值 {{ Number(ev.payload.itemValue) }}W</span>
               <span v-if="Number(ev.payload.guaranteeDelta) > 0" class="text-gold-200/80">保底 +{{ Number(ev.payload.guaranteeDelta) }}W · {{ Number(ev.payload.guaranteeBefore) }}→{{ Number(ev.payload.guaranteeAfter) }}</span>
