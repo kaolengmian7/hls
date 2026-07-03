@@ -23,38 +23,6 @@ const LAND_ITEMS = 16; // 着陆阶段额外滚过的格数
 const RECYCLE_AT = 20; // 顶部消耗超过这么多格就回收，保持位移有界
 const RESULT_TIMEOUT_MS = 6000; // 抽奖被拒/无响应的安全复位
 
-/**
- * 仅用于"滚动模糊"的装饰条目，**不是**权威奖池（无真实价值/权重）。
- * 真正开出的奖品始终来自服务端 LOTTERY_DRAWN；这里只是让卷轴看起来热闹。
- * 历史抽奖记录里的真实奖品会优先用于填充，装饰条目作为新房间的兜底。
- */
-const DECOR_FILLERS: LotteryItem[] = [
-  { id: 'decor-1', name: '海洋之泪', rarity: 'HIGH', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/tear-of-the-ocean.webp' },
-  { id: 'decor-2', name: '非洲之心', rarity: 'HIGH', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/heart-of-africa.webp' },
-  { id: 'decor-3', name: '便携军用雷达', rarity: 'HIGH', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/radar-portable.webp' },
-  { id: 'decor-4', name: '万金泪冠', rarity: 'HIGH', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/golden-crown-of-tears.webp' },
-  { id: 'decor-5', name: '军用无人机', rarity: 'MEDIUM', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/mil-drone.webp' },
-  { id: 'decor-6', name: '万足金条', rarity: 'MEDIUM', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/gold-bar.webp' },
-  { id: 'decor-7', name: '医疗机器人', rarity: 'MEDIUM', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/medical-robot.webp' },
-  { id: 'decor-8', name: '笔记本电脑', rarity: 'MEDIUM', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/laptop.webp' },
-  { id: 'decor-9', name: '劳力士', rarity: 'LOW', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/rolex.webp' },
-  { id: 'decor-10', name: '鱼子酱', rarity: 'LOW', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/caviar.webp' },
-  { id: 'decor-11', name: '鎏金卡牌', rarity: 'LOW', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/gilt-card.webp' },
-  { id: 'decor-12', name: '恒星敏感器', rarity: 'LOW', value: 0,
-    imageUrl: 'https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/star-sensor.webp' },
-];
-
 /* ------------------------------ 响应式状态 ------------------------------ */
 
 type Phase = 'idle' | 'spinning' | 'landing' | 'revealed';
@@ -99,7 +67,6 @@ function makeFillers(pool: LotteryItem[], n: number): LotteryItem[] {
   return Array.from({ length: n }, () => randItem(pool));
 }
 
-/** 优先用本房间真实的历史奖品填充卷轴，不足时用装饰条目兜底。 */
 function buildFillerPool(): LotteryItem[] {
   const seen = new Set<string>();
   const pool: LotteryItem[] = [];
@@ -110,7 +77,7 @@ function buildFillerPool(): LotteryItem[] {
       pool.push(it);
     }
   }
-  for (const it of DECOR_FILLERS) {
+  for (const it of roomStore.lotteryPool) {
     if (!seen.has(it.id)) {
       seen.add(it.id);
       pool.push(it);
