@@ -255,12 +255,12 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
                 v-if="row.imageUrl && !failedImages.has(row.imageUrl)"
                 :src="row.imageUrl"
                 :alt="row.name"
-                style="width:64px;height:64px;border-radius:10px;object-fit:contain;"
+                style="width:160px;height:160px;border-radius:16px;object-fit:contain;"
                 @error="failedImages.add(row.imageUrl!)"
               />
               <div
                 v-else
-                style="width:64px;height:64px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:30px;"
+                style="width:160px;height:160px;border-radius:16px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:80px;"
               >
                 🎁
               </div>
@@ -270,32 +270,27 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
           <!-- 上下渐隐遮罩，强化"窗口"观感 -->
           <div
             class="pointer-events-none absolute inset-x-0 top-0"
-            :style="{
-              height: ITEM_H + 'px',
-              background: 'linear-gradient(180deg, #1a0f0a 5%, rgba(26,15,10,0))',
-            }"
+            style="height:28px;background:linear-gradient(180deg,#1a0f0a,rgba(26,15,10,0));"
           />
           <div
             class="pointer-events-none absolute inset-x-0 bottom-0"
-            :style="{
-              height: ITEM_H + 'px',
-              background: 'linear-gradient(0deg, #1a0f0a 5%, rgba(26,15,10,0))',
-            }"
+            style="height:28px;background:linear-gradient(0deg,#1a0f0a,rgba(26,15,10,0));"
           />
 
           <!-- 中间结果指示线 -->
           <div
             class="pointer-events-none absolute inset-x-0 transition-all duration-300"
+            :class="{ 'lottery-reveal-pulse': revealed }"
             :style="{
               top: CENTER_ROW * ITEM_H + 'px',
               height: ITEM_H + 'px',
               border: revealed
-                ? '1px solid rgba(212,175,55,0.85)'
+                ? '1.5px solid rgba(212,175,55,0.95)'
                 : '1px solid rgba(212,175,55,0.35)',
               boxShadow: revealed
-                ? 'inset 0 0 26px rgba(249,115,22,0.35), 0 0 18px rgba(212,175,55,0.45)'
+                ? 'inset 0 0 56px rgba(249,115,22,0.4), 0 0 36px rgba(212,175,55,0.55)'
                 : 'inset 0 0 18px rgba(0,0,0,0.45)',
-              background: revealed ? 'rgba(249,115,22,0.08)' : 'transparent',
+              background: revealed ? 'rgba(249,115,22,0.06)' : 'transparent',
             }"
           >
             <span
@@ -307,6 +302,27 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
               class="absolute right-1 top-1/2 -translate-y-1/2 text-gold-400/80 text-xs"
               :class="spinning ? 'animate-flicker' : ''"
               >◀</span
+            >
+            <!-- 四角装饰：revealed 时淡入 -->
+            <span
+              class="absolute text-gold-400 text-sm transition-opacity duration-500"
+              :style="{ opacity: revealed ? 0.9 : 0, top: '8px', left: '8px' }"
+              >✦</span
+            >
+            <span
+              class="absolute text-gold-400 text-sm transition-opacity duration-500"
+              :style="{ opacity: revealed ? 0.9 : 0, top: '8px', right: '8px' }"
+              >✦</span
+            >
+            <span
+              class="absolute text-gold-400 text-sm transition-opacity duration-500"
+              :style="{ opacity: revealed ? 0.9 : 0, bottom: '8px', left: '8px' }"
+              >✦</span
+            >
+            <span
+              class="absolute text-gold-400 text-sm transition-opacity duration-500"
+              :style="{ opacity: revealed ? 0.9 : 0, bottom: '8px', right: '8px' }"
+              >✦</span
             >
           </div>
         </div>
@@ -354,3 +370,18 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
     </div>
   </div>
 </template>
+
+<style scoped>
+.lottery-reveal-pulse {
+  animation: lotteryRevealPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes lotteryRevealPulse {
+  0%, 100% {
+    box-shadow: inset 0 0 56px rgba(249, 115, 22, 0.4), 0 0 36px rgba(212, 175, 55, 0.55);
+  }
+  50% {
+    box-shadow: inset 0 0 80px rgba(249, 115, 22, 0.6), 0 0 64px rgba(212, 175, 55, 0.9);
+  }
+}
+</style>
