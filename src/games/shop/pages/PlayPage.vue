@@ -179,8 +179,8 @@ function dismissClosed(): void {
                 >
                   ⚖ 本轮结算
                 </button>
-                <button class="btn-ghost text-[11px]" @click="showSettlementHistory = true">结算记录</button>
-                <button class="btn-ghost text-[11px]" @click="showLottery = true">抽奖记录</button>
+                <button class="btn-ghost py-1.5 px-3 text-[11px]" @click="showSettlementHistory = true">结算记录</button>
+                <button class="btn-ghost py-1.5 px-3 text-[11px]" @click="showLottery = true">抽奖记录</button>
               </div>
             </div>
 
