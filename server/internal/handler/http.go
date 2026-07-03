@@ -11,6 +11,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 
+	"hls.dev/server/internal/game"
 	"hls.dev/server/internal/svc"
 	"hls.dev/server/pkg/code"
 	"hls.dev/server/pkg/errors"
@@ -107,6 +108,18 @@ func HealthzHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			"ok":    true,
 			"rooms": ctx.Hub.Stats(),
 		})
+	}
+}
+
+// LotteryPoolHandler 处理 GET /api/lottery/pool。
+// 返回奖品池数组（不含 Weight），无需鉴权，数据为静态只读。
+func LotteryPoolHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			writeError(w, r, http.StatusMethodNotAllowed, "method not allowed", nil)
+			return
+		}
+		httpx.OkJsonCtx(r.Context(), w, game.GetPool())
 	}
 }
 
