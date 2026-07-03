@@ -50,6 +50,7 @@ func main() {
 		{Method: http.MethodPost, Path: "/api/rooms", Handler: handler.CreateRoomHandler(ctx)},
 		{Method: http.MethodGet, Path: "/api/rooms/:code", Handler: handler.QueryRoomHandler(ctx)},
 		{Method: http.MethodGet, Path: "/api/healthz", Handler: handler.HealthzHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/lottery/pool", Handler: handler.LotteryPoolHandler()},
 		{Method: http.MethodGet, Path: "/ws/rooms/:code", Handler: handler.WebSocketHandler(ctx)},
 		{Method: http.MethodGet, Path: "/api/auth/wechat/qr/start", Handler: handler.QrStartHandler(ctx)},
 		{Method: http.MethodGet, Path: "/api/auth/wechat/qr/callback", Handler: handler.QrCallbackHandler(ctx)},
