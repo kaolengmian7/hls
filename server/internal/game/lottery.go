@@ -156,6 +156,21 @@ var lotteryPool = []LotteryItem{
 		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ultrasonic-cutter.webp"},
 }
 
+// GetPool 返回奖品池的客户端视图（不含 Weight）。
+func GetPool() []protocol.Item {
+	items := make([]protocol.Item, len(lotteryPool))
+	for i, it := range lotteryPool {
+		items[i] = protocol.Item{
+			ID:       it.ID,
+			Name:     it.Name,
+			Rarity:   it.Rarity,
+			Value:    it.Value,
+			ImageURL: it.ImageURL,
+		}
+	}
+	return items
+}
+
 // CostForTimes 根据抽数返回总消耗；不支持的抽数返回错误。
 //
 // 当前仅支持 times == 1。

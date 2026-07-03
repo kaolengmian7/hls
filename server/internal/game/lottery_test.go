@@ -198,3 +198,28 @@ func TestRollOneDistribution(t *testing.T) {
 		t.Errorf("biased pool wrong: a=%d b=%d", counts["a"], counts["b"])
 	}
 }
+
+func TestGetPool(t *testing.T) {
+	pool := GetPool()
+	if len(pool) != len(lotteryPool) {
+		t.Fatalf("GetPool len=%d, want %d", len(pool), len(lotteryPool))
+	}
+	for i, item := range pool {
+		src := lotteryPool[i]
+		if item.ID != src.ID {
+			t.Errorf("[%d] ID=%s, want %s", i, item.ID, src.ID)
+		}
+		if item.Name != src.Name {
+			t.Errorf("[%d] Name=%s, want %s", i, item.Name, src.Name)
+		}
+		if item.Rarity != src.Rarity {
+			t.Errorf("[%d] Rarity=%s, want %s", i, item.Rarity, src.Rarity)
+		}
+		if item.Value != src.Value {
+			t.Errorf("[%d] Value=%d, want %d", i, item.Value, src.Value)
+		}
+		if item.ImageURL != src.ImageURL {
+			t.Errorf("[%d] ImageURL=%s, want %s", i, item.ImageURL, src.ImageURL)
+		}
+	}
+}
