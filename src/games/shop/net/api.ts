@@ -8,7 +8,7 @@
  */
 
 import { apiBase } from './config';
-import type { RoomStatus } from './protocol';
+import type { LotteryItem, RoomStatus } from './protocol';
 
 export type CreateRoomResponse = {
   code: string;
@@ -104,4 +104,8 @@ export async function queryRoom(code: string, playerId?: string): Promise<RoomSu
     }
     throw err;
   }
+}
+
+export function fetchLotteryPool(): Promise<LotteryItem[]> {
+  return request<LotteryItem[]>('GET', '/api/lottery/pool');
 }
