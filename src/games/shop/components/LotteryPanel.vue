@@ -12,14 +12,14 @@ const roomStore = useRoomStore();
 
 /* ------------------------------ 老虎机参数 ------------------------------ */
 
-const ITEM_H = 96; // 每格高度（px）
-const VISIBLE_ROWS = 3; // 窗口可见行数（奇数，中间行为结果行）
+const ITEM_H = 240; // 每格高度（px）
+const VISIBLE_ROWS = 1; // 窗口可见行数（奇数，中间行为结果行）
 const CENTER_ROW = Math.floor(VISIBLE_ROWS / 2);
 const VIEWPORT_H = ITEM_H * VISIBLE_ROWS;
-const SPIN_SPEED = ITEM_H * 17; // 滚动速度（px/s），制造高速模糊
-const MIN_SPIN_MS = 700; // 即使结果秒回，也至少滚动这么久
-const LAND_MS = 2300; // 减速着陆时长
-const LAND_ITEMS = 16; // 着陆阶段额外滚过的格数
+const SPIN_SPEED = ITEM_H * 22; // 滚动速度（px/s），制造高速模糊
+const MIN_SPIN_MS = 1000; // 即使结果秒回，也至少滚动这么久
+const LAND_MS = 3000; // 减速着陆时长
+const LAND_ITEMS = 22; // 着陆阶段额外滚过的格数
 const RECYCLE_AT = 20; // 顶部消耗超过这么多格就回收，保持位移有界
 const RESULT_TIMEOUT_MS = 6000; // 抽奖被拒/无响应的安全复位
 
@@ -55,8 +55,8 @@ let landTargetOffset = 0;
 let awaiting = false;
 let landing = false;
 
-function easeOutQuart(t: number): number {
-  return 1 - Math.pow(1 - t, 4);
+function easeOutSextic(t: number): number {
+  return 1 - Math.pow(1 - t, 6);
 }
 
 function randItem(pool: LotteryItem[]): LotteryItem {
@@ -127,7 +127,7 @@ function tick(ts: number): void {
     }
   } else {
     const t = Math.min((ts - landStartTs) / LAND_MS, 1);
-    offset.value = landStartOffset + (landTargetOffset - landStartOffset) * easeOutQuart(t);
+    offset.value = landStartOffset + (landTargetOffset - landStartOffset) * easeOutSextic(t);
     if (t >= 1) {
       offset.value = landTargetOffset;
       phase.value = 'revealed';
