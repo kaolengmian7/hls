@@ -48,6 +48,7 @@ const roster = computed(() => {
 
 onMounted(async () => {
   playerStore.ensureIdentity();
+  roomStore.loadLotteryPool();
   const targetCode = (route.params.code as string) || roomStore.code;
 
   if (roomStore.status !== 'connected') {
