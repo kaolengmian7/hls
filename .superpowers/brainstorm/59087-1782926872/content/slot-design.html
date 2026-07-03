@@ -1,0 +1,76 @@
+<h2>老虎机卷轴设计方案</h2>
+<p class="subtitle">图片模式 vs 现有文字模式对比</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">现有：文字模式</div>
+    <div class="mockup-body" style="background:#1a0f0a;padding:0;border-radius:8px;overflow:hidden;">
+      <div style="border:1px solid rgba(212,175,55,0.45);border-radius:8px;overflow:hidden;position:relative;">
+        <!-- 上渐隐 -->
+        <div style="position:absolute;top:0;left:0;right:0;height:84px;background:linear-gradient(180deg,#1a0f0a 5%,rgba(26,15,10,0));z-index:2;pointer-events:none;"></div>
+        <!-- 下渐隐 -->
+        <div style="position:absolute;bottom:0;left:0;right:0;height:84px;background:linear-gradient(0deg,#1a0f0a 5%,rgba(26,15,10,0));z-index:2;pointer-events:none;"></div>
+        <!-- 中间指示框 -->
+        <div style="position:absolute;top:84px;left:0;right:0;height:84px;border:1px solid rgba(212,175,55,0.85);box-shadow:inset 0 0 26px rgba(249,115,22,0.35),0 0 18px rgba(212,175,55,0.45);background:rgba(249,115,22,0.08);z-index:3;">
+          <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);color:#d4af37;font-size:11px;">▶</span>
+          <span style="position:absolute;right:4px;top:50%;transform:translateY(-50%);color:#d4af37;font-size:11px;">◀</span>
+        </div>
+        <!-- 3行文字 -->
+        <div style="background:radial-gradient(120% 80% at 50% 0%,rgba(249,115,22,0.18),transparent 60%),linear-gradient(180deg,rgba(0,0,0,0.45),rgba(0,0,0,0.65)),#1a0f0a;">
+          <div style="height:84px;display:flex;align-items:center;justify-content:center;">
+            <span style="color:#f87171;font-size:20px;font-weight:700;letter-spacing:0.05em;opacity:0.5;">海洋之泪</span>
+          </div>
+          <div style="height:84px;display:flex;align-items:center;justify-content:center;">
+            <span style="color:#f59e0b;font-size:22px;font-weight:700;letter-spacing:0.05em;">万足金条</span>
+          </div>
+          <div style="height:84px;display:flex;align-items:center;justify-content:center;">
+            <span style="color:#a78bfa;font-size:20px;font-weight:700;letter-spacing:0.05em;opacity:0.5;">劳力士</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">新版：图片模式</div>
+    <div class="mockup-body" style="background:#1a0f0a;padding:0;border-radius:8px;overflow:hidden;">
+      <div style="border:1px solid rgba(212,175,55,0.45);border-radius:8px;overflow:hidden;position:relative;">
+        <!-- 上渐隐 -->
+        <div style="position:absolute;top:0;left:0;right:0;height:96px;background:linear-gradient(180deg,#1a0f0a 5%,rgba(26,15,10,0));z-index:2;pointer-events:none;"></div>
+        <!-- 下渐隐 -->
+        <div style="position:absolute;bottom:0;left:0;right:0;height:96px;background:linear-gradient(0deg,#1a0f0a 5%,rgba(26,15,10,0));z-index:2;pointer-events:none;"></div>
+        <!-- 中间指示框（高96px适配图片） -->
+        <div style="position:absolute;top:96px;left:0;right:0;height:96px;border:1px solid rgba(212,175,55,0.85);box-shadow:inset 0 0 26px rgba(249,115,22,0.35),0 0 18px rgba(212,175,55,0.45);background:rgba(249,115,22,0.08);z-index:3;">
+          <span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);color:#d4af37;font-size:11px;">▶</span>
+          <span style="position:absolute;right:4px;top:50%;transform:translateY(-50%);color:#d4af37;font-size:11px;">◀</span>
+        </div>
+        <!-- 3行图片 -->
+        <div style="background:radial-gradient(120% 80% at 50% 0%,rgba(249,115,22,0.18),transparent 60%),linear-gradient(180deg,rgba(0,0,0,0.45),rgba(0,0,0,0.65)),#1a0f0a;">
+          <!-- 行1：有图 -->
+          <div style="height:96px;display:flex;align-items:center;justify-content:center;opacity:0.5;">
+            <div style="width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,#0ea5e9,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 2px 12px rgba(0,0,0,0.5);">💎</div>
+          </div>
+          <!-- 行2：中间行（中奖），有图 -->
+          <div style="height:96px;display:flex;align-items:center;justify-content:center;">
+            <div style="width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#dc2626);display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 4px 20px rgba(245,158,11,0.5);">🏅</div>
+          </div>
+          <!-- 行3：fallback（无图） -->
+          <div style="height:96px;display:flex;align-items:center;justify-content:center;opacity:0.5;">
+            <div style="width:64px;height:64px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:30px;">🎁</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>设计要点</h3>
+  <ul>
+    <li><strong>格子高度</strong>：从 84px 升至 96px，给图片更多呼吸空间</li>
+    <li><strong>图片尺寸</strong>：中间结果行 72×72px，上下非焦点行 64×64px（opacity 0.5）</li>
+    <li><strong>Fallback</strong>：无 imageUrl 时显示半透明背景 + 🎁，风格统一</li>
+    <li><strong>协议</strong>：<code>LotteryItem</code> 加可选字段 <code>imageUrl?: string</code></li>
+    <li><strong>DECOR_FILLERS</strong>：加入对应 CDN URL，滚动时有真实图片飞过</li>
+  </ul>
+</div>

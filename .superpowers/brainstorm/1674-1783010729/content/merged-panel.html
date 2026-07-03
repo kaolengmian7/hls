@@ -1,0 +1,278 @@
+<h2>左侧信息面板 · 合并方案</h2>
+<p class="subtitle">将 header 右侧的保底 / 得吃 / 记录按钮整合进左侧面板，header 只保留标题与离开。</p>
+
+<style>
+* { box-sizing: border-box; }
+.demo-page {
+  background: #12090680;
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: #f4e6c2;
+}
+.demo-header {
+  background: rgba(20,12,8,0.85);
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.demo-body {
+  display: flex;
+  gap: 0;
+  height: 320px;
+}
+.demo-left {
+  width: 200px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(212,175,55,0.12);
+  background: rgba(10,6,4,0.5);
+  padding: 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+.demo-center {
+  flex: 1;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(120% 80% at 50% 0%, rgba(249,115,22,0.1), transparent 60%);
+}
+.demo-right {
+  width: 220px;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(212,175,55,0.12);
+  background: rgba(10,6,4,0.5);
+  padding: 10px;
+}
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+.stat-box {
+  background: rgba(212,175,55,0.07);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 5px;
+  padding: 5px 7px;
+  text-align: center;
+}
+.stat-label { font-size: 9px; color: rgba(212,175,55,0.7); letter-spacing: 0.15em; margin-bottom: 2px; }
+.stat-value { font-size: 14px; font-weight: bold; color: #fcd34d; }
+.stat-value.green { color: #6ee7b7; }
+.divider { border: none; border-top: 1px solid rgba(212,175,55,0.15); margin: 2px 0; }
+.section-title {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(212,175,55,0.6);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 5px;
+  border: 1px solid rgba(212,175,55,0.18);
+  background: rgba(20,12,8,0.5);
+}
+.player-row.self { border-color: rgba(212,175,55,0.5); background: rgba(212,175,55,0.07); }
+.avatar { width: 26px; height: 26px; border-radius: 50%; background: rgba(249,115,22,0.3); border: 1px solid rgba(249,115,22,0.5); display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0; }
+.avatar.escort { background: rgba(59,130,246,0.3); border-color: rgba(59,130,246,0.5); }
+.player-info { flex: 1; min-width: 0; }
+.player-name { font-size: 11px; color: #f4e6c2; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.player-role { font-size: 9px; color: rgba(249,115,22,0.9); }
+.player-role.escort-role { color: rgba(96,165,250,0.9); }
+.player-coin { font-size: 10px; color: #fcd34d; margin-left: auto; flex-shrink:0; }
+.btn-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.mini-btn {
+  font-size: 9px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(212,175,55,0.3);
+  background: rgba(212,175,55,0.06);
+  color: rgba(212,175,55,0.8);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+.mini-btn.boss { border-color: rgba(249,115,22,0.5); background: rgba(249,115,22,0.12); color: #fb923c; }
+.slot-box {
+  width: 100%;
+  max-width: 340px;
+  border: 1px solid rgba(212,175,55,0.4);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(249,115,22,0.15), rgba(0,0,0,0.5));
+  padding: 12px;
+  text-align: center;
+}
+.slot-screen {
+  height: 80px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 8px 0;
+}
+.feed-item { background: rgba(20,12,8,0.6); border: 1px solid rgba(212,175,55,0.15); border-radius: 4px; padding: 5px 7px; margin-bottom: 5px; font-size: 10px; color: #d4c49a; }
+.feed-time { font-size: 9px; color: rgba(212,175,55,0.5); margin-bottom: 2px; }
+.highlight-box {
+  background: rgba(249,115,22,0.08);
+  border: 1px dashed rgba(249,115,22,0.4);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 10px;
+  color: rgba(249,115,22,0.7);
+  margin-bottom: 4px;
+  text-align: center;
+}
+</style>
+
+<div class="mockup" style="max-width:780px;margin:0 auto;">
+  <div class="mockup-header">桌面效果预览</div>
+  <div class="mockup-body" style="padding:0;overflow:hidden;">
+    <div class="demo-page">
+
+      <!-- Header：简化，只留标题 + 口令 + 离开 -->
+      <div class="demo-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="color:#fcd34d;font-size:16px;">⚜</span>
+          <div>
+            <div style="font-size:12px;font-weight:bold;color:#f4e6c2;">花栗鼠的神秘商店</div>
+            <div style="font-size:9px;color:rgba(212,175,55,0.6);letter-spacing:0.2em;">口令 · ABCD</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <div class="highlight-box" style="padding:2px 8px;margin:0;">← 数据已移至左侧</div>
+          <button class="mini-btn" style="border-color:rgba(180,50,50,0.4);color:rgba(230,100,100,0.8);">离开</button>
+        </div>
+      </div>
+
+      <div class="demo-body">
+        <!-- 左侧合并面板 -->
+        <div class="demo-left">
+          <!-- 新增：游戏数据区 -->
+          <div>
+            <div class="section-title">⚜ 本局数据</div>
+            <div class="stat-grid">
+              <div class="stat-box">
+                <div class="stat-label">保底</div>
+                <div class="stat-value">120<span style="font-size:9px;color:rgba(212,175,55,0.6);">W</span></div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">得吃</div>
+                <div class="stat-value green">35<span style="font-size:9px;color:rgba(100,200,150,0.6);">W</span></div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="divider"/>
+
+          <!-- 新增：记录按钮 -->
+          <div>
+            <div class="section-title">🗂 操作</div>
+            <div class="btn-row">
+              <button class="mini-btn boss">⚖ 本轮结算</button>
+              <button class="mini-btn">结算记录</button>
+              <button class="mini-btn">抽奖记录</button>
+            </div>
+          </div>
+
+          <hr class="divider"/>
+
+          <!-- 原有：店内成员 -->
+          <div style="flex:1;">
+            <div class="section-title">👥 店内成员</div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div class="player-row self">
+                <div class="avatar">🧙</div>
+                <div class="player-info">
+                  <div class="player-name">👑 花栗鼠</div>
+                  <div class="player-role">板板</div>
+                </div>
+                <div class="player-coin">💰 0</div>
+              </div>
+              <div class="player-row">
+                <div class="avatar escort">🛡</div>
+                <div class="player-info">
+                  <div class="player-name">队友甲</div>
+                  <div class="player-role escort-role">护航</div>
+                </div>
+                <div class="player-coin">💰 10</div>
+              </div>
+              <div class="player-row">
+                <div class="avatar escort">🛡</div>
+                <div class="player-info">
+                  <div class="player-name">队友乙</div>
+                  <div class="player-role escort-role">护航</div>
+                </div>
+                <div class="player-coin">💰 10</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 中间：抽奖主区 -->
+        <div class="demo-center">
+          <div class="slot-box">
+            <div style="font-size:11px;color:rgba(212,175,55,0.8);letter-spacing:0.2em;margin-bottom:4px;">⚜ 板板专属 · 神秘商店</div>
+            <div class="slot-screen">🎁</div>
+            <div style="font-size:10px;color:#d4c49a;margin-bottom:8px;">点击开启神秘货柜</div>
+            <button style="width:100%;padding:6px;background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.5);border-radius:5px;color:#fb923c;font-size:11px;cursor:pointer;">
+              🎁 开启神秘商店 · 3 鼠币
+            </button>
+          </div>
+        </div>
+
+        <!-- 右侧：小报童 -->
+        <div class="demo-right">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="font-size:11px;color:#fcd34d;letter-spacing:0.1em;">⚜ 神秘商店 · 小报童</div>
+            <div style="font-size:9px;color:rgba(212,175,55,0.5);">3 缄</div>
+          </div>
+          <div style="border-top:1px solid rgba(212,175,55,0.15);padding-top:6px;">
+            <div class="feed-item">
+              <div class="feed-time">✦ 14:32:01</div>
+              <span style="color:#6ee7b7;">「花栗鼠」</span> 进入了神秘商店。
+            </div>
+            <div class="feed-item">
+              <div class="feed-time">✦ 14:32:15</div>
+              <span style="color:#93c5fd;">「队友甲」</span> 从补给架拿走了 ‹护甲›
+            </div>
+            <div class="feed-item">
+              <div class="feed-time">✦ 14:33:02</div>
+              <span style="color:#fcd34d;">「花栗鼠」</span> 获得了 - <span style="color:#a78bfa;">‹劳力士›</span> · 价值 8W
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)" style="flex:1;min-width:200px;">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>方向正确，继续细化</h3>
+      <p>左侧合并面板的思路没问题，基于这个继续设计</p>
+    </div>
+  </div>
+  <div class="option" data-choice="adjust" onclick="toggleSelect(this)" style="flex:1;min-width:200px;">
+    <div class="letter">↺</div>
+    <div class="content">
+      <h3>需要调整</h3>
+      <p>有些部分不对，在终端告诉我</p>
+    </div>
+  </div>
+</div>

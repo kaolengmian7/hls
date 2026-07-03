@@ -1,0 +1,8 @@
+{"type":"server-started","port":58449,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:58449","screen_dir":"/Users/kratos/hls/.superpowers/brainstorm/59087-1782926872/content","state_dir":"/Users/kratos/hls/.superpowers/brainstorm/59087-1782926872/state"}
+{"type":"screen-added","file":"/Users/kratos/hls/.superpowers/brainstorm/59087-1782926872/content/slot-row-layout.html"}
+{"source":"user-event","type":"click","text":"💎\n    \n    \n      只显示图片\n      大图，视觉冲击强，滚动时图片快速闪过。名字在停稳后单独展示。","choice":"a","id":null,"timestamp":1782927383109}
+{"source":"user-event","type":"click","text":"💎\n    \n    \n      只显示图片\n      大图，视觉冲击强，滚动时图片快速闪过。名字在停稳后单独展示。","choice":"a","id":null,"timestamp":1782927392549}
+{"source":"user-event","type":"click","text":"💎\n    \n    \n      只显示图片\n      大图，视觉冲击强，滚动时图片快速闪过。名字在停稳后单独展示。","choice":"a","id":null,"timestamp":1782927392724}
+{"source":"user-event","type":"click","text":"💎\n    \n    \n      只显示图片\n      大图，视觉冲击强，滚动时图片快速闪过。名字在停稳后单独展示。","choice":"a","id":null,"timestamp":1782927395661}
+{"type":"screen-added","file":"/Users/kratos/hls/.superpowers/brainstorm/59087-1782926872/content/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

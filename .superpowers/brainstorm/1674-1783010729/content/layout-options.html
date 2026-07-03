@@ -1,0 +1,162 @@
+<h2>三种排版方案</h2>
+<p class="subtitle">中间抽奖区是核心，桌面 + 手机都要顾及。点击方案选择你倾向的方向。</p>
+
+<style>
+.layout-demo {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 12px;
+}
+.demo-desktop {
+  display: flex;
+  gap: 6px;
+  height: 220px;
+  margin-bottom: 8px;
+}
+.demo-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 90px;
+  height: 160px;
+  flex-shrink: 0;
+}
+.demo-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.demo-label {
+  font-size: 10px;
+  text-align: center;
+  color: #aaa;
+  margin-bottom: 3px;
+  letter-spacing: 0.05em;
+}
+.col-left  { background: rgba(100,149,237,0.18); border: 1px solid rgba(100,149,237,0.45); border-radius: 6px; display:flex;align-items:center;justify-content:center;text-align:center;color:#93c5fd;font-size:11px;padding:4px; }
+.col-center { background: rgba(249,115,22,0.18); border: 1px solid rgba(249,115,22,0.5); border-radius: 6px; display:flex;align-items:center;justify-content:center;text-align:center;color:#fb923c;font-size:11px;padding:4px; flex:1; }
+.col-right  { background: rgba(134,239,172,0.15); border: 1px solid rgba(134,239,172,0.4); border-radius: 6px; display:flex;align-items:center;justify-content:center;text-align:center;color:#86efac;font-size:11px;padding:4px; }
+.col-strip  { background: rgba(100,149,237,0.18); border: 1px solid rgba(100,149,237,0.45); border-radius: 4px; height:32px; display:flex;align-items:center;justify-content:center;color:#93c5fd;font-size:10px; }
+.col-thin   { background: rgba(100,149,237,0.18); border: 1px dashed rgba(100,149,237,0.45); border-radius: 6px; display:flex;align-items:center;justify-content:center;text-align:center;color:#93c5fd;font-size:10px;padding:2px; }
+.col-icon-strip { background: rgba(100,149,237,0.12); border: 1px solid rgba(100,149,237,0.3); border-radius: 6px; display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:6px;color:#93c5fd; font-size:10px;}
+.tag {display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;margin-top:4px;}
+.tag-new{background:rgba(249,115,22,0.25);color:#fb923c;border:1px solid rgba(249,115,22,0.4);}
+.tag-keep{background:rgba(100,149,237,0.2);color:#93c5fd;border:1px solid rgba(100,149,237,0.3);}
+.note{font-size:10px;color:#888;margin-top:6px;line-height:1.5;}
+.section-divider{margin:6px 0 4px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:4px;}
+.change-list{list-style:none;padding:0;margin:4px 0 0;font-size:11px;color:#ccc;line-height:1.6;}
+.change-list li::before{content:"→ ";color:#fb923c;}
+</style>
+
+<div class="options" style="flex-direction:column;gap:18px;">
+
+  <!-- 方案 A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)" style="align-items:flex-start;">
+    <div class="letter">A</div>
+    <div class="content" style="width:100%;">
+      <h3>均衡精简 · 收窄侧栏</h3>
+      <p>两侧收窄给中间让路，成员栏更紧凑；手机端成员条横置于顶。改动最小，风险最低。</p>
+      <div class="layout-demo">
+        <div class="demo-wrap">
+          <div>
+            <div class="demo-label">🖥 桌面</div>
+            <div class="demo-desktop">
+              <div class="col-left" style="width:180px;">店内成员<br/><span style="font-size:10px;opacity:0.7">180px 精简卡片</span></div>
+              <div class="col-center">⚜ 板板专属神秘商店<br/><span style="font-size:10px;opacity:0.7">1fr · 最宽，居中突出</span></div>
+              <div class="col-right" style="width:240px;">小报童<br/><span style="font-size:10px;opacity:0.7">240px 全高滚动</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="demo-label">📱 手机</div>
+            <div class="demo-mobile">
+              <div class="col-strip">──成员横条──</div>
+              <div class="col-center" style="flex:1;">⚜ 抽奖<br/>主区</div>
+              <div class="col-right" style="height:48px;flex-shrink:0;">小报童</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ul class="change-list">
+        <li>左侧 260px → 180px，玩家卡片横向一行显示头像+昵称+金币</li>
+        <li>右侧 340px → 240px，不再固定 max-h，随页面高度自适应</li>
+        <li>手机：成员改为顶部横向滚动条（头像+金币 mini 版）</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 方案 B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)" style="align-items:flex-start;">
+    <div class="letter">B</div>
+    <div class="content" style="width:100%;">
+      <h3>成员上移 · 两栏聚焦</h3>
+      <p>店内成员整合进顶部 header，页面变为两栏：大中心 + 窄报童。中间区域最大化。</p>
+      <div class="layout-demo">
+        <div class="demo-wrap">
+          <div>
+            <div class="demo-label">🖥 桌面</div>
+            <div class="demo-desktop" style="flex-direction:column;height:auto;">
+              <div class="col-strip" style="height:36px;margin-bottom:4px;">⚜ Header · 口令 · 保底 · [👑板板 💰0] [🛡护航 💰10] [🛡护航 💰10]</div>
+              <div style="display:flex;gap:6px;flex:1;height:180px;">
+                <div class="col-center">⚜ 板板专属神秘商店<br/><span style="font-size:10px;opacity:0.7">1fr · 空间最大</span></div>
+                <div class="col-right" style="width:260px;">小报童<br/><span style="font-size:10px;opacity:0.7">260px 全高</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="demo-label">📱 手机</div>
+            <div class="demo-mobile">
+              <div class="col-strip" style="height:28px;font-size:9px;">Header 成员 mini</div>
+              <div class="col-center" style="flex:1;">⚜ 抽奖</div>
+              <div class="col-right" style="height:40px;flex-shrink:0;">报童</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ul class="change-list">
+        <li>Header 增加三个 mini 玩家卡片（头像 · 昵称 · 金币 · 角色色彩）</li>
+        <li>移除左侧侧栏，改为两栏布局 1fr + 260px</li>
+        <li>中心区域宽度大幅增加，老虎机/装备架更宽阔</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 方案 C -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)" style="align-items:flex-start;">
+    <div class="letter">C</div>
+    <div class="content" style="width:100%;">
+      <h3>图标侧栏 + 报童抽屉</h3>
+      <p>左侧变为超窄图标栏（只显示头像+金币），小报童收为可展开抽屉。中间空间最大，但交互更复杂。</p>
+      <div class="layout-demo">
+        <div class="demo-wrap">
+          <div>
+            <div class="demo-label">🖥 桌面</div>
+            <div class="demo-desktop">
+              <div class="col-icon-strip" style="width:64px;">
+                <div>🧙</div><div style="color:#fb923c;">0W</div>
+                <div style="border-top:1px solid rgba(255,255,255,0.1);width:100%;"></div>
+                <div>🛡</div><div>10W</div>
+                <div>🛡</div><div>10W</div>
+              </div>
+              <div class="col-center">⚜ 神秘商店<br/><span style="font-size:10px;opacity:0.7">最宽，老虎机充分展开</span></div>
+              <div class="col-right" style="width:40px;writing-mode:vertical-rl;letter-spacing:4px;font-size:10px;color:#86efac;">小报童 ▶</div>
+            </div>
+          </div>
+          <div>
+            <div class="demo-label">📱 手机</div>
+            <div class="demo-mobile">
+              <div class="col-center" style="flex:1;">⚜ 抽奖</div>
+              <div class="col-strip">成员+报童 底部栏</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ul class="change-list">
+        <li>左侧压缩到 64px 仅显示角色图标+金币，hover 展开完整卡片</li>
+        <li>右侧报童默认折叠为 40px 边条，点击展开为覆盖层或抽屉</li>
+        <li>中间区域获得最大空间；改动最激进，需要较多新交互逻辑</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<p class="note" style="margin-top:16px;">💡 点击选择你倾向的方向，也可以在终端告诉我你想混合哪些元素。</p>
