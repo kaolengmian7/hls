@@ -189,8 +189,7 @@ func CostForTimes(times int) (int, error) {
 //     若累加后 > MaxGuaranteedAmount，本次抽奖整体回滚：返回 INVALID_GUARANTEE
 //     错误，不返回任何记录；调用方应据此拒绝整次 Intent（金币不扣、保底不变）。
 //   - 成功时第二个返回值为最终保底金额（= 最后一条记录的 GuaranteeAfter）。
-// highBoost is the weight multiplier for HIGH-rarity items. Pass 1.0 for no
-// boost. Values > 1 increase the probability of HIGH items proportionally.
+//   - highBoost 是 HIGH 物品的权重倍数；传 1.0 表示无提升。
 func DrawLottery(playerID string, times int, currentGuarantee int, highBoost float64) ([]protocol.LotteryRecord, int, error) {
 	cost, err := CostForTimes(times)
 	if err != nil {
@@ -199,11 +198,11 @@ func DrawLottery(playerID string, times int, currentGuarantee int, highBoost flo
 	now := time.Now().UnixMilli()
 	out := make([]protocol.LotteryRecord, 0, times)
 	guarantee := currentGuarantee
+	pool := lotteryPool
+	if highBoost != 1.0 {
+		pool = applyHighBoost(lotteryPool, highBoost)
+	}
 	for i := 0; i < times; i++ {
-		pool := lotteryPool
-		if highBoost != 1.0 {
-			pool = applyHighBoost(lotteryPool, highBoost)
-		}
 		item, err := rollOne(pool)
 		if err != nil {
 			return nil, currentGuarantee, errors.WithMessage(err, "roll lottery")
