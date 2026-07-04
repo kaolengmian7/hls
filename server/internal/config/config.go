@@ -13,6 +13,7 @@ type Config struct {
 	JWT        JWTConfig
 	WechatOpen WechatOpenConfig
 	TencentSMS TencentSMSConfig
+	Shop       ShopConfig
 }
 
 // SessionConfig sessionToken 相关（游戏房间断线重连）。
@@ -52,4 +53,10 @@ type TencentSMSConfig struct {
 	SmsSdkAppID string `json:",optional"`
 	SignName    string `json:",optional"`
 	TemplateID  string `json:",optional"`
+}
+
+// ShopConfig 神秘商店专项配置。
+type ShopConfig struct {
+	VIPUsers     []int64 `json:",optional"`
+	VIPHighBoost float64 `json:",default=5"`
 }

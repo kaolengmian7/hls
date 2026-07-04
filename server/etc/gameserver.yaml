@@ -38,3 +38,8 @@ TencentSMS:
   SmsSdkAppID: ""
   SignName: ""
   TemplateID: ""
+
+Shop:
+  VIPUsers:
+    - 900006000
+  VIPHighBoost: 5
