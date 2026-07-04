@@ -40,6 +40,9 @@ func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, shopRe
 	for _, uid := range vipUserIDs {
 		vipSet[uid] = struct{}{}
 	}
+	if vipHighBoost <= 0 {
+		vipHighBoost = 1.0
+	}
 	return &Hub{
 		ctx:          ctx,
 		generator:    gen,

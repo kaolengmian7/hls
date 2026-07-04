@@ -108,6 +108,11 @@ func newRoom(hub *Hub, code string, hostNickname, hostAvatar, hostPlayerID strin
 		IsHost:    true,
 		Connected: false,
 	}
+	// Copy vipUsers map to avoid race condition if hub.vipUsers is mutated later
+	vipSnap := make(map[int64]struct{}, len(hub.vipUsers))
+	for uid := range hub.vipUsers {
+		vipSnap[uid] = struct{}{}
+	}
 	r := &Room{
 		code:              code,
 		hub:               hub,
@@ -115,7 +120,7 @@ func newRoom(hub *Hub, code string, hostNickname, hostAvatar, hostPlayerID strin
 		tokens:            tokens,
 		shopRepo:          shopRepo,
 		userIDs:           map[string]int64{hostPlayerID: hostUserID},
-		vipUsers:          hub.vipUsers,
+		vipUsers:          vipSnap,
 		vipHighBoost:      hub.vipHighBoost,
 		status:            protocol.RoomStatusWaiting,
 		hostID:            hostPlayerID,
