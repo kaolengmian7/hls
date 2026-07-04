@@ -2,7 +2,9 @@ package room
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 
@@ -153,4 +155,111 @@ func (h *Hub) Stats() (rooms int) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return len(h.rooms)
+}
+
+// RestoreFromDB rebuilds in-memory rooms from active DB rows at startup.
+func (h *Hub) RestoreFromDB(ctx context.Context) error {
+	if h.shopRepo == nil {
+		return nil
+	}
+	roomRows, err := h.shopRepo.LoadActiveRooms(ctx)
+	if err != nil {
+		return err
+	}
+	for _, rr := range roomRows {
+		players, err := h.shopRepo.LoadRoomPlayers(ctx, rr.Code)
+		if err != nil {
+			h.logger.Errorw("restore players", logx.Field("code", rr.Code), logx.Field("err", err))
+			continue
+		}
+		if len(players) == 0 {
+			continue
+		}
+		lotteryRows, _ := h.shopRepo.LoadLotteryRecords(ctx, rr.Code)
+		settlementRows, _ := h.shopRepo.LoadSettlements(ctx, rr.Code)
+
+		rm := h.buildRestoredRoom(rr, players, lotteryRows, settlementRows)
+		h.mu.Lock()
+		h.rooms[rr.Code] = rm
+		h.mu.Unlock()
+		h.generator.Reserve(rr.Code)
+		go rm.Run(h.ctx)
+		h.logger.Infow("room restored", logx.Field("code", rr.Code), logx.Field("players", len(players)))
+	}
+	return nil
+}
+
+func (h *Hub) buildRestoredRoom(
+	rr repo.ShopRoomRow,
+	players []repo.ShopRoomPlayerRow,
+	lotteryRows []repo.ShopLotteryRow,
+	settlementRows []repo.ShopSettlementRow,
+) *Room {
+	now := time.Now()
+	rm := &Room{
+		code:              rr.Code,
+		hub:               h,
+		logger:            h.logger,
+		tokens:            h.tokens,
+		shopRepo:          h.shopRepo,
+		status:            protocol.RoomStatus(rr.Status),
+		hostID:            rr.HostPlayerID,
+		players:           make(map[string]*protocol.Player),
+		states:            make(map[string]*playerState),
+		playerOrder:       []string{},
+		clients:           make(map[string]*Client),
+		userIDs:           make(map[string]int64),
+		guaranteedAmount:  rr.GuaranteedAmount,
+		lotteryRecords:    make([]protocol.LotteryRecord, 0, len(lotteryRows)),
+		settlementRecords: make([]protocol.SettlementRecord, 0, len(settlementRows)),
+		feed:              make([]protocol.FeedEvent, 0),
+		createdAt:         rr.CreatedAt,
+		lastActivity:      now,
+		inbox:             make(chan Intent, 128),
+		regCh:             make(chan registration, 8),
+		doneCh:            make(chan struct{}),
+	}
+	for _, pr := range players {
+		rm.players[pr.PlayerID] = &protocol.Player{
+			ID:        pr.PlayerID,
+			Nickname:  pr.PlayerID, // placeholder; refreshed on reconnect via JOIN
+			Ready:     pr.Ready,
+			Coin:      pr.Coin,
+			IsHost:    pr.IsHost,
+			Connected: false,
+			Role:      protocol.Role(pr.Role),
+		}
+		rm.states[pr.PlayerID] = &playerState{disconnectedAt: now}
+		rm.playerOrder = append(rm.playerOrder, pr.PlayerID)
+		rm.userIDs[pr.PlayerID] = pr.UserID
+	}
+	for _, lr := range lotteryRows {
+		rm.lotteryRecords = append(rm.lotteryRecords, protocol.LotteryRecord{
+			PlayerID: lr.PlayerID,
+			At:       lr.CreatedAt.UnixMilli(),
+			Item: protocol.Item{
+				ID:     lr.ItemID,
+				Name:   lr.ItemName,
+				Rarity: lr.Rarity,
+				Value:  lr.ItemValue,
+			},
+			GuaranteeDelta:  lr.GuaranteeAfter - lr.GuaranteeBefore,
+			GuaranteeBefore: lr.GuaranteeBefore,
+			GuaranteeAfter:  lr.GuaranteeAfter,
+		})
+	}
+	for _, sr := range settlementRows {
+		var perPlayer []protocol.SettlementPerPlayer
+		_ = json.Unmarshal([]byte(sr.PerPlayer), &perPlayer)
+		rm.settlementRecords = append(rm.settlementRecords, protocol.SettlementRecord{
+			ID:              sr.ID,
+			At:              sr.CreatedAt.UnixMilli(),
+			Outcome:         protocol.SettlementOutcome(sr.Outcome),
+			GuaranteeDelta:  sr.GuaranteeDelta,
+			GuaranteeBefore: sr.GuaranteeBefore,
+			GuaranteeAfter:  sr.GuaranteeAfter,
+			PerPlayer:       perPlayer,
+		})
+	}
+	return rm
 }

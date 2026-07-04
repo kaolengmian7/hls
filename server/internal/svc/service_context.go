@@ -46,6 +46,10 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 	conn := sqlx.NewMysql(cfg.DB.DSN)
 	shopRepo := repo.NewShopRepo(conn)
 	hub := room.NewHub(rootCtx, gen, signer, shopRepo, logx.WithContext(rootCtx))
+	if err := hub.RestoreFromDB(rootCtx); err != nil {
+		logx.WithContext(rootCtx).Errorw("restore rooms from db", logx.Field("err", err))
+		// Non-fatal — server starts with empty hub if DB is unavailable
+	}
 	smsSender, err := auth.NewTencentSmsSender(cfg.TencentSMS)
 	if err != nil {
 		logx.Must(err)
