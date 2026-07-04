@@ -57,7 +57,7 @@ func WebSocketHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		client := room.NewClient(conn, rm, playerID, logx.WithContext(ctx.RootCtx))
+		client := room.NewClient(conn, rm, playerID, 0, logx.WithContext(ctx.RootCtx)) // userID wired in Task 8
 
 		authenticated := false
 		if sessionToken != "" {

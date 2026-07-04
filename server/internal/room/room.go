@@ -12,6 +12,7 @@ import (
 
 	"hls.dev/server/internal/game"
 	"hls.dev/server/internal/protocol"
+	"hls.dev/server/internal/repo"
 	"hls.dev/server/pkg/errors"
 )
 
@@ -55,10 +56,12 @@ type TokenIssuer interface {
 
 // Room 持有单个房间的权威状态及处理循环。
 type Room struct {
-	code   string
-	hub    *Hub
-	logger logx.Logger
-	tokens TokenIssuer
+	code     string
+	hub      *Hub
+	logger   logx.Logger
+	tokens   TokenIssuer
+	shopRepo *repo.ShopRepo   // nil = tests / no-persistence mode
+	userIDs  map[string]int64 // playerID → auth user ID
 
 	status      protocol.RoomStatus
 	hostID      string
@@ -92,7 +95,7 @@ type registration struct {
 //
 // guaranteedAmount 来自 Hub.CreateRoom 已规范化的保底金额（单位 W），房间生命周期内不变。
 func newRoom(hub *Hub, code string, hostNickname, hostAvatar, hostPlayerID string,
-	guaranteedAmount int, logger logx.Logger, tokens TokenIssuer) *Room {
+	hostUserID int64, guaranteedAmount int, shopRepo *repo.ShopRepo, logger logx.Logger, tokens TokenIssuer) *Room {
 	now := time.Now()
 	host := &protocol.Player{
 		ID:        hostPlayerID,
@@ -108,6 +111,8 @@ func newRoom(hub *Hub, code string, hostNickname, hostAvatar, hostPlayerID strin
 		hub:               hub,
 		logger:            logger,
 		tokens:            tokens,
+		shopRepo:          shopRepo,
+		userIDs:           map[string]int64{hostPlayerID: hostUserID},
 		status:            protocol.RoomStatusWaiting,
 		hostID:            hostPlayerID,
 		players:           map[string]*protocol.Player{hostPlayerID: host},

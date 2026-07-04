@@ -30,6 +30,7 @@ type ServiceContext struct {
 	UserRepo      *repo.UserRepo
 	JWTSigner     *auth.JWTSigner
 	WechatClient  *auth.WechatClient
+	ShopRepo      *repo.ShopRepo
 
 	// SMS fields — wired in Task 5.
 	SmsStore  *SmsStore
@@ -42,8 +43,9 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 	gen := code.NewGenerator()
 	ttl := time.Duration(cfg.Session.TTLMinutes) * time.Minute
 	signer := token.NewSigner(cfg.Session.Secret, ttl)
-	hub := room.NewHub(rootCtx, gen, signer, logx.WithContext(rootCtx))
 	conn := sqlx.NewMysql(cfg.DB.DSN)
+	shopRepo := repo.NewShopRepo(conn)
+	hub := room.NewHub(rootCtx, gen, signer, shopRepo, logx.WithContext(rootCtx))
 	smsSender, err := auth.NewTencentSmsSender(cfg.TencentSMS)
 	if err != nil {
 		logx.Must(err)
@@ -59,6 +61,7 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 		AuthStateRepo: repo.NewAuthStateRepo(conn),
 		JWTSigner:     auth.NewJWTSigner(cfg.JWT.Secret, cfg.JWT.TTLDays),
 		WechatClient:  auth.NewWechatClient(cfg.WechatOpen.AppID, cfg.WechatOpen.AppSecret),
+		ShopRepo:      shopRepo,
 		SmsStore:      NewSmsStore(),
 		SmsSender:     smsSender,
 	}

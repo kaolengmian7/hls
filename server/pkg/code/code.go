@@ -58,6 +58,14 @@ func (g *Generator) Release(c string) {
 	delete(g.used, c)
 }
 
+// Reserve marks an externally-known code as in-use without random allocation.
+// Used for restart recovery. No-op if already reserved.
+func (g *Generator) Reserve(c string) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.used[c] = struct{}{}
+}
+
 // Has 返回 Code 是否已被占用（仅诊断用）。
 func (g *Generator) Has(c string) bool {
 	g.mu.Lock()

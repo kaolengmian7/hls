@@ -64,7 +64,7 @@ func CreateRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		room, tok, err := ctx.Hub.CreateRoom(req.Nickname, req.Avatar, hostPlayerID, req.GuaranteedAmount)
+		room, tok, err := ctx.Hub.CreateRoom(req.Nickname, req.Avatar, hostPlayerID, 0, req.GuaranteedAmount) // hostUserID wired in Task 8
 		if err != nil {
 			status := http.StatusInternalServerError
 			if errors.IsExposable(err) {

@@ -22,6 +22,7 @@ type Client struct {
 	conn      *websocket.Conn
 	room      *Room
 	playerID  string
+	userID    int64
 	hasJoined bool
 	nickname  string
 	avatar    string
@@ -51,11 +52,12 @@ const (
 
 // NewClient 创建 client；conn 必须已完成 WebSocket Upgrade。
 // playerID 来自 WebSocket query 参数；JOIN 之前作为预绑定身份，JOIN 时与首帧 nickname 配对入场。
-func NewClient(conn *websocket.Conn, room *Room, playerID string, logger logx.Logger) *Client {
+func NewClient(conn *websocket.Conn, room *Room, playerID string, userID int64, logger logx.Logger) *Client {
 	return &Client{
 		conn:     conn,
 		room:     room,
 		playerID: playerID,
+		userID:   userID,
 		send:     make(chan []byte, sendQueueSize),
 		closed:   make(chan struct{}),
 		logger:   logger,

@@ -8,6 +8,7 @@ import (
 
 	"hls.dev/server/internal/game"
 	"hls.dev/server/internal/protocol"
+	"hls.dev/server/internal/repo"
 	"hls.dev/server/pkg/code"
 	"hls.dev/server/pkg/errors"
 )
@@ -22,6 +23,7 @@ type Hub struct {
 	ctx       context.Context
 	generator *code.Generator
 	tokens    TokenIssuer
+	shopRepo  *repo.ShopRepo
 	logger    logx.Logger
 
 	mu    sync.RWMutex
@@ -29,11 +31,12 @@ type Hub struct {
 }
 
 // NewHub 创建 Hub。
-func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, logger logx.Logger) *Hub {
+func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, shopRepo *repo.ShopRepo, logger logx.Logger) *Hub {
 	return &Hub{
 		ctx:       ctx,
 		generator: gen,
 		tokens:    tokens,
+		shopRepo:  shopRepo,
 		logger:    logger,
 		rooms:     map[string]*Room{},
 	}
@@ -44,7 +47,7 @@ func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, logger
 //
 // guaranteedAmount 是房间级"保底金额"（单位 W），传 0 表示采用 game.DefaultGuaranteedAmount；
 // 越界则返回可暴露错误。
-func (h *Hub) CreateRoom(nickname, avatar, hostPlayerID string, guaranteedAmount int) (*Room, string, error) {
+func (h *Hub) CreateRoom(nickname, avatar, hostPlayerID string, hostUserID int64, guaranteedAmount int) (*Room, string, error) {
 	if nickname == "" {
 		return nil, "", errors.NewExposable(errors.CodeInvalidParam, "nickname required")
 	}
@@ -60,7 +63,7 @@ func (h *Hub) CreateRoom(nickname, avatar, hostPlayerID string, guaranteedAmount
 	if err != nil {
 		return nil, "", errors.WithMessage(err, "allocate code")
 	}
-	r := newRoom(h, c, nickname, avatar, hostPlayerID, normalizedGuarantee, h.logger, h.tokens)
+	r := newRoom(h, c, nickname, avatar, hostPlayerID, hostUserID, normalizedGuarantee, h.shopRepo, h.logger, h.tokens)
 
 	h.mu.Lock()
 	h.rooms[c] = r
