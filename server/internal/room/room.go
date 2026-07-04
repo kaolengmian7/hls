@@ -132,6 +132,19 @@ func newRoom(hub *Hub, code string, hostNickname, hostAvatar, hostPlayerID strin
 	return r
 }
 
+// dbWriteAsync fires a DB write in a background goroutine.
+// Skipped when shopRepo is nil (test / no-persistence mode).
+func (r *Room) dbWriteAsync(fn func() error) {
+	if r.shopRepo == nil {
+		return
+	}
+	go func() {
+		if err := fn(); err != nil {
+			r.logger.Errorw("shop db write", logx.Field("room", r.code), logx.Field("err", err))
+		}
+	}()
+}
+
 // GuaranteedAmount 返回该房间的保底金额（单位 W）。仅在 Run 之外的只读访问场景使用。
 func (r *Room) GuaranteedAmount() int { return r.guaranteedAmount }
 
@@ -219,6 +232,9 @@ func (r *Room) stop() {
 }
 
 func (r *Room) cleanup(ctx context.Context) {
+	r.dbWriteAsync(func() error {
+		return r.shopRepo.CloseRoom(context.Background(), r.code)
+	})
 	for _, c := range r.clients {
 		if c == nil {
 			continue
@@ -445,6 +461,12 @@ func (r *Room) handleJoin(ctx context.Context, it Intent) {
 	c.playerID = playerID
 	c.nickname = p.Nickname
 	c.avatar = p.Avatar
+	r.userIDs[playerID] = c.userID
+	uid := c.userID
+	pid := playerID
+	r.dbWriteAsync(func() error {
+		return r.shopRepo.AddPlayer(context.Background(), r.code, uid, pid, false)
+	})
 
 	r.appendFeed("PLAYER_JOINED", map[string]any{
 		"playerId": playerID,
@@ -996,6 +1018,10 @@ func (r *Room) removePlayer(ctx context.Context, pid string, broadcastPlayerLeft
 		c.Close()
 		delete(r.clients, pid)
 	}
+	rpid := pid
+	r.dbWriteAsync(func() error {
+		return r.shopRepo.RemovePlayer(context.Background(), r.code, rpid)
+	})
 	if broadcastPlayerLeft {
 		r.appendFeed("PLAYER_LEFT", map[string]any{"playerId": pid})
 		r.broadcast(protocol.EventPlayerLeft, protocol.PlayerLeftPayload{PlayerID: pid})

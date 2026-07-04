@@ -71,6 +71,23 @@ func (h *Hub) CreateRoom(nickname, avatar, hostPlayerID string, hostUserID int64
 
 	go r.Run(h.ctx)
 
+	if h.shopRepo != nil {
+		hpid := hostPlayerID
+		huid := hostUserID
+		ga := normalizedGuarantee
+		roomCode := c
+		go func() {
+			bctx := context.Background()
+			if err := h.shopRepo.CreateRoom(bctx, roomCode, hpid, ga); err != nil {
+				h.logger.Errorw("db create room", logx.Field("err", err))
+				return
+			}
+			if err := h.shopRepo.AddPlayer(bctx, roomCode, huid, hpid, true); err != nil {
+				h.logger.Errorw("db add host player", logx.Field("err", err))
+			}
+		}()
+	}
+
 	logx.WithContext(h.ctx).Infow("room created",
 		logx.Field("code", c),
 		logx.Field("hostId", hostPlayerID),
