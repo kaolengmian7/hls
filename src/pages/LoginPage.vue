@@ -55,7 +55,7 @@ function handleBack() {
 
         <button
           class="w-full font-serif text-sm text-gold-300 border border-gold-400/40 px-4 py-2 rounded hover:border-gold-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          :disabled="sending || phone.length !== 11"
+          :disabled="sending || (phone.length !== 11 && phone.length !== 9)"
           @click="handleSend"
         >
           {{ sending ? '发送中…' : '发送验证码' }}
@@ -72,7 +72,7 @@ function handleBack() {
           v-model="code"
           type="text"
           inputmode="numeric"
-          maxlength="6"
+          :maxlength="phone.length"
           autocomplete="one-time-code"
           placeholder="请输入6位验证码"
           class="w-full bg-white/5 border border-white/20 rounded px-3 py-2 text-sm font-serif text-parchment-200 placeholder:text-parchment-400/40 focus:outline-none focus:border-gold-400/60 tracking-[0.4em] text-center"
@@ -80,7 +80,7 @@ function handleBack() {
 
         <button
           class="w-full font-serif text-sm text-gold-300 border border-gold-400/40 px-4 py-2 rounded hover:border-gold-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          :disabled="verifying || code.length !== 6"
+          :disabled="verifying || code.length !== phone.length"
           @click="verifyCode"
         >
           {{ verifying ? '验证中…' : '登录' }}
