@@ -41,6 +41,10 @@ func SmsSendHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		req.Phone = strings.TrimSpace(req.Phone)
+		if isTestPhone(req.Phone) {
+			httpx.OkJsonCtx(r.Context(), w, map[string]any{"ok": true})
+			return
+		}
 		if !phoneRe.MatchString(req.Phone) {
 			writeSmsError(w, http.StatusBadRequest, "invalid_phone", 0)
 			return
@@ -87,6 +91,26 @@ func SmsVerifyHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 		req.Phone = strings.TrimSpace(req.Phone)
 		req.Code = strings.TrimSpace(req.Code)
+		if isTestPhone(req.Phone) {
+			if req.Code != req.Phone {
+				writeSmsError(w, http.StatusBadRequest, "invalid_code", 0)
+				return
+			}
+			user, err := ctx.UserRepo.UpsertByPhone(r.Context(), req.Phone)
+			if err != nil {
+				logx.WithContext(r.Context()).Errorw("upsert test user", logx.Field("err", err))
+				writeSmsError(w, http.StatusInternalServerError, "server_error", 0)
+				return
+			}
+			token, err := ctx.JWTSigner.Sign(user.ID)
+			if err != nil {
+				logx.WithContext(r.Context()).Errorw("sign jwt test user", logx.Field("err", err))
+				writeSmsError(w, http.StatusInternalServerError, "server_error", 0)
+				return
+			}
+			httpx.OkJsonCtx(r.Context(), w, map[string]any{"token": token})
+			return
+		}
 		if !phoneRe.MatchString(req.Phone) {
 			writeSmsError(w, http.StatusBadRequest, "invalid_phone", 0)
 			return
