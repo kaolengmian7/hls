@@ -115,9 +115,9 @@ func TestDrawLotteryRollbackOnOverflow(t *testing.T) {
 }
 
 func TestLotteryPoolDefinition(t *testing.T) {
-	// 奖品池共 50 件：prizeId 唯一、Value > 0、Weight > 0。
-	if len(lotteryPool) != 50 {
-		t.Fatalf("expect 50 prizes in pool, got %d", len(lotteryPool))
+	// 奖品池共 51 件：prizeId 唯一、Value > 0、Weight > 0。
+	if len(lotteryPool) != 51 {
+		t.Fatalf("expect 51 prizes in pool, got %d", len(lotteryPool))
 	}
 	seen := make(map[string]bool, len(lotteryPool))
 	for _, it := range lotteryPool {

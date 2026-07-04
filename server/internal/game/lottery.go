@@ -98,6 +98,8 @@ var lotteryPool = []LotteryItem{
 		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/blade-server.webp"},
 	{ID: "IFV_MODEL_DELUXE", Name: "步战车模型", Rarity: rarityHigh, Value: 220, Weight: 6.08,
 		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ifv-model-deluxe.webp"},
+	{ID: "IFV_MODEL", Name: "步战车模型", Rarity: rarityMedium, Value: 130, Weight: 6.08,
+		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ifv-model.webp"},
 	{ID: "MIL_DRONE", Name: "军用无人机", Rarity: rarityMedium, Value: 50, Weight: 6.08,
 		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/mil-drone.webp"},
 	{ID: "MIL_INFO_TERMINAL", Name: "军用信息终端", Rarity: rarityMedium, Value: 38, Weight: 6.08,
