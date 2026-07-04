@@ -12,6 +12,7 @@ const (
 	IntentBuyEquipment   = "BUY_EQUIPMENT"
 	IntentDrawLottery    = "DRAW_LOTTERY"
 	IntentSettleRound    = "SETTLE_ROUND"
+	IntentCloseGame      = "CLOSE_GAME"
 	IntentPing           = "PING"
 )
 

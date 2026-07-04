@@ -334,6 +334,8 @@ func (r *Room) dispatch(ctx context.Context, it Intent) {
 		r.handleDrawLottery(ctx, it)
 	case protocol.IntentSettleRound:
 		r.handleSettleRound(ctx, it)
+	case protocol.IntentCloseGame:
+		r.handleCloseGame(ctx, it)
 	case protocol.IntentPing:
 		it.From.SendEvent(protocol.EventPong, map[string]any{}, it.ReqID)
 	default:
@@ -1018,6 +1020,32 @@ func (r *Room) handleSettleRound(ctx context.Context, it Intent) {
 		logx.Field("outcome", string(result.Outcome)),
 		logx.Field("guaranteeBefore", result.GuaranteeBefore),
 		logx.Field("guaranteeAfter", result.GuaranteeAfter))
+}
+
+// handleCloseGame 处理房主结单：强制结束游戏，断开所有玩家。
+//
+// 行为：
+//  1. 仅房主、且房间处于 PLAYING 时允许；否则回 ACTION_REJECTED。
+//  2. 向全员广播 KICK 事件（Reason: protocol.KickClosed），关闭所有客户端连接。
+//  3. 调用 r.stop() 触发房间关闭流程，cleanup() 会写入 CloseRoom DB 记录。
+func (r *Room) handleCloseGame(ctx context.Context, it Intent) {
+	if it.From.playerID != r.hostID {
+		r.rejectAction(it.From, it.ReqID, "FORBIDDEN", "仅房主可结单")
+		return
+	}
+	if r.status != protocol.RoomStatusPlaying {
+		r.rejectAction(it.From, it.ReqID, "INVALID_STATE", "结单仅在游戏进行中有效")
+		return
+	}
+	logx.WithContext(ctx).Infow("close game", logx.Field("code", r.code), logx.Field("by", it.From.playerID))
+	for _, c := range r.clients {
+		if c == nil {
+			continue
+		}
+		c.SendEvent(protocol.EventKick, protocol.KickPayload{Reason: protocol.KickClosed}, "")
+		c.Close()
+	}
+	r.stop() // triggers cleanup() → DB CloseRoom
 }
 
 /* ------------------------------ 定时巡检 ------------------------------ */

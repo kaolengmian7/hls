@@ -32,6 +32,7 @@ const (
 	KickDismissed = "DISMISSED"
 	KickIdle      = "IDLE"
 	KickByHost    = "KICKED_BY_HOST"
+	KickClosed    = "CLOSED"
 )
 
 // JoinAcceptedPayload 服务端 → 客户端 准入成功。
