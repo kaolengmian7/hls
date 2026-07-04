@@ -100,3 +100,104 @@ func (r *ShopRepo) LoadActiveRooms(ctx context.Context) ([]ShopRoomRow, error) {
 		"SELECT code, status, host_player_id, guaranteed_amount, created_at FROM shop_rooms WHERE status IN ('waiting','playing')")
 	return rows, err
 }
+
+// AddPlayer adds a player to a room.
+func (r *ShopRepo) AddPlayer(ctx context.Context, roomCode string, userID int64, playerID string, isHost bool) error {
+	host := 0
+	if isHost {
+		host = 1
+	}
+	_, err := r.db.ExecCtx(ctx,
+		"INSERT INTO shop_room_players (room_code, user_id, player_id, is_host) VALUES (?, ?, ?, ?)",
+		roomCode, userID, playerID, host)
+	return err
+}
+
+// UpdatePlayerState updates player role, coin, and ready state.
+func (r *ShopRepo) UpdatePlayerState(ctx context.Context, roomCode, playerID, role string, coin int, ready bool) error {
+	readyInt := 0
+	if ready {
+		readyInt = 1
+	}
+	_, err := r.db.ExecCtx(ctx,
+		"UPDATE shop_room_players SET role=?, coin=?, ready=? WHERE room_code=? AND player_id=?",
+		role, coin, readyInt, roomCode, playerID)
+	return err
+}
+
+// RemovePlayer marks a player as left.
+func (r *ShopRepo) RemovePlayer(ctx context.Context, roomCode, playerID string) error {
+	_, err := r.db.ExecCtx(ctx,
+		"UPDATE shop_room_players SET left_at=NOW() WHERE room_code=? AND player_id=? AND left_at IS NULL",
+		roomCode, playerID)
+	return err
+}
+
+// FindActiveRoomForUser returns the room code of the user's current waiting/playing room, or "" if none.
+func (r *ShopRepo) FindActiveRoomForUser(ctx context.Context, userID int64) (string, error) {
+	var code string
+	err := r.db.QueryRowCtx(ctx, &code,
+		`SELECT r.code FROM shop_room_players p
+		 JOIN shop_rooms r ON r.code = p.room_code
+		 WHERE p.user_id = ? AND r.status IN ('waiting','playing') AND p.left_at IS NULL
+		 LIMIT 1`, userID)
+	if err == sqlx.ErrNotFound {
+		return "", nil
+	}
+	return code, err
+}
+
+// LoadRoomPlayers returns all active players in a room.
+func (r *ShopRepo) LoadRoomPlayers(ctx context.Context, roomCode string) ([]ShopRoomPlayerRow, error) {
+	var rows []ShopRoomPlayerRow
+	err := r.db.QueryRowsCtx(ctx, &rows,
+		"SELECT room_code, user_id, player_id, role, coin, is_host, ready FROM shop_room_players WHERE room_code=? AND left_at IS NULL",
+		roomCode)
+	return rows, err
+}
+
+// InsertLotteryRecords inserts lottery records for a room.
+func (r *ShopRepo) InsertLotteryRecords(ctx context.Context, records []ShopLotteryRow) error {
+	for _, rec := range records {
+		_, err := r.db.ExecCtx(ctx,
+			`INSERT INTO shop_lottery_records
+			 (room_code, player_id, item_id, item_name, rarity, item_value, guarantee_before, guarantee_after)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			rec.RoomCode, rec.PlayerID, rec.ItemID, rec.ItemName,
+			rec.Rarity, rec.ItemValue, rec.GuaranteeBefore, rec.GuaranteeAfter)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// LoadLotteryRecords loads all lottery records for a room.
+func (r *ShopRepo) LoadLotteryRecords(ctx context.Context, roomCode string) ([]ShopLotteryRow, error) {
+	var rows []ShopLotteryRow
+	err := r.db.QueryRowsCtx(ctx, &rows,
+		`SELECT room_code, player_id, item_id, item_name, rarity, item_value,
+		        guarantee_before, guarantee_after, created_at
+		 FROM shop_lottery_records WHERE room_code=? ORDER BY id DESC`, roomCode)
+	return rows, err
+}
+
+// InsertSettlement inserts a settlement record.
+func (r *ShopRepo) InsertSettlement(ctx context.Context, rec ShopSettlementRow) error {
+	_, err := r.db.ExecCtx(ctx,
+		`INSERT INTO shop_settlement_records
+		 (id, room_code, outcome, guarantee_delta, guarantee_before, guarantee_after, per_player)
+		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		rec.ID, rec.RoomCode, rec.Outcome,
+		rec.GuaranteeDelta, rec.GuaranteeBefore, rec.GuaranteeAfter, rec.PerPlayer)
+	return err
+}
+
+// LoadSettlements loads all settlement records for a room.
+func (r *ShopRepo) LoadSettlements(ctx context.Context, roomCode string) ([]ShopSettlementRow, error) {
+	var rows []ShopSettlementRow
+	err := r.db.QueryRowsCtx(ctx, &rows,
+		`SELECT id, room_code, outcome, guarantee_delta, guarantee_before, guarantee_after, per_player, created_at
+		 FROM shop_settlement_records WHERE room_code=? ORDER BY created_at DESC`, roomCode)
+	return rows, err
+}
