@@ -34,7 +34,7 @@ func TestCostForTimes(t *testing.T) {
 
 func TestDrawLotterySingle(t *testing.T) {
 	const current = 2500
-	records, newGuarantee, err := DrawLottery("p1", 1, current)
+	records, newGuarantee, err := DrawLottery("p1", 1, current, 1.0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func TestDrawLotteryInvalidTimes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			records, guarantee, err := DrawLottery("p1", tt.times, 2500)
+			records, guarantee, err := DrawLottery("p1", tt.times, 2500, 1.0)
 			if err == nil {
 				t.Fatalf("expect error for times=%d", tt.times)
 			}
@@ -96,7 +96,7 @@ func TestDrawLotteryInvalidTimes(t *testing.T) {
 
 func TestDrawLotteryRollbackOnOverflow(t *testing.T) {
 	// 任意奖品 Value 都为正整数，currentGuarantee 取上限 → 累加必越界 → 回滚。
-	records, guarantee, err := DrawLottery("p1", 1, MaxGuaranteedAmount)
+	records, guarantee, err := DrawLottery("p1", 1, MaxGuaranteedAmount, 1.0)
 	if err == nil {
 		t.Fatalf("expect overflow error at currentGuarantee=MaxGuaranteedAmount")
 	}
@@ -115,9 +115,9 @@ func TestDrawLotteryRollbackOnOverflow(t *testing.T) {
 }
 
 func TestLotteryPoolDefinition(t *testing.T) {
-	// 奖品池共 51 件：prizeId 唯一、Value > 0、Weight > 0。
-	if len(lotteryPool) != 51 {
-		t.Fatalf("expect 51 prizes in pool, got %d", len(lotteryPool))
+	// 奖品池共 50 件：prizeId 唯一、Value > 0、Weight > 0。
+	if len(lotteryPool) != 50 {
+		t.Fatalf("expect 50 prizes in pool, got %d", len(lotteryPool))
 	}
 	seen := make(map[string]bool, len(lotteryPool))
 	for _, it := range lotteryPool {
@@ -171,7 +171,7 @@ func TestDrawLotteryPropagatesImageURL(t *testing.T) {
 		}
 	})
 
-	records, _, err := DrawLottery("player-test", 1, 0)
+	records, _, err := DrawLottery("player-test", 1, 0, 1.0)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -221,5 +221,50 @@ func TestGetPool(t *testing.T) {
 		if item.ImageURL != src.ImageURL {
 			t.Errorf("[%d] ImageURL=%s, want %s", i, item.ImageURL, src.ImageURL)
 		}
+	}
+}
+
+func TestApplyHighBoost(t *testing.T) {
+	pool := []LotteryItem{
+		{ID: "h1", Name: "H1", Rarity: rarityHigh, Value: 100, Weight: 2.0},
+		{ID: "m1", Name: "M1", Rarity: rarityMedium, Value: 50, Weight: 6.0},
+		{ID: "l1", Name: "L1", Rarity: rarityLow, Value: 10, Weight: 6.0},
+	}
+	boosted := applyHighBoost(pool, 5.0)
+
+	// HIGH weight multiplied
+	if boosted[0].Weight != 10.0 {
+		t.Errorf("HIGH weight got %f, want 10.0", boosted[0].Weight)
+	}
+	// MEDIUM unchanged
+	if boosted[1].Weight != 6.0 {
+		t.Errorf("MEDIUM weight got %f, want 6.0", boosted[1].Weight)
+	}
+	// LOW unchanged
+	if boosted[2].Weight != 6.0 {
+		t.Errorf("LOW weight got %f, want 6.0", boosted[2].Weight)
+	}
+	// original pool not mutated
+	if pool[0].Weight != 2.0 {
+		t.Errorf("original HIGH weight mutated, got %f", pool[0].Weight)
+	}
+}
+
+func TestDrawLottery_VIPBoost(t *testing.T) {
+	// With a huge boost, HIGH items must dominate.
+	const runs = 1000
+	highCount := 0
+	for i := 0; i < runs; i++ {
+		records, _, err := DrawLottery("p1", 1, 0, 1000.0)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if records[0].Item.Rarity == rarityHigh {
+			highCount++
+		}
+	}
+	ratio := float64(highCount) / runs
+	if ratio < 0.95 {
+		t.Errorf("HIGH ratio=%.2f with boost=1000, want >= 0.95", ratio)
 	}
 }

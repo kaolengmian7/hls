@@ -132,8 +132,6 @@ var lotteryPool = []LotteryItem{
 		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/medical-robot.webp"},
 	{ID: "LAPTOP", Name: "笔记本电脑", Rarity: rarityMedium, Value: 120, Weight: 6.08,
 		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/laptop.webp"},
-	{ID: "IFV_MODEL", Name: "步战车模型", Rarity: rarityMedium, Value: 130, Weight: 6.08,
-		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ifv-model.webp"},
 	{ID: "CLOUD_STORAGE_ARRAY", Name: "云储存阵列", Rarity: rarityMedium, Value: 130, Weight: 6.08,
 		ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/cloud-storage-array.webp"},
 	{ID: "VENTILATOR", Name: "呼吸机", Rarity: rarityMedium, Value: 45, Weight: 6.08,
@@ -189,7 +187,9 @@ func CostForTimes(times int) (int, error) {
 //     若累加后 > MaxGuaranteedAmount，本次抽奖整体回滚：返回 INVALID_GUARANTEE
 //     错误，不返回任何记录；调用方应据此拒绝整次 Intent（金币不扣、保底不变）。
 //   - 成功时第二个返回值为最终保底金额（= 最后一条记录的 GuaranteeAfter）。
-func DrawLottery(playerID string, times int, currentGuarantee int) ([]protocol.LotteryRecord, int, error) {
+// highBoost is the weight multiplier for HIGH-rarity items. Pass 1.0 for no
+// boost. Values > 1 increase the probability of HIGH items proportionally.
+func DrawLottery(playerID string, times int, currentGuarantee int, highBoost float64) ([]protocol.LotteryRecord, int, error) {
 	cost, err := CostForTimes(times)
 	if err != nil {
 		return nil, currentGuarantee, err
@@ -198,7 +198,11 @@ func DrawLottery(playerID string, times int, currentGuarantee int) ([]protocol.L
 	out := make([]protocol.LotteryRecord, 0, times)
 	guarantee := currentGuarantee
 	for i := 0; i < times; i++ {
-		item, err := rollOne(lotteryPool)
+		pool := lotteryPool
+		if highBoost != 1.0 {
+			pool = applyHighBoost(lotteryPool, highBoost)
+		}
+		item, err := rollOne(pool)
 		if err != nil {
 			return nil, currentGuarantee, errors.WithMessage(err, "roll lottery")
 		}
@@ -255,6 +259,19 @@ func rollOne(pool []LotteryItem) (LotteryItem, error) {
 		}
 	}
 	return pool[len(pool)-1], nil
+}
+
+// applyHighBoost returns a new pool slice with HIGH item weights multiplied by
+// factor. MEDIUM and LOW items are unchanged. The original slice is not mutated.
+func applyHighBoost(src []LotteryItem, factor float64) []LotteryItem {
+	out := make([]LotteryItem, len(src))
+	copy(out, src)
+	for i := range out {
+		if out[i].Rarity == rarityHigh {
+			out[i].Weight *= factor
+		}
+	}
+	return out
 }
 
 // randFloat 返回 [0,1) 的均匀分布随机浮点数（crypto/rand）。
