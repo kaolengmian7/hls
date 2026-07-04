@@ -44,6 +44,13 @@ func WebSocketHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 		sessionToken := strings.TrimSpace(query.Get("token"))
 
+		var userID int64
+		if jwt := strings.TrimSpace(query.Get("jwt")); jwt != "" {
+			if uid, err := ctx.JWTSigner.Verify(jwt); err == nil {
+				userID = uid
+			}
+		}
+
 		upgrader := defaultUpgrader
 		upgrader.CheckOrigin = func(req *http.Request) bool {
 			return originAllowed(ctx, req)
@@ -57,7 +64,7 @@ func WebSocketHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		client := room.NewClient(conn, rm, playerID, 0, logx.WithContext(ctx.RootCtx)) // userID wired in Task 8
+		client := room.NewClient(conn, rm, playerID, userID, logx.WithContext(ctx.RootCtx))
 
 		authenticated := false
 		if sessionToken != "" {

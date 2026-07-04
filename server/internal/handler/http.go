@@ -12,6 +12,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"hls.dev/server/internal/game"
+	"hls.dev/server/internal/room"
 	"hls.dev/server/internal/svc"
 	"hls.dev/server/pkg/code"
 	"hls.dev/server/pkg/errors"
@@ -40,6 +41,24 @@ type CreateRoomResponse struct {
 // CreateRoomHandler 处理 POST /api/rooms。
 func CreateRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userID, errKey := extractUserID(r, ctx)
+		if errKey != "" {
+			writeError(w, r, http.StatusUnauthorized, errKey, nil)
+			return
+		}
+		activeCode, err := ctx.ShopRepo.FindActiveRoomForUser(r.Context(), userID)
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db error", err)
+			return
+		}
+		if activeCode != "" {
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusConflict)
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"ok": false, "message": "already_in_game", "activeRoomCode": activeCode,
+			})
+			return
+		}
 		if r.Method != http.MethodPost {
 			writeError(w, r, http.StatusMethodNotAllowed, "method not allowed", nil)
 			return
@@ -64,7 +83,7 @@ func CreateRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		room, tok, err := ctx.Hub.CreateRoom(req.Nickname, req.Avatar, hostPlayerID, 0, req.GuaranteedAmount) // hostUserID wired in Task 8
+		rm, tok, err := ctx.Hub.CreateRoom(req.Nickname, req.Avatar, hostPlayerID, userID, req.GuaranteedAmount)
 		if err != nil {
 			status := http.StatusInternalServerError
 			if errors.IsExposable(err) {
@@ -75,12 +94,19 @@ func CreateRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		httpx.OkJsonCtx(r.Context(), w, CreateRoomResponse{
-			Code:             room.Code(),
+			Code:             rm.Code(),
 			PlayerID:         hostPlayerID,
 			SessionToken:     tok,
-			GuaranteedAmount: room.GuaranteedAmount(),
+			GuaranteedAmount: rm.GuaranteedAmount(),
 		})
 	}
+}
+
+// QueryRoomResponse 是 QueryRoomHandler 的响应体。
+// 当请求方不是房间成员且自己已在另一局时，额外附带 activeRoomCode。
+type QueryRoomResponse struct {
+	room.RoomSummary
+	ActiveRoomCode string `json:"activeRoomCode,omitempty"`
 }
 
 // QueryRoomHandler 处理 GET /api/rooms/:code。
@@ -97,7 +123,15 @@ func QueryRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			writeError(w, r, http.StatusNotFound, "room not found", nil)
 			return
 		}
-		httpx.OkJsonCtx(r.Context(), w, summary)
+		resp := QueryRoomResponse{RoomSummary: summary}
+		if !summary.IsMember {
+			if uid, ek := extractUserID(r, ctx); ek == "" {
+				if ac, err := ctx.ShopRepo.FindActiveRoomForUser(r.Context(), uid); err == nil && ac != "" && ac != c {
+					resp.ActiveRoomCode = ac
+				}
+			}
+		}
+		httpx.OkJsonCtx(r.Context(), w, resp)
 	}
 }
 
@@ -134,6 +168,20 @@ func extractCode(path, prefix string) string {
 		rest = rest[:i]
 	}
 	return rest
+}
+
+// extractUserID reads and verifies the Authorization: Bearer JWT header.
+// Returns (userID, "") on success, (0, errKey) on failure.
+func extractUserID(r *http.Request, ctx *svc.ServiceContext) (int64, string) {
+	auth := r.Header.Get("Authorization")
+	if !strings.HasPrefix(auth, "Bearer ") {
+		return 0, "unauthorized"
+	}
+	uid, err := ctx.JWTSigner.Verify(strings.TrimPrefix(auth, "Bearer "))
+	if err != nil {
+		return 0, "unauthorized"
+	}
+	return uid, ""
 }
 
 // writeError 返回 JSON 错误并写入日志。
