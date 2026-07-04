@@ -17,7 +17,7 @@ func newTestHub(t *testing.T) *Hub {
 	t.Cleanup(cancel)
 	gen := code.NewGenerator()
 	signer := token.NewSigner("test-secret", time.Hour)
-	return NewHub(ctx, gen, signer, nil, logx.WithContext(ctx)) // nil shopRepo = no DB
+	return NewHub(ctx, gen, signer, nil, logx.WithContext(ctx), nil, 1.0) // nil shopRepo = no DB; no VIP users; default boost
 }
 
 // TestQueryRoomMembership 覆盖回归判定：携带 playerId 查询时，

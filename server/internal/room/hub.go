@@ -27,20 +27,28 @@ type Hub struct {
 	tokens    TokenIssuer
 	shopRepo  *repo.ShopRepo
 	logger    logx.Logger
+	vipUsers     map[int64]struct{}
+	vipHighBoost float64
 
 	mu    sync.RWMutex
 	rooms map[string]*Room
 }
 
-// NewHub 创建 Hub。
-func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, shopRepo *repo.ShopRepo, logger logx.Logger) *Hub {
+// NewHub 创建 Hub。vipUsers 是专属高爆率账号集合；vipHighBoost 是 HIGH 物品权重倍数。
+func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, shopRepo *repo.ShopRepo, logger logx.Logger, vipUserIDs []int64, vipHighBoost float64) *Hub {
+	vipSet := make(map[int64]struct{}, len(vipUserIDs))
+	for _, uid := range vipUserIDs {
+		vipSet[uid] = struct{}{}
+	}
 	return &Hub{
-		ctx:       ctx,
-		generator: gen,
-		tokens:    tokens,
-		shopRepo:  shopRepo,
-		logger:    logger,
-		rooms:     map[string]*Room{},
+		ctx:          ctx,
+		generator:    gen,
+		tokens:       tokens,
+		shopRepo:     shopRepo,
+		logger:       logger,
+		vipUsers:     vipSet,
+		vipHighBoost: vipHighBoost,
+		rooms:        map[string]*Room{},
 	}
 }
 
