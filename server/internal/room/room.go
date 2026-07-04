@@ -62,6 +62,8 @@ type Room struct {
 	tokens   TokenIssuer
 	shopRepo *repo.ShopRepo   // nil = tests / no-persistence mode
 	userIDs  map[string]int64 // playerID → auth user ID
+	vipUsers     map[int64]struct{} // read-only after newRoom; shared reference from Hub
+	vipHighBoost float64
 
 	status      protocol.RoomStatus
 	hostID      string
@@ -113,6 +115,8 @@ func newRoom(hub *Hub, code string, hostNickname, hostAvatar, hostPlayerID strin
 		tokens:            tokens,
 		shopRepo:          shopRepo,
 		userIDs:           map[string]int64{hostPlayerID: hostUserID},
+		vipUsers:          hub.vipUsers,
+		vipHighBoost:      hub.vipHighBoost,
 		status:            protocol.RoomStatusWaiting,
 		hostID:            hostPlayerID,
 		players:           map[string]*protocol.Player{hostPlayerID: host},
@@ -811,7 +815,13 @@ func (r *Room) handleDrawLottery(ctx context.Context, it Intent) {
 	// 抽奖随机 + 计算保底累加（纯函数）。若累加后越界，整次回滚：
 	// 金币不扣、保底不变、不下发 LOTTERY_DRAWN。
 	guaranteeBefore := r.guaranteedAmount
-	records, newGuarantee, err := game.DrawLottery(pid, p.Times, guaranteeBefore)
+	boost := 1.0
+	if uid, ok := r.userIDs[pid]; ok {
+		if _, isVIP := r.vipUsers[uid]; isVIP {
+			boost = r.vipHighBoost
+		}
+	}
+	records, newGuarantee, err := game.DrawLottery(pid, p.Times, guaranteeBefore, boost)
 	if err != nil {
 		if errors.IsExposable(err) {
 			r.rejectAction(it.From, it.ReqID, err.Error(), "")
