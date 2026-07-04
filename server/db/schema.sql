@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS shop_room_players (
   left_at     DATETIME     NULL,
   joined_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_room_user (room_code, user_id),
+  INDEX idx_room_code (room_code),
   INDEX idx_user_active (user_id, left_at)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
