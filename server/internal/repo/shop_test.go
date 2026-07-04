@@ -13,9 +13,9 @@ import (
 
 func testShopConn(t *testing.T) sqlx.SqlConn {
 	t.Helper()
-	dsn := os.Getenv("TEST_DSN")
+	dsn := os.Getenv("TEST_DB_DSN")
 	if dsn == "" {
-		t.Skip("TEST_DSN not set — skipping integration test")
+		t.Skip("TEST_DB_DSN not set — skipping integration test")
 	}
 	return sqlx.NewMysql(dsn)
 }

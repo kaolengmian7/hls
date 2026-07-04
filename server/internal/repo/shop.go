@@ -103,25 +103,17 @@ func (r *ShopRepo) LoadActiveRooms(ctx context.Context) ([]ShopRoomRow, error) {
 
 // AddPlayer adds a player to a room.
 func (r *ShopRepo) AddPlayer(ctx context.Context, roomCode string, userID int64, playerID string, isHost bool) error {
-	host := 0
-	if isHost {
-		host = 1
-	}
 	_, err := r.db.ExecCtx(ctx,
 		"INSERT INTO shop_room_players (room_code, user_id, player_id, is_host) VALUES (?, ?, ?, ?)",
-		roomCode, userID, playerID, host)
+		roomCode, userID, playerID, isHost)
 	return err
 }
 
 // UpdatePlayerState updates player role, coin, and ready state.
 func (r *ShopRepo) UpdatePlayerState(ctx context.Context, roomCode, playerID, role string, coin int, ready bool) error {
-	readyInt := 0
-	if ready {
-		readyInt = 1
-	}
 	_, err := r.db.ExecCtx(ctx,
 		"UPDATE shop_room_players SET role=?, coin=?, ready=? WHERE room_code=? AND player_id=?",
-		role, coin, readyInt, roomCode, playerID)
+		role, coin, ready, roomCode, playerID)
 	return err
 }
 
