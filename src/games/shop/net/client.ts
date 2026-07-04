@@ -19,6 +19,7 @@ import {
   type IntentType,
 } from './protocol';
 import { shortId } from '@shared/utils/id';
+import { useAuthStore } from '@/stores/auth';
 
 export type ClientCallbacks = {
   /** 收到 JOIN_ACCEPTED 时触发；snapshot 已就绪。 */
@@ -68,6 +69,10 @@ export class GameClient {
     const params = new URLSearchParams({ playerId: input.playerId });
     if (this.currentSessionToken) {
       params.set('token', this.currentSessionToken);
+    }
+    const auth = useAuthStore();
+    if (auth.token) {
+      params.set('jwt', auth.token);
     }
     const url = `${wsBase()}/ws/rooms/${input.code}?${params.toString()}`;
 

@@ -110,6 +110,17 @@ async function handleCreate(): Promise<void> {
     });
     router.push({ name: 'shop-room', params: { code: resp.code } });
   } catch (err) {
+    if (err instanceof ApiError && err.status === 409) {
+      const body = err.body as { activeRoomCode?: string } | null;
+      const ac = body?.activeRoomCode;
+      if (ac) {
+        roomStore.pushToast('warn', `您已在商店 ${ac} 中，请先离开当前商店`);
+        codeInput.value = ac;
+      } else {
+        roomStore.pushToast('error', '您已在另一个商店中');
+      }
+      return;
+    }
     const message =
       err instanceof ApiError ? err.message : (err as Error).message;
     roomStore.pushToast('error', `创建商店失败：${message}`);
@@ -132,6 +143,12 @@ async function handleJoin(): Promise<void> {
     const summary = await queryRoom(codeInput.value, playerStore.playerId);
     if (!summary.exists) {
       roomStore.pushToast('error', '这家商店不存在，或已经关闭');
+      return;
+    }
+
+    // Check if user is already in a DIFFERENT active room
+    if (summary.activeRoomCode && summary.activeRoomCode !== codeInput.value) {
+      roomStore.pushToast('warn', `您已在商店 ${summary.activeRoomCode} 中，请先离开当前商店`);
       return;
     }
 

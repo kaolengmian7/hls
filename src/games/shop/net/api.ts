@@ -8,6 +8,7 @@
  */
 
 import { apiBase } from './config';
+import { useAuthStore } from '@/stores/auth';
 import type { LotteryItem, RoomStatus } from './protocol';
 
 export type CreateRoomResponse = {
@@ -35,6 +36,7 @@ export type RoomSummary = {
   playerCount?: number;
   /** 携带 playerId 查询时回填：该玩家当前是否仍在房间内（可凭口令回归恢复身份/鼠币）。 */
   isMember?: boolean;
+  activeRoomCode?: string;
 };
 
 export class ApiError extends Error {
@@ -91,7 +93,24 @@ export function createRoom(payload: {
   /** 保底金额（单位 W），不传则由服务端落到 DEFAULT_GUARANTEED_AMOUNT。 */
   guaranteedAmount?: number;
 }): Promise<CreateRoomResponse> {
-  return request<CreateRoomResponse>('POST', '/api/rooms', payload);
+  const auth = useAuthStore();
+  const url = apiBase() + '/api/rooms';
+  return fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${auth.token ?? ''}`,
+    },
+    body: JSON.stringify(payload),
+  }).then(async (resp) => {
+    const text = await resp.text();
+    const parsed = text ? JSON.parse(text) : null;
+    if (!resp.ok) {
+      const msg = (parsed as { message?: string } | null)?.message ?? `HTTP ${resp.status}`;
+      throw new ApiError(resp.status, msg, parsed);
+    }
+    return parsed as CreateRoomResponse;
+  });
 }
 
 export async function queryRoom(code: string, playerId?: string): Promise<RoomSummary> {
