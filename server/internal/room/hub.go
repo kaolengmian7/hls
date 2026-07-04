@@ -22,11 +22,11 @@ import (
 //  2. 按 Code 查找房间，转交连接。
 //  3. 房间生命结束后释放 Code。
 type Hub struct {
-	ctx       context.Context
-	generator *code.Generator
-	tokens    TokenIssuer
-	shopRepo  *repo.ShopRepo
-	logger    logx.Logger
+	ctx          context.Context
+	generator    *code.Generator
+	tokens       TokenIssuer
+	shopRepo     *repo.ShopRepo
+	logger       logx.Logger
 	vipUsers     map[int64]struct{}
 	vipHighBoost float64
 
