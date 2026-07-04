@@ -826,6 +826,32 @@ func (r *Room) handleDrawLottery(ctx context.Context, it Intent) {
 	//  1. 扣金币；2. 更新保底；3. 记录抽奖流水 + Feed。
 	player.Coin -= cost
 	r.guaranteedAmount = newGuarantee
+	pid2, coin2, guarantee2 := pid, player.Coin, newGuarantee
+	lotteryRows := make([]repo.ShopLotteryRow, len(records))
+	for i, rec := range records {
+		lotteryRows[i] = repo.ShopLotteryRow{
+			RoomCode:        r.code,
+			PlayerID:        pid2,
+			ItemID:          rec.Item.ID,
+			ItemName:        rec.Item.Name,
+			Rarity:          string(rec.Item.Rarity),
+			ItemValue:       rec.Item.Value,
+			GuaranteeBefore: rec.GuaranteeBefore,
+			GuaranteeAfter:  rec.GuaranteeAfter,
+		}
+	}
+	r.dbWriteAsync(func() error {
+		bctx := context.Background()
+		if pl, ok := r.players[pid2]; ok {
+			if err := r.shopRepo.UpdatePlayerState(bctx, r.code, pid2, string(pl.Role), coin2, pl.Ready); err != nil {
+				return err
+			}
+		}
+		if err := r.shopRepo.UpdateGuaranteedAmount(bctx, r.code, guarantee2); err != nil {
+			return err
+		}
+		return r.shopRepo.InsertLotteryRecords(bctx, lotteryRows)
+	})
 	// 头部插入，最新在前；与前端 UI 期望一致。
 	r.lotteryRecords = append(append([]protocol.LotteryRecord{}, records...), r.lotteryRecords...)
 	for _, rec := range records {
@@ -940,6 +966,32 @@ func (r *Room) handleSettleRound(ctx context.Context, it Intent) {
 	}
 	// 头部插入，最新在前；与抽奖记录一致，便于前端按时间倒序展示。
 	r.settlementRecords = append([]protocol.SettlementRecord{record}, r.settlementRecords...)
+
+	guarantee2 := result.GuaranteeAfter
+	perPlayerJSON, _ := json.Marshal(result.PerPlayer)
+	settleRow := repo.ShopSettlementRow{
+		ID:              record.ID,
+		RoomCode:        r.code,
+		Outcome:         string(result.Outcome),
+		GuaranteeDelta:  result.GuaranteeDelta,
+		GuaranteeBefore: result.GuaranteeBefore,
+		GuaranteeAfter:  result.GuaranteeAfter,
+		PerPlayer:       string(perPlayerJSON),
+	}
+	r.dbWriteAsync(func() error {
+		bctx := context.Background()
+		if err := r.shopRepo.UpdateGuaranteedAmount(bctx, r.code, guarantee2); err != nil {
+			return err
+		}
+		for _, pp := range result.PerPlayer {
+			if pl, ok := r.players[pp.PlayerID]; ok {
+				if err := r.shopRepo.UpdatePlayerState(bctx, r.code, pp.PlayerID, string(pl.Role), pl.Coin, pl.Ready); err != nil {
+					return err
+				}
+			}
+		}
+		return r.shopRepo.InsertSettlement(bctx, settleRow)
+	})
 
 	r.appendFeed("SETTLEMENT", map[string]any{
 		"outcome":         string(result.Outcome),
