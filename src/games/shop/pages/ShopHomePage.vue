@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { isValidRoomCode } from '@shared/utils/id';
-import { MAX_NICKNAME_LENGTH, usePlayerStore } from '@shared/stores/player';
+import { usePlayerStore } from '@shared/stores/player';
 import { useRoomStore } from '../stores/room';
 import {
   createRoom,
@@ -22,11 +22,9 @@ const playerStore = usePlayerStore();
 const roomStore = useRoomStore();
 
 const codeInput = ref<string>('');
-const nicknameInput = ref<string>('');
 const guaranteeInput = ref<string>(String(DEFAULT_GUARANTEED_AMOUNT));
 const creating = ref(false);
 const joining = ref(false);
-const nicknameReady = computed(() => !!nicknameInput.value.trim());
 
 /**
  * 保底金额本地校验：仅允许整数，落在 [MIN, MAX]。
@@ -43,31 +41,11 @@ const guaranteeValid = computed(() => guaranteeNumber.value !== null);
 
 onMounted(() => {
   playerStore.ensureIdentity();
-  nicknameInput.value = playerStore.nicknameCustom;
   const queryCode = (route.query.code as string | undefined) ?? '';
   if (queryCode && isValidRoomCode(queryCode)) {
     codeInput.value = queryCode;
   }
 });
-
-function onNicknameInput(e: Event): void {
-  const target = e.target as HTMLInputElement;
-  nicknameInput.value = target.value.slice(0, MAX_NICKNAME_LENGTH);
-}
-
-/**
- * 校验并落库昵称。首页只需填昵称即可（名牌为选填，进店后在准备页再选）。
- * 这里会保留玩家此前可能选过的名牌前缀，仅更新自定义昵称部分。
- */
-function ensureNicknameReady(): boolean {
-  if (!nicknameInput.value.trim()) {
-    roomStore.pushToast('warn', '请先填写昵称');
-    return false;
-  }
-  playerStore.setNicknameCustom(nicknameInput.value);
-  nicknameInput.value = playerStore.nicknameCustom;
-  return true;
-}
 
 function onCodeInput(e: Event): void {
   const target = e.target as HTMLInputElement;
@@ -82,9 +60,6 @@ function onGuaranteeInput(e: Event): void {
 
 async function handleCreate(): Promise<void> {
   if (creating.value) return;
-  if (!ensureNicknameReady()) {
-    return;
-  }
   if (!guaranteeValid.value) {
     roomStore.pushToast(
       'warn',
@@ -131,9 +106,6 @@ async function handleCreate(): Promise<void> {
 
 async function handleJoin(): Promise<void> {
   if (joining.value) return;
-  if (!ensureNicknameReady()) {
-    return;
-  }
   if (!isValidRoomCode(codeInput.value)) {
     roomStore.pushToast('warn', '请输入 6 位商店口令');
     return;
@@ -174,7 +146,8 @@ async function handleJoin(): Promise<void> {
       sessionToken: playerStore.getSessionToken(codeInput.value),
     });
     playerStore.rememberRoomCode(codeInput.value);
-    router.push({ name: 'shop-room', params: { code: codeInput.value } });
+    const dest = roomStore.snapshot?.status === 'PLAYING' ? 'shop-play' : 'shop-room';
+    router.push({ name: dest, params: { code: codeInput.value } });
   } catch (err) {
     const reason = (err as Error).message;
     if (reason === 'FULL') roomStore.pushToast('warn', '店内 3 个位置已满');
@@ -208,28 +181,6 @@ async function handleJoin(): Promise<void> {
       <div class="card rpg-corners card-ornate w-full max-w-md p-7 sm:p-9 animate-slide-up">
         <div class="text-center mb-6">
           <div class="rune-mark text-2xl">⚜</div>
-          <div class="rpg-subtitle text-[10px] mt-1">填写昵称 · 进入神秘商店</div>
-        </div>
-
-        <div class="mb-5">
-          <label class="font-serif text-xs tracking-[0.32em] uppercase text-gold-300 mb-2 block">
-            <span class="rune-mark mr-1">❖</span>您的昵称
-          </label>
-          <input
-            :value="nicknameInput"
-            class="input"
-            :maxlength="MAX_NICKNAME_LENGTH"
-            placeholder="请输入昵称…"
-            @input="onNicknameInput"
-          />
-          <p class="text-[11px] mt-2 font-body" :class="nicknameReady ? 'text-parchment-300/75' : 'text-oxblood-300'">
-            <template v-if="nicknameReady">
-              最多 {{ MAX_NICKNAME_LENGTH }} 字 · 进店后可在准备页挑选名牌（选填）
-            </template>
-            <template v-else>
-              填写昵称即可开始，名牌可进店后再选。
-            </template>
-          </p>
         </div>
 
         <div class="mb-7">
