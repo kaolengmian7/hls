@@ -87,6 +87,10 @@ watch(
   },
 );
 
+function handleCloseGame(): void {
+  roomStore.sendIntent('CLOSE_GAME', {})
+}
+
 function confirmLeave(): void {
   showLeaveConfirm.value = false;
   roomStore.leaveRoom();
@@ -179,6 +183,13 @@ function dismissClosed(): void {
                   @click="showSettlement = true"
                 >
                   ⚖ 本轮结算
+                </button>
+                <button
+                  v-if="canSettle"
+                  class="btn-danger py-1.5 px-3 text-[11px]"
+                  @click="handleCloseGame"
+                >
+                  结单
                 </button>
                 <button class="btn-ghost py-1.5 px-3 text-[11px]" @click="showSettlementHistory = true">结算记录</button>
                 <button class="btn-ghost py-1.5 px-3 text-[11px]" @click="showLottery = true">抽奖记录</button>

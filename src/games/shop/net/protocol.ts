@@ -174,6 +174,7 @@ export type IntentMap = {
     guaranteeDelta: number;
     perPlayer: SettlePlayerInput[];
   };
+  CLOSE_GAME: Record<string, never>;
   PING: Record<string, never>;
 };
 
