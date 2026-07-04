@@ -565,6 +565,13 @@ func (r *Room) handleChangeRole(ctx context.Context, it Intent) {
 	}
 	player.Role = p.Role
 	player.Ready = false
+	pid2, role2 := pid, string(p.Role)
+	r.dbWriteAsync(func() error {
+		if pl, ok := r.players[pid2]; ok {
+			return r.shopRepo.UpdatePlayerState(context.Background(), r.code, pid2, role2, pl.Coin, pl.Ready)
+		}
+		return nil
+	})
 	r.broadcast(protocol.EventRoleChanged, protocol.RoleChangedPayload{
 		PlayerID: pid,
 		Role:     p.Role,
@@ -639,6 +646,13 @@ func (r *Room) handleReady(ctx context.Context, it Intent) {
 		return
 	}
 	player.Ready = p.Ready
+	pid2, ready2 := pid, p.Ready
+	r.dbWriteAsync(func() error {
+		if pl, ok := r.players[pid2]; ok {
+			return r.shopRepo.UpdatePlayerState(context.Background(), r.code, pid2, string(pl.Role), pl.Coin, ready2)
+		}
+		return nil
+	})
 	r.broadcast(protocol.EventReadyChanged, protocol.ReadyChangedPayload{
 		PlayerID: pid,
 		Ready:    p.Ready,
@@ -670,6 +684,21 @@ func (r *Room) handleStartGame(ctx context.Context, it Intent) {
 		}
 	}
 	r.status = protocol.RoomStatusPlaying
+	orderSnap := append([]string(nil), r.playerOrder...)
+	r.dbWriteAsync(func() error {
+		bctx := context.Background()
+		if err := r.shopRepo.UpdateRoomStatus(bctx, r.code, "playing"); err != nil {
+			return err
+		}
+		for _, pid2 := range orderSnap {
+			if pl, ok := r.players[pid2]; ok {
+				if err := r.shopRepo.UpdatePlayerState(bctx, r.code, pid2, string(pl.Role), pl.Coin, pl.Ready); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
 	r.appendFeed("GAME_STARTED", map[string]any{})
 	snap := r.buildSnapshot()
 	r.broadcast(protocol.EventGameStarted, protocol.GameStartedPayload{Snapshot: snap})
@@ -713,6 +742,13 @@ func (r *Room) handleBuyEquipment(ctx context.Context, it Intent) {
 		return
 	}
 	player.Coin -= eq.Price
+	pid2, coin2 := pid, player.Coin
+	r.dbWriteAsync(func() error {
+		if pl, ok := r.players[pid2]; ok {
+			return r.shopRepo.UpdatePlayerState(context.Background(), r.code, pid2, string(pl.Role), coin2, pl.Ready)
+		}
+		return nil
+	})
 	feedPayload := map[string]any{
 		"playerId":    pid,
 		"equipmentId": eq.ID,
