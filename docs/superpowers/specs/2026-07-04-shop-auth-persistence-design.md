@@ -205,8 +205,8 @@ router.push(redirect || '/')
 | 角色 / 准备状态变更     | UPDATE shop_room_players                                 |
 | 游戏开始               | UPDATE shop_rooms.status='playing' + UPDATE coins        |
 | 购买装备               | UPDATE shop_room_players.coin                            |
-| 抽奖                  | UPDATE coin + INSERT shop_lottery_records (批量)          |
-| 结算                  | UPDATE coin + UPDATE guaranteed_amount + INSERT shop_settlement_records |
+| 抽奖                  | UPDATE coin + UPDATE shop_rooms.guaranteed_amount + INSERT shop_lottery_records (批量) |
+| 结算                  | UPDATE coin + UPDATE shop_rooms.guaranteed_amount + INSERT shop_settlement_records |
 | 玩家离开 / 超时 GC     | UPDATE shop_room_players.left_at                         |
 | 结单 / 解散            | UPDATE shop_rooms.status='closed' + UPDATE left_at 全员  |
 
