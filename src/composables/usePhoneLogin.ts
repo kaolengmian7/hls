@@ -1,5 +1,5 @@
 import { ref, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import http from '../http'
 import axios from 'axios'
@@ -29,6 +29,7 @@ const ERROR_LABELS: Record<string, string> = {
 
 export function usePhoneLogin() {
   const router = useRouter()
+  const route = useRoute()
   const auth = useAuthStore()
 
   const step = ref<LoginStep>('phone')
@@ -96,7 +97,8 @@ export function usePhoneLogin() {
       if (res.data.token) {
         auth.setToken(res.data.token)
         try { await auth.init() } catch { /* token valid, profile fetch failed — navigate anyway */ }
-        router.push('/')
+        const redirect = (route.query.redirect as string | undefined) || '/'
+        router.push(redirect)
       } else {
         error.value = '登录失败，请重试'
       }

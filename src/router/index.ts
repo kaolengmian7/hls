@@ -3,6 +3,7 @@ import shopRoutes from '@/games/shop/router';
 import teachRoutes from '@/games/teach/router';
 import auditionRoutes from '@/games/audition/router';
 import pokerRoutes from '@/games/poker/router';
+import { useAuthStore } from '@/stores/auth';
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -28,4 +29,11 @@ export const router = createRouter({
     ...pokerRoutes,
     { path: '/:catchAll(.*)', redirect: '/' },
   ],
+});
+
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  if (to.path.startsWith('/shop') && !auth.token) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
 });
