@@ -7,19 +7,12 @@ import "github.com/zeromicro/go-zero/rest"
 type Config struct {
 	rest.RestConf
 
-	Session    SessionConfig
 	Cors       CorsConfig
 	DB         DBConfig
 	JWT        JWTConfig
 	WechatOpen WechatOpenConfig
 	TencentSMS TencentSMSConfig
 	Shop       ShopConfig
-}
-
-// SessionConfig sessionToken 相关（游戏房间断线重连）。
-type SessionConfig struct {
-	Secret     string `json:",default=change-me"`
-	TTLMinutes int    `json:",default=240"`
 }
 
 // CorsConfig CORS 允许列表。

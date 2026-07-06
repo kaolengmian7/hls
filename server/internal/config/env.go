@@ -12,8 +12,6 @@ const (
 	envHost             = "HLS_HOST"
 	envPort             = "HLS_PORT"
 	envMode             = "HLS_MODE"
-	envSessionSecret    = "HLS_SESSION_SECRET"
-	envSessionTTL       = "HLS_SESSION_TTL_MINUTES"
 	envCorsAllowOrigins = "HLS_CORS_ALLOW_ORIGINS"
 
 	envDBDSN = "HLS_DB_DSN"
@@ -38,9 +36,6 @@ func ApplyEnvOverrides(cfg *Config) error {
 	}
 	if mode := strings.TrimSpace(os.Getenv(envMode)); mode != "" {
 		cfg.Mode = mode
-	}
-	if secret := strings.TrimSpace(os.Getenv(envSessionSecret)); secret != "" {
-		cfg.Session.Secret = secret
 	}
 	if origins := strings.TrimSpace(os.Getenv(envCorsAllowOrigins)); origins != "" {
 		cfg.Cors.AllowOrigins = splitCSV(origins)
@@ -70,13 +65,6 @@ func ApplyEnvOverrides(cfg *Config) error {
 			return errors.New(errors.CodeInvalidParam, "%s must be a positive integer", envPort)
 		}
 		cfg.Port = value
-	}
-	if ttl := strings.TrimSpace(os.Getenv(envSessionTTL)); ttl != "" {
-		value, err := strconv.Atoi(ttl)
-		if err != nil || value <= 0 {
-			return errors.New(errors.CodeInvalidParam, "%s must be a positive integer", envSessionTTL)
-		}
-		cfg.Session.TTLMinutes = value
 	}
 	if ttlDays := strings.TrimSpace(os.Getenv(envJWTTTLDays)); ttlDays != "" {
 		value, err := strconv.Atoi(ttlDays)

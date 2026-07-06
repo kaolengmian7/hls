@@ -2,10 +2,9 @@
 package handler
 
 import (
-	stdrand "crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -33,8 +32,6 @@ type CreateRoomRequest struct {
 // GuaranteedAmount 是服务端最终落库的保底金额（单位 W），客户端应以此为准展示。
 type CreateRoomResponse struct {
 	Code             string `json:"code"`
-	PlayerID         string `json:"playerId"`
-	SessionToken     string `json:"sessionToken"`
 	GuaranteedAmount int    `json:"guaranteedAmount"`
 }
 
@@ -77,13 +74,9 @@ func CreateRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			req.Nickname = string([]rune(req.Nickname)[:16])
 		}
 
-		hostPlayerID, err := newPlayerID()
-		if err != nil {
-			writeError(w, r, http.StatusInternalServerError, "alloc playerId", err)
-			return
-		}
+		hostPlayerID := strconv.FormatInt(userID, 10)
 
-		rm, tok, err := ctx.Hub.CreateRoom(req.Nickname, req.Avatar, hostPlayerID, userID, req.GuaranteedAmount)
+		rm, err := ctx.Hub.CreateRoom(req.Nickname, req.Avatar, hostPlayerID, userID, req.GuaranteedAmount)
 		if err != nil {
 			status := http.StatusInternalServerError
 			if errors.IsExposable(err) {
@@ -95,8 +88,6 @@ func CreateRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 
 		httpx.OkJsonCtx(r.Context(), w, CreateRoomResponse{
 			Code:             rm.Code(),
-			PlayerID:         hostPlayerID,
-			SessionToken:     tok,
 			GuaranteedAmount: rm.GuaranteedAmount(),
 		})
 	}
@@ -117,18 +108,20 @@ func QueryRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			writeError(w, r, http.StatusBadRequest, "invalid code", nil)
 			return
 		}
-		playerID := strings.TrimSpace(r.URL.Query().Get("playerId"))
+		uid, errKey := extractUserID(r, ctx)
+		playerID := ""
+		if errKey == "" {
+			playerID = strconv.FormatInt(uid, 10)
+		}
 		summary := ctx.Hub.QueryRoom(c, playerID)
 		if !summary.Exists {
 			writeError(w, r, http.StatusNotFound, "room not found", nil)
 			return
 		}
 		resp := QueryRoomResponse{RoomSummary: summary}
-		if !summary.IsMember {
-			if uid, ek := extractUserID(r, ctx); ek == "" {
-				if ac, err := ctx.ShopRepo.FindActiveRoomForUser(r.Context(), uid); err == nil && ac != "" && ac != c {
-					resp.ActiveRoomCode = ac
-				}
+		if !summary.IsMember && errKey == "" && ctx.ShopRepo != nil {
+			if ac, err := ctx.ShopRepo.FindActiveRoomForUser(r.Context(), uid); err == nil && ac != "" && ac != c {
+				resp.ActiveRoomCode = ac
 			}
 		}
 		httpx.OkJsonCtx(r.Context(), w, resp)
@@ -218,13 +211,4 @@ func requireOwner(ctx *svc.ServiceContext, next http.HandlerFunc) http.HandlerFu
 		}
 		next(w, r)
 	}
-}
-
-// newPlayerID 生成 14 字符 base64url 玩家 ID。
-func newPlayerID() (string, error) {
-	var buf [10]byte
-	if _, err := stdrand.Read(buf[:]); err != nil {
-		return "", errors.WithMessage(err, "rand")
-	}
-	return "p_" + base64.RawURLEncoding.EncodeToString(buf[:]), nil
 }

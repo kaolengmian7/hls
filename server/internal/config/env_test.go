@@ -9,8 +9,6 @@ func TestApplyEnvOverrides(t *testing.T) {
 	t.Setenv(envHost, "127.0.0.1")
 	t.Setenv(envPort, "9090")
 	t.Setenv(envMode, "prod")
-	t.Setenv(envSessionSecret, "secret-from-env")
-	t.Setenv(envSessionTTL, "60")
 	t.Setenv(envCorsAllowOrigins, "https://a.example.com, https://b.example.com")
 
 	cfg := Config{}
@@ -26,12 +24,6 @@ func TestApplyEnvOverrides(t *testing.T) {
 	}
 	if cfg.Mode != "prod" {
 		t.Fatalf("Mode = %q, want %q", cfg.Mode, "prod")
-	}
-	if cfg.Session.Secret != "secret-from-env" {
-		t.Fatalf("Session.Secret = %q, want %q", cfg.Session.Secret, "secret-from-env")
-	}
-	if cfg.Session.TTLMinutes != 60 {
-		t.Fatalf("Session.TTLMinutes = %d, want %d", cfg.Session.TTLMinutes, 60)
 	}
 
 	wantOrigins := []string{"https://a.example.com", "https://b.example.com"}
@@ -82,8 +74,6 @@ func TestApplyEnvOverridesInvalidIntegers(t *testing.T) {
 	}{
 		{name: "invalid port", key: envPort, value: "bad"},
 		{name: "zero port", key: envPort, value: "0"},
-		{name: "invalid ttl", key: envSessionTTL, value: "bad"},
-		{name: "zero ttl", key: envSessionTTL, value: "0"},
 	}
 
 	for _, tt := range tests {

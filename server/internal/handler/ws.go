@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -12,7 +13,6 @@ import (
 	"hls.dev/server/pkg/code"
 )
 
-// defaultUpgrader 默认 WebSocket 升级器；CheckOrigin 在 handler 里按配置注入。
 var defaultUpgrader = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
@@ -21,8 +21,10 @@ var defaultUpgrader = websocket.Upgrader{
 // WebSocketHandler 处理 GET /ws/rooms/:code。
 //
 // 查询参数：
-//   - playerId 必填：客户端持久 ID。
-//   - token   选填：sessionToken；存在且校验通过 → 视为 reconnect，无需再发 JOIN。
+//   - jwt 必填：Bearer JWT，用于身份验证并派生 playerID。
+//
+// 重连判断：服务端通过 rm.HasPlayer(playerID) 检查玩家是否已在房间内；
+// 客户端始终发送 JOIN，服务端按 hasJoined 标志幂等处理。
 func WebSocketHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		c := extractCode(r.URL.Path, "/ws/rooms/")
@@ -36,49 +38,30 @@ func WebSocketHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		query := r.URL.Query()
-		playerID := strings.TrimSpace(query.Get("playerId"))
-		if playerID == "" {
-			http.Error(w, "playerId required", http.StatusBadRequest)
+		jwt := strings.TrimSpace(r.URL.Query().Get("jwt"))
+		userID, err := ctx.JWTSigner.Verify(jwt)
+		if err != nil {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-		sessionToken := strings.TrimSpace(query.Get("token"))
-
-		var userID int64
-		if jwt := strings.TrimSpace(query.Get("jwt")); jwt != "" {
-			if uid, err := ctx.JWTSigner.Verify(jwt); err == nil {
-				userID = uid
-			}
-		}
+		playerID := strconv.FormatInt(userID, 10)
 
 		upgrader := defaultUpgrader
 		upgrader.CheckOrigin = func(req *http.Request) bool {
 			return originAllowed(ctx, req)
 		}
 
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
+		conn, wsErr := upgrader.Upgrade(w, r, nil)
+		if wsErr != nil {
 			logx.WithContext(r.Context()).Errorw("ws upgrade",
-				logx.Field("err", err),
+				logx.Field("err", wsErr),
 				logx.Field("code", c))
 			return
 		}
 
 		client := room.NewClient(conn, rm, playerID, userID, logx.WithContext(ctx.RootCtx))
-
-		authenticated := false
-		if sessionToken != "" {
-			if _, err := ctx.Signer.Verify(c, playerID, sessionToken); err != nil {
-				logx.WithContext(r.Context()).Infow("session token invalid",
-					logx.Field("code", c),
-					logx.Field("playerId", playerID),
-					logx.Field("err", err))
-			} else {
-				authenticated = true
-			}
-		}
-
-		rm.RegisterClient(client, playerID, authenticated)
+		isReturningMember := rm.HasPlayer(playerID)
+		rm.RegisterClient(client, playerID, isReturningMember)
 		go client.Run(ctx.RootCtx)
 	}
 }
