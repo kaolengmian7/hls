@@ -31,8 +31,6 @@ services:
     environment:
       HLS_HOST: 0.0.0.0
       HLS_MODE: ${HLS_MODE:-prod}
-      HLS_SESSION_SECRET: ${HLS_SESSION_SECRET:?set HLS_SESSION_SECRET in server/.env}
-      HLS_SESSION_TTL_MINUTES: ${HLS_SESSION_TTL_MINUTES:-1440}
       HLS_CORS_ALLOW_ORIGINS: ${HLS_CORS_ALLOW_ORIGINS:?set HLS_CORS_ALLOW_ORIGINS in server/.env}
       HLS_DB_DSN: ${HLS_DB_DSN:?set HLS_DB_DSN in server/.env}
       HLS_JWT_SECRET: ${HLS_JWT_SECRET:?set HLS_JWT_SECRET in server/.env}
