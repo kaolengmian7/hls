@@ -39,7 +39,6 @@ const (
 type JoinAcceptedPayload struct {
 	Snapshot     RoomSnapshot `json:"snapshot"`
 	SelfPlayerID string       `json:"selfPlayerId"`
-	SessionToken string       `json:"sessionToken"`
 }
 
 // JoinRejectedPayload 服务端拒绝。
