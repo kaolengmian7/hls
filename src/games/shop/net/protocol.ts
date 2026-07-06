@@ -149,11 +149,6 @@ export type IntentMap = {
   LEAVE: Record<string, never>;
   DISMISS_ROOM: Record<string, never>;
   CHANGE_ROLE: { role: Role };
-  /**
-   * 准备阶段修改昵称（含可选名牌前缀）。
-   * `nickname` 为拼接后的最终昵称；仅房间处于 WAITING 时服务端接受。
-   */
-  CHANGE_NICKNAME: { nickname: string };
   READY: { ready: boolean };
   START_GAME: Record<string, never>;
   BUY_EQUIPMENT: { equipmentId: string; pick?: string };
@@ -187,7 +182,7 @@ export type JoinRejectReason = 'NOT_FOUND' | 'FULL' | 'PLAYING' | 'DUP' | 'OTHER
 export type KickReason = 'DISMISSED' | 'IDLE' | 'KICKED_BY_HOST' | 'REPLACED' | string;
 
 export type EventMap = {
-  JOIN_ACCEPTED: { snapshot: RoomSnapshot; selfPlayerId: string; sessionToken: string };
+  JOIN_ACCEPTED: { snapshot: RoomSnapshot; selfPlayerId: string };
   JOIN_REJECTED: { reason: JoinRejectReason; message?: string };
   STATE_SNAPSHOT: { snapshot: RoomSnapshot };
   PLAYER_JOINED: { player: Player };

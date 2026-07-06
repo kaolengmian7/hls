@@ -13,8 +13,6 @@ import type { LotteryItem, RoomStatus } from './protocol';
 
 export type CreateRoomResponse = {
   code: string;
-  playerId: string;
-  sessionToken: string;
   guaranteedAmount: number;
 };
 
@@ -113,15 +111,27 @@ export function createRoom(payload: {
   });
 }
 
-export async function queryRoom(code: string, playerId?: string): Promise<RoomSummary> {
-  const suffix = playerId ? `?playerId=${encodeURIComponent(playerId)}` : '';
+export async function queryRoom(code: string): Promise<RoomSummary> {
+  const auth = useAuthStore();
+  const url = apiBase() + `/api/rooms/${code}`;
   try {
-    return await request<RoomSummary>('GET', `/api/rooms/${code}${suffix}`);
-  } catch (err) {
-    if (err instanceof ApiError && err.status === 404) {
-      return { exists: false };
+    const resp = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${auth.token ?? ''}` },
+    });
+    if (resp.status === 404) return { exists: false };
+    if (!resp.ok) {
+      const text = await resp.text();
+      let parsed: unknown = null;
+      try { parsed = JSON.parse(text); } catch { parsed = text; }
+      const msg = (parsed && typeof parsed === 'object' && 'message' in parsed
+        ? String((parsed as { message: unknown }).message)
+        : undefined) ?? `HTTP ${resp.status}`;
+      throw new ApiError(resp.status, msg, parsed);
     }
-    throw err;
+    return await resp.json() as RoomSummary;
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
+    throw new ApiError(0, `network: ${(err as Error).message}`);
   }
 }
 
