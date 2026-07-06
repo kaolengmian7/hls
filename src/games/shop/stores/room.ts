@@ -149,15 +149,15 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   /**
-   * 利用本地持久化的 sessionToken / playerId 尝试恢复对房间的连接。
+   * 利用已登录用户身份尝试恢复对房间的连接。
    *
    * 触发场景：用户在 /room/:code 或 /room/:code/play 路径下刷新页面，
-   * Pinia 状态被清空，但 localStorage 中仍持有最近一次签发的 sessionToken。
+   * Pinia 状态被清空，服务端通过 rm.HasPlayer(playerID) 判断是否为重连。
    *
    * 行为：
    * - 已处于 connected/connecting/reconnecting：直接返回 true，避免重复建链。
-   * - 无 playerId 或目标 code 无对应 token：返回 false（调用方应跳回首页）。
-   * - 否则按 reconnect 流程建链；成功 resolve true，失败（JOIN_REJECTED / 网络终态）resolve false。
+   * - 未登录（auth.user 为空）：返回 false（调用方应跳回首页）。
+   * - 否则按正常连接流程建链；成功 resolve true，失败（JOIN_REJECTED / 网络终态）resolve false。
    */
   async function tryRestoreSession(targetCode: string): Promise<boolean> {
     if (status.value === 'connected' || status.value === 'connecting' || status.value === 'reconnecting') {
