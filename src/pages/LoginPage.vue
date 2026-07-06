@@ -1,7 +1,35 @@
 <script setup lang="ts">
-import { usePhoneLogin } from '../composables/usePhoneLogin'
+import { ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import axios from 'axios'
 
-const { phone, code, verifying, error, verifyCode } = usePhoneLogin()
+const router = useRouter()
+const route = useRoute()
+const auth = useAuthStore()
+
+const username = ref('')
+const password = ref('')
+const loading = ref(false)
+const error = ref('')
+
+async function handleLogin() {
+  error.value = ''
+  loading.value = true
+  try {
+    await auth.login(username.value.trim(), password.value)
+    const redirect = (route.query.redirect as string | undefined) || '/'
+    router.push(redirect)
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e) && e.response?.status === 401) {
+      error.value = '账号或密码错误'
+    } else {
+      error.value = '登录失败，请重试'
+    }
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -12,37 +40,30 @@ const { phone, code, verifying, error, verifyCode } = usePhoneLogin()
       <p v-if="error" class="text-red-400 text-sm text-center">{{ error }}</p>
 
       <input
-        v-model="phone"
-        type="tel"
-        maxlength="11"
-        autocomplete="tel"
-        placeholder="请输入手机号"
+        v-model="username"
+        type="text"
+        autocomplete="username"
+        placeholder="账号（hlsXXXX）"
         class="w-full bg-white/5 border border-white/20 rounded px-3 py-2 text-sm font-serif text-parchment-200 placeholder:text-parchment-400/40 focus:outline-none focus:border-gold-400/60"
-        @keydown.enter="code.length === phone.length && !verifying && verifyCode()"
+        @keydown.enter="!loading && handleLogin()"
       />
 
       <input
-        v-model="code"
-        type="text"
-        inputmode="numeric"
-        :maxlength="phone.length || 11"
-        autocomplete="one-time-code"
-        placeholder="请输入验证码"
-        class="w-full bg-white/5 border border-white/20 rounded px-3 py-2 text-sm font-serif text-parchment-200 placeholder:text-parchment-400/40 focus:outline-none focus:border-gold-400/60 tracking-[0.4em] text-center"
-        @keydown.enter="code.length === phone.length && !verifying && verifyCode()"
+        v-model="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="密码"
+        class="w-full bg-white/5 border border-white/20 rounded px-3 py-2 text-sm font-serif text-parchment-200 placeholder:text-parchment-400/40 focus:outline-none focus:border-gold-400/60"
+        @keydown.enter="!loading && handleLogin()"
       />
 
       <button
         class="w-full font-serif text-sm text-gold-300 border border-gold-400/40 px-4 py-2 rounded hover:border-gold-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        :disabled="verifying || phone.length < 9 || code.length !== phone.length"
-        @click="verifyCode"
+        :disabled="loading || !username || !password"
+        @click="handleLogin"
       >
-        {{ verifying ? '验证中…' : '登录' }}
+        {{ loading ? '登录中…' : '登录' }}
       </button>
-
-      <p class="text-center text-xs text-parchment-400/40 font-serif">
-        测试账号：900006001 &nbsp;·&nbsp; 验证码与手机号相同
-      </p>
     </div>
   </div>
 </template>
