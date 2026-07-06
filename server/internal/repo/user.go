@@ -4,22 +4,34 @@ import (
 	"context"
 	"crypto/rand"
 	"database/sql"
+	"strings"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 // User represents a registered user.
 type User struct {
-	ID         int64          `db:"id"`
-	OpenOpenID sql.NullString `db:"open_openid"`
-	MpOpenID   sql.NullString `db:"mp_openid"`
-	UnionID    sql.NullString `db:"union_id"`
-	Phone      sql.NullString `db:"phone"`
-	Nickname   string         `db:"nickname"`
-	AvatarURL  string         `db:"avatar_url"`
+	ID           int64          `db:"id"`
+	OpenOpenID   sql.NullString `db:"open_openid"`
+	MpOpenID     sql.NullString `db:"mp_openid"`
+	UnionID      sql.NullString `db:"union_id"`
+	Phone        sql.NullString `db:"phone"`
+	Nickname     string         `db:"nickname"`
+	AvatarURL    string         `db:"avatar_url"`
+	Username     sql.NullString `db:"username"`
+	PasswordHash sql.NullString `db:"password_hash"`
+	Role         string         `db:"role"`
 }
 
-const userCols = "id, open_openid, mp_openid, union_id, phone, nickname, avatar_url"
+// UserSummary is a lightweight projection used in admin listings.
+type UserSummary struct {
+	ID       int64  `db:"id"       json:"id"`
+	Username string `db:"username" json:"username"`
+	Nickname string `db:"nickname" json:"nickname"`
+	Role     string `db:"role"     json:"role"`
+}
+
+const userCols = "id, open_openid, mp_openid, union_id, phone, nickname, avatar_url, username, password_hash, role"
 
 // UserRepo provides database access for users.
 type UserRepo struct {
@@ -143,4 +155,22 @@ func randSuffix() string {
 		out[i] = chars[int(c)%len(chars)]
 	}
 	return string(out)
+}
+
+const usernameChars = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+func genUsername() (string, error) {
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	out := make([]byte, 4)
+	for i, c := range b {
+		out[i] = usernameChars[int(c)%len(usernameChars)]
+	}
+	return "hls" + string(out), nil
+}
+
+func isDuplicateKey(err error) bool {
+	return strings.Contains(err.Error(), "Duplicate entry")
 }
