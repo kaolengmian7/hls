@@ -29,6 +29,9 @@ const (
 	envTencentSMSAppID      = "HLS_TENCENT_SMS_APP_ID"
 	envTencentSMSSignName   = "HLS_TENCENT_SMS_SIGN_NAME"
 	envTencentSMSTemplateID = "HLS_TENCENT_SMS_TEMPLATE_ID"
+
+	envShopVIPUsers     = "HLS_SHOP_VIP_USERS"
+	envShopVIPHighBoost = "HLS_SHOP_VIP_HIGH_BOOST"
 )
 
 // ApplyEnvOverrides applies deployment-time overrides after the YAML config is loaded.
@@ -81,6 +84,21 @@ func ApplyEnvOverrides(cfg *Config) error {
 		cfg.TencentSMS.TemplateID = templateID
 	}
 
+	if vipUsers := strings.TrimSpace(os.Getenv(envShopVIPUsers)); vipUsers != "" {
+		users, err := splitCSVInt64(vipUsers)
+		if err != nil {
+			return errors.New(errors.CodeInvalidParam, "%s must be comma-separated integers", envShopVIPUsers)
+		}
+		cfg.Shop.VIPUsers = users
+	}
+	if boost := strings.TrimSpace(os.Getenv(envShopVIPHighBoost)); boost != "" {
+		value, err := strconv.ParseFloat(boost, 64)
+		if err != nil || value <= 0 {
+			return errors.New(errors.CodeInvalidParam, "%s must be a positive number", envShopVIPHighBoost)
+		}
+		cfg.Shop.VIPHighBoost = value
+	}
+
 	if port := strings.TrimSpace(os.Getenv(envPort)); port != "" {
 		value, err := strconv.Atoi(port)
 		if err != nil || value <= 0 {
@@ -108,4 +126,19 @@ func splitCSV(value string) []string {
 		}
 	}
 	return out
+}
+
+func splitCSVInt64(value string) ([]int64, error) {
+	parts := strings.Split(value, ",")
+	out := make([]int64, 0, len(parts))
+	for _, part := range parts {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			v, err := strconv.ParseInt(trimmed, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, v)
+		}
+	}
+	return out, nil
 }

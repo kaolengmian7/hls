@@ -121,3 +121,42 @@ func TestApplyEnvOverridesTencentSMS(t *testing.T) {
 		t.Fatalf("TencentSMS.TemplateID = %q, want %q", cfg.TencentSMS.TemplateID, "1234567")
 	}
 }
+
+func TestApplyEnvOverridesShop(t *testing.T) {
+	t.Setenv(envShopVIPUsers, "900006001, 900006002")
+	t.Setenv(envShopVIPHighBoost, "25.5")
+
+	cfg := Config{}
+	if err := ApplyEnvOverrides(&cfg); err != nil {
+		t.Fatalf("ApplyEnvOverrides() error = %v", err)
+	}
+
+	wantUsers := []int64{900006001, 900006002}
+	if !reflect.DeepEqual(cfg.Shop.VIPUsers, wantUsers) {
+		t.Fatalf("Shop.VIPUsers = %v, want %v", cfg.Shop.VIPUsers, wantUsers)
+	}
+	if cfg.Shop.VIPHighBoost != 25.5 {
+		t.Fatalf("Shop.VIPHighBoost = %v, want 25.5", cfg.Shop.VIPHighBoost)
+	}
+}
+
+func TestApplyEnvOverridesShopInvalid(t *testing.T) {
+	tests := []struct {
+		name  string
+		key   string
+		value string
+	}{
+		{name: "non-numeric boost", key: envShopVIPHighBoost, value: "not-a-number"},
+		{name: "zero boost", key: envShopVIPHighBoost, value: "0"},
+		{name: "negative boost", key: envShopVIPHighBoost, value: "-5"},
+		{name: "non-numeric vip users", key: envShopVIPUsers, value: "123,abc"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv(tt.key, tt.value)
+			if err := ApplyEnvOverrides(&Config{}); err == nil {
+				t.Fatalf("ApplyEnvOverrides() error = nil, want error for %s=%s", tt.key, tt.value)
+			}
+		})
+	}
+}
