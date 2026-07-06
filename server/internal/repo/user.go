@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -175,4 +176,38 @@ func genUsername() (string, error) {
 func isDuplicateKey(err error) bool {
 	var me *mysql.MySQLError
 	return errors.As(err, &me) && me.Number == 1062
+}
+
+// FindByUsername returns the user with the given username.
+func (r *UserRepo) FindByUsername(ctx context.Context, username string) (*User, error) {
+	return r.findBy(ctx, "username", username)
+}
+
+// CreateWithPassword inserts a new user with an auto-generated username and hashed password.
+// nickname defaults to "小小花栗鼠" if empty.
+func (r *UserRepo) CreateWithPassword(ctx context.Context, nickname, passwordHash, role string) (*User, error) {
+	if nickname == "" {
+		nickname = "小小花栗鼠"
+	}
+	for i := 0; i < 5; i++ {
+		username, err := genUsername()
+		if err != nil {
+			return nil, err
+		}
+		result, err := r.db.ExecCtx(ctx,
+			"INSERT INTO users (username, password_hash, role, nickname, avatar_url) VALUES (?, ?, ?, ?, '')",
+			username, passwordHash, role, nickname)
+		if err != nil {
+			if isDuplicateKey(err) {
+				continue
+			}
+			return nil, err
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			return nil, err
+		}
+		return r.FindByID(ctx, id)
+	}
+	return nil, fmt.Errorf("failed to generate unique username after 5 attempts")
 }

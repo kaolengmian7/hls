@@ -77,3 +77,69 @@ func TestFindByID_NotFound(t *testing.T) {
 		t.Fatal("FindByID() with non-existent ID should return error")
 	}
 }
+
+func TestCreateWithPassword_GeneratesUsername(t *testing.T) {
+	conn := testConn(t)
+	r := repo.NewUserRepo(conn)
+	ctx := context.Background()
+
+	u, err := r.CreateWithPassword(ctx, "测试用户", "hashedpw", "customer")
+	if err != nil {
+		t.Fatalf("CreateWithPassword() error = %v", err)
+	}
+	if !u.Username.Valid || len(u.Username.String) != 7 {
+		t.Fatalf("username = %q, want 7-char hls* string", u.Username.String)
+	}
+	if u.Username.String[:3] != "hls" {
+		t.Fatalf("username prefix = %q, want 'hls'", u.Username.String[:3])
+	}
+	if u.Nickname != "测试用户" {
+		t.Fatalf("nickname = %q, want '测试用户'", u.Nickname)
+	}
+	if u.Role != "customer" {
+		t.Fatalf("role = %q, want 'customer'", u.Role)
+	}
+
+	// cleanup
+	db, _ := conn.RawDB()
+	db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", u.ID)
+}
+
+func TestCreateWithPassword_DefaultNickname(t *testing.T) {
+	conn := testConn(t)
+	r := repo.NewUserRepo(conn)
+	ctx := context.Background()
+
+	u, err := r.CreateWithPassword(ctx, "", "hashedpw", "customer")
+	if err != nil {
+		t.Fatalf("CreateWithPassword() error = %v", err)
+	}
+	if u.Nickname != "小小花栗鼠" {
+		t.Fatalf("nickname = %q, want '小小花栗鼠'", u.Nickname)
+	}
+
+	db, _ := conn.RawDB()
+	db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", u.ID)
+}
+
+func TestFindByUsername(t *testing.T) {
+	conn := testConn(t)
+	r := repo.NewUserRepo(conn)
+	ctx := context.Background()
+
+	u, err := r.CreateWithPassword(ctx, "查找测试", "hashedpw", "owner")
+	if err != nil {
+		t.Fatalf("setup error = %v", err)
+	}
+
+	found, err := r.FindByUsername(ctx, u.Username.String)
+	if err != nil {
+		t.Fatalf("FindByUsername() error = %v", err)
+	}
+	if found.ID != u.ID {
+		t.Fatalf("ID = %d, want %d", found.ID, u.ID)
+	}
+
+	db, _ := conn.RawDB()
+	db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", u.ID)
+}
