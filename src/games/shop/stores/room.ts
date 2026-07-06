@@ -19,8 +19,8 @@ import type {
   Player,
   RoomSnapshot,
 } from '../net/protocol';
-import { usePlayerStore } from '@shared/stores/player';
 import { fetchLotteryPool } from '../net/api';
+import { useAuthStore } from '@/stores/auth';
 
 export type Toast = {
   id: string;
@@ -71,18 +71,15 @@ export const useRoomStore = defineStore('room', () => {
 
   function connect(input: {
     code: string;
-    playerId: string;
     nickname: string;
     avatar?: string;
-    sessionToken?: string;
   }): Promise<void> {
     teardownClient();
     code.value = input.code;
-    selfPlayerId.value = input.playerId;
+    const auth = useAuthStore();
+    selfPlayerId.value = String(auth.user?.id ?? '');
     status.value = 'connecting';
     closedReason.value = '';
-
-    const playerStore = usePlayerStore();
 
     return new Promise<void>((resolve, reject) => {
       let settled = false;
@@ -99,7 +96,6 @@ export const useRoomStore = defineStore('room', () => {
           const wasReconnecting = status.value === 'reconnecting';
           status.value = 'connected';
           closedReason.value = '';
-          playerStore.setSessionToken(input.code, payload.sessionToken);
           if (wasReconnecting) {
             pushToast('success', '已重新回到神秘商店');
           }
@@ -167,30 +163,22 @@ export const useRoomStore = defineStore('room', () => {
     if (status.value === 'connected' || status.value === 'connecting' || status.value === 'reconnecting') {
       return true;
     }
-    const playerStore = usePlayerStore();
-    playerStore.ensureIdentity();
-    const playerId = playerStore.playerId;
-    const token = playerStore.getSessionToken(targetCode);
-    if (!playerId || !token) {
+    const auth = useAuthStore();
+    if (!auth.user) {
       return false;
     }
     try {
       await connect({
         code: targetCode,
-        playerId,
-        nickname: playerStore.nickname,
-        sessionToken: token,
+        nickname: auth.user.nickname,
       });
       return true;
     } catch {
-      // 清理失效的 session，避免下一次刷新仍卡在重连失败。
-      playerStore.clearSession();
       return false;
     }
   }
 
   function leaveRoom(): void {
-    const playerStore = usePlayerStore();
     if (snapshot.value && me.value?.isHost) {
       // 房主：通知服务端解散
       client?.send('DISMISS_ROOM', {});
@@ -198,7 +186,6 @@ export const useRoomStore = defineStore('room', () => {
       client?.send('LEAVE', {});
     }
     teardownClient();
-    playerStore.clearSession();
     snapshot.value = null;
     latestLotteryReveal.value = [];
     awaitingSelfLotteryReveal = false;

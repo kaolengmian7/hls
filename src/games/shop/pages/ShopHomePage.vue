@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { isValidRoomCode } from '@shared/utils/id';
 import { usePlayerStore } from '@shared/stores/player';
+import { useAuthStore } from '@/stores/auth';
 import { useRoomStore } from '../stores/room';
 import {
   createRoom,
@@ -19,6 +20,7 @@ import ToastContainer from '../components/ToastContainer.vue';
 const router = useRouter();
 const route = useRoute();
 const playerStore = usePlayerStore();
+const authStore = useAuthStore();
 const roomStore = useRoomStore();
 
 const codeInput = ref<string>('');
@@ -26,10 +28,6 @@ const guaranteeInput = ref<string>(String(DEFAULT_GUARANTEED_AMOUNT));
 const creating = ref(false);
 const joining = ref(false);
 
-/**
- * 保底金额本地校验：仅允许整数，落在 [MIN, MAX]。
- * 空字符串视为非法（要求显式填写或保留默认值）。
- */
 const guaranteeNumber = computed<number | null>(() => {
   const trimmed = guaranteeInput.value.trim();
   if (!trimmed) return null;
@@ -54,9 +52,10 @@ function onCodeInput(e: Event): void {
 
 function onGuaranteeInput(e: Event): void {
   const target = e.target as HTMLInputElement;
-  // 仅保留数字，最长 6 位（MAX_GUARANTEED_AMOUNT 是 999999）。
   guaranteeInput.value = target.value.replace(/\D/g, '').slice(0, 6);
 }
+
+const nickname = computed(() => authStore.user?.nickname ?? '');
 
 async function handleCreate(): Promise<void> {
   if (creating.value) return;
@@ -70,18 +69,14 @@ async function handleCreate(): Promise<void> {
   creating.value = true;
   try {
     const resp = await createRoom({
-      nickname: playerStore.nickname,
+      nickname: nickname.value,
       guaranteedAmount: guaranteeNumber.value as number,
     });
-    playerStore.setPlayerId(resp.playerId);
-    playerStore.setSessionToken(resp.code, resp.sessionToken);
     playerStore.rememberRoomCode(resp.code);
 
     await roomStore.connect({
       code: resp.code,
-      playerId: resp.playerId,
-      nickname: playerStore.nickname,
-      sessionToken: resp.sessionToken,
+      nickname: nickname.value,
     });
     router.push({ name: 'shop-room', params: { code: resp.code } });
   } catch (err) {
@@ -112,21 +107,17 @@ async function handleJoin(): Promise<void> {
   }
   joining.value = true;
   try {
-    const summary = await queryRoom(codeInput.value, playerStore.playerId);
+    const summary = await queryRoom(codeInput.value);
     if (!summary.exists) {
       roomStore.pushToast('error', '这家商店不存在，或已经关闭');
       return;
     }
 
-    // Check if user is already in a DIFFERENT active room
     if (summary.activeRoomCode && summary.activeRoomCode !== codeInput.value) {
       roomStore.pushToast('warn', `您已在商店 ${summary.activeRoomCode} 中，请先离开当前商店`);
       return;
     }
 
-    // 优先回归：若服务端确认这个 playerId 仍占着该房间的座位（含正在进行中的对局），
-    // 直接走重连/回座路径恢复身份与鼠币，不受 PLAYING / 满员限制。
-    // 否则按全新加入处理。
     const isMember = summary.isMember === true;
     if (!isMember) {
       if (summary.status === 'PLAYING') {
@@ -141,9 +132,7 @@ async function handleJoin(): Promise<void> {
 
     await roomStore.connect({
       code: codeInput.value,
-      playerId: playerStore.playerId,
-      nickname: playerStore.nickname,
-      sessionToken: playerStore.getSessionToken(codeInput.value),
+      nickname: nickname.value,
     });
     playerStore.rememberRoomCode(codeInput.value);
     const dest = roomStore.snapshot?.status === 'PLAYING' ? 'shop-play' : 'shop-room';
