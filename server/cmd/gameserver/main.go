@@ -14,6 +14,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
@@ -26,6 +27,7 @@ import (
 var configFile = flag.String("f", "etc/gameserver.yaml", "config file path")
 
 func main() {
+	godotenv.Load() // loads .env if present; silent no-op when not found
 	flag.Parse()
 
 	var cfg config.Config

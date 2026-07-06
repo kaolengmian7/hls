@@ -4,37 +4,7 @@ Port: 8088
 Mode: dev
 Timeout: 30000
 
-Cors:
-  AllowOrigins:
-    - "http://localhost:5173"
-    - "http://127.0.0.1:5173"
-
 Log:
   Mode: console
   Encoding: plain
   Level: info
-
-DB:
-  DSN: "root@tcp(localhost:3306)/hls?parseTime=true"
-
-JWT:
-  Secret: please-change-me-in-prod
-  TTLDays: 7
-
-WechatOpen:
-  AppID: ""
-  AppSecret: ""
-  CallbackDomain: "localhost:8088"
-  FrontendURL: "http://localhost:5173"
-
-TencentSMS:
-  SecretID: ""
-  SecretKey: ""
-  SmsSdkAppID: ""
-  SignName: ""
-  TemplateID: ""
-
-Shop:
-  VIPUsers:
-    - 900006000
-  VIPHighBoost: 30
