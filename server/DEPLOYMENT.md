@@ -5,6 +5,7 @@
 ## 目录
 
 - [架构概览](#架构概览)
+- [本地开发](#本地开发)
 - [服务器信息](#服务器信息)
 - [一、SSH 密钥连接](#一ssh-密钥连接)
 - [二、服务器环境准备](#二服务器环境准备)
@@ -25,6 +26,43 @@
 - **关键点**：所有配置都基于域名，代码层面零改动。迁移本质 = **新机重新部署 + DNS 指向新 IP + 关停旧机**。
 
 > 因为房间状态只存在内存中，迁移（以及任何重启）都会清空所有房间，建议挑无人在线的时段操作。
+
+---
+
+## 本地开发
+
+### 前置条件
+
+- Go 1.25+
+- 本地 MySQL（默认 `root@localhost:3306`，无密码）
+
+### 首次设置
+
+```bash
+cd server
+cp .env.example .env
+```
+
+编辑 `server/.env`，填入本地值（与生产不同的部分）：
+
+```env
+HLS_MODE=dev
+HLS_CORS_ALLOW_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+HLS_DB_DSN=root@tcp(localhost:3306)/hls?parseTime=true
+HLS_JWT_SECRET=any-dev-secret
+HLS_WECHAT_OPEN_CALLBACK_DOMAIN=localhost:8088
+HLS_WECHAT_OPEN_FRONTEND_URL=http://localhost:5173
+```
+
+其余字段（TencentSMS、Shop 等）保持 `.env.example` 的默认值即可，留空不影响启动。
+
+### 启动服务器
+
+```bash
+cd server && go run ./cmd/gameserver
+```
+
+服务器启动时会自动加载当前目录的 `.env` 文件。`server/.env` 已加入 `.gitignore`，不会被提交。
 
 ---
 
@@ -176,13 +214,23 @@ cd /root/hls/server
 cp .env.example .env
 ```
 
-`.env` 内容：
+按 `.env.example` 的格式填写所有字段。最少需要设置：
 
 ```env
-HLS_MODE=prod
 HLS_API_DOMAIN=api.hls-club.com
-HLS_CORS_ALLOW_ORIGINS=https://hls-club.com,https://www.hls-club.com,https://hls-shop.vercel.app
+MYSQL_ROOT_PASSWORD=<随机密码>
+
+HLS_MODE=prod
+HLS_CORS_ALLOW_ORIGINS=https://hls-club.com,https://www.hls-club.com
+HLS_DB_DSN=root:<随机密码>@tcp(mysql:3306)/hls?parseTime=true
+HLS_JWT_SECRET=<随机密钥>
+HLS_WECHAT_OPEN_APP_ID=<微信 AppID>
+HLS_WECHAT_OPEN_APP_SECRET=<微信 AppSecret>
+HLS_WECHAT_OPEN_CALLBACK_DOMAIN=api.hls-club.com
+HLS_WECHAT_OPEN_FRONTEND_URL=https://hls-club.com
 ```
+
+其余字段（TencentSMS、Shop 等）参考 `.env.example` 的注释按需填写。
 
 启动（此时**先不要改 DNS**）：
 
