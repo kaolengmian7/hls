@@ -18,10 +18,7 @@ services:
       - caddy_config:/config
 
   gameserver:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: hls-gameserver:local
+    image: kaolengmian77/hls-gameserver:latest
     container_name: hls-gameserver
     restart: unless-stopped
     init: true
