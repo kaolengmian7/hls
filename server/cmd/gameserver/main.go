@@ -58,6 +58,13 @@ func main() {
 		{Method: http.MethodGet, Path: "/api/auth/me", Handler: handler.MeHandler(ctx)},
 		{Method: http.MethodPost, Path: "/api/auth/sms/send", Handler: handler.SmsSendHandler(ctx)},
 		{Method: http.MethodPost, Path: "/api/auth/sms/verify", Handler: handler.SmsVerifyHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/auth/login", Handler: handler.LoginHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/admin/users", Handler: handler.ListUsersHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/admin/users", Handler: handler.CreateUserHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/admin/users/:id/password", Handler: handler.ResetPasswordHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/admin/users/:id/nickname", Handler: handler.ResetNicknameHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/user/password", Handler: handler.UpdatePasswordHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/user/nickname", Handler: handler.UpdateNicknameHandler(ctx)},
 	})
 
 	logx.Infof("gameserver starting at %s:%d", cfg.Host, cfg.Port)
