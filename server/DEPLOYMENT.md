@@ -360,6 +360,8 @@ docker compose up -d
 
 **回滚到指定版本：**
 
+> 以下命令在**服务器（Debian/Linux）**上执行。`sed -i` 不带备份后缀是 Linux 语法，macOS 上不适用。
+
 ```bash
 # 服务器端：修改 docker-compose.yml 中的 tag，然后重启
 sed -i 's|hls-gameserver:latest|hls-gameserver:v1.0.0|' docker-compose.yml
