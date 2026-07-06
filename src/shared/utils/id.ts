@@ -12,11 +12,6 @@ export function generateRoomCode(): string {
   return code;
 }
 
-/** 生成持久化 playerId。 */
-export function generatePlayerId(): string {
-  return `p_${nanoid(12)}`;
-}
-
 /** 生成短随机 ID（用于 reqId / lottery record id 等）。 */
 export function shortId(): string {
   return nanoid(10);
