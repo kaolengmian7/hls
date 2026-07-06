@@ -27,6 +27,7 @@ const confirmOpen = ref(false)
 const confirmTitle = ref('')
 const confirmMessage = ref('')
 const confirmAction = ref<(() => Promise<void>) | null>(null)
+const confirmError = ref('')
 
 const roleLabels: Record<AdminUser['role'], string> = {
   owner: '店长',
@@ -82,7 +83,7 @@ function askResetPassword(u: AdminUser) {
   confirmMessage.value = `将 ${u.nickname || u.username} 的密码重置为 123456？`
   confirmAction.value = async () => {
     await http.put(`/admin/users/${u.id}/password`)
-    confirmOpen.value = false
+    await loadUsers()
   }
   confirmOpen.value = true
 }
@@ -93,14 +94,18 @@ function askResetNickname(u: AdminUser) {
   confirmAction.value = async () => {
     await http.put(`/admin/users/${u.id}/nickname`)
     await loadUsers()
-    confirmOpen.value = false
   }
   confirmOpen.value = true
 }
 
 async function handleConfirm() {
-  if (confirmAction.value) {
-    await confirmAction.value()
+  confirmError.value = ''
+  try {
+    await confirmAction.value?.()
+  } catch {
+    confirmError.value = '操作失败，请重试'
+  } finally {
+    confirmOpen.value = false
   }
 }
 </script>
@@ -227,6 +232,9 @@ async function handleConfirm() {
         </div>
       </div>
     </transition>
+
+    <!-- Confirm error feedback -->
+    <p v-if="confirmError" class="text-red-400 text-sm text-center">{{ confirmError }}</p>
 
     <!-- Confirm Dialog -->
     <ConfirmDialog
