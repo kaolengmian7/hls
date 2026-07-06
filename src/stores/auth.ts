@@ -4,8 +4,10 @@ import http from '../http'
 
 export interface AuthUser {
   id: number
+  username: string
   nickname: string
   avatar_url: string
+  role: 'owner' | 'service' | 'enforcer' | 'customer'
 }
 
 const TOKEN_KEY = 'hls_auth_token'
@@ -17,6 +19,12 @@ export const useAuthStore = defineStore('auth', () => {
   function setToken(t: string) {
     token.value = t
     localStorage.setItem(TOKEN_KEY, t)
+  }
+
+  async function login(username: string, password: string) {
+    const res = await http.post<{ token: string }>('/auth/login', { username, password })
+    setToken(res.data.token)
+    await init()
   }
 
   async function init() {
@@ -37,5 +45,5 @@ export const useAuthStore = defineStore('auth', () => {
     window.location.href = '/login'
   }
 
-  return { token, user, setToken, init, logout }
+  return { token, user, setToken, login, init, logout }
 })
