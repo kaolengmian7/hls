@@ -1,4 +1,4 @@
-# 设计文档：用 userId 替换随机 playerId
+# 设计文档：用 userId 替换随机 playerId，并移除 session token
 
 **日期：** 2026-07-06  
 **状态：** 已批准  
@@ -7,7 +7,10 @@
 
 ## 背景
 
-神秘商店游戏原来用随机生成的 `p_<nanoid>` 作为玩家身份标识，在没有用户系统时用于匿名区分玩家。现在系统已有用户账号体系（JWT 认证），所有玩家都需要登录，因此随机 playerId 成了冗余的平行身份层，需要统一清除。
+神秘商店游戏原来用随机生成的 `p_<nanoid>` 作为玩家身份标识，在没有用户系统时用于匿名区分玩家。同时用 HMAC-signed session token 来区分"断线重连"与"新加入"。现在系统已有用户账号体系（JWT 认证），所有玩家都需要登录：
+
+- 随机 playerId 成了冗余的平行身份层
+- session token 的唯一作用（区分重连 vs 新加入）可完全用 JWT 身份 + 房间内成员查找替代
 
 ---
 
@@ -16,7 +19,7 @@
 - 所有玩家身份（playerID）统一从 JWT 派生：`strconv.FormatInt(userID, 10)`
 - 删除随机生成、存储、传递 playerId 的所有代码
 - 各接口（REST、WebSocket）不再接受 `playerId` 参数
-- 保持 session token 机制不变（仍用 `roomCode|playerID|exp` 签名）
+- **移除 session token 机制**：重连判断改为 JWT 身份 + 服务端房间成员查找
 
 ---
 
@@ -55,7 +58,32 @@ playerID := strconv.FormatInt(userID, 10)
 - JWT 变为必填：无 JWT 或 JWT 无效时返回 `401 Unauthorized`
 - 删除从 query 读取 `playerId` 的代码
 - 改为：`playerID := strconv.FormatInt(userID, 10)`
-- Session token 验证逻辑不变（`ctx.Signer.Verify(code, playerID, sessionToken)`）
+- 删除 session token 读取与验证逻辑（`query.Get("token")`、`ctx.Signer.Verify(...)`）
+- 重连判断改为：`isReturningMember := rm.HasPlayer(playerID)`
+- `rm.RegisterClient(client, playerID, isReturningMember)` 不变（`authenticated` 参数语义保留，值来源改变）
+
+### `server/pkg/token/`
+
+- 删除整个 `token` 包（`token.go`）
+
+### `server/internal/svc/servicecontext.go`
+
+- 删除 `Signer` 字段及其初始化
+
+### `server/internal/room/room.go`
+
+- `issueToken()` 方法删除
+- `handleReconnect` 中 `issueToken` 调用删除（`JOIN_ACCEPTED` 不再携带 `sessionToken`）
+- `TokenIssuer` interface 引用删除
+
+### `server/internal/room/hub.go`
+
+- `tokens TokenIssuer` 字段删除
+- `NewHub` 参数中 `tokens` 删除
+
+### `server/internal/room/client.go`
+
+- `tokenVerified` 字段删除（如有）
 
 ---
 
@@ -77,6 +105,7 @@ playerID := strconv.FormatInt(userID, 10)
 
 **`CreateRoomResponse` type**
 - 删除 `playerId: string` 字段
+- 删除 `sessionToken: string` 字段（服务端不再签发）
 
 **`queryRoom()`**
 - 删除 `playerId?` 参数
@@ -89,19 +118,29 @@ playerID := strconv.FormatInt(userID, 10)
 
 **`ConnectInput` type**
 - 删除 `playerId: string` 字段
+- 删除 `sessionToken?: string` 字段
 
 **`connect()`**
-- WS URL 构建：删除 `playerId` query 参数，仍保留 `jwt` 和 `token`
+- WS URL 构建：删除 `playerId` 和 `token` query 参数，只保留 `jwt`
+- 删除 `currentSessionToken` 字段及相关逻辑
+- `handleOpen()`：删除 `if (this.currentSessionToken) { return; }` 判断——客户端始终发送 JOIN；服务端根据房间成员查找决定是走重连还是新加入路径
 
 ### `src/games/shop/stores/room.ts`
 
 **`connect()` 方法**
-- 参数 interface：删除 `playerId` 字段
+- 参数 interface：删除 `playerId` 和 `sessionToken` 字段
 - `selfPlayerId` 初始值从 `useAuthStore().user?.id.toString()` 取，JOIN_ACCEPTED 后由服务端 `selfPlayerId` 覆盖
+- 删除 `playerStore.setSessionToken(...)` 调用
 
 **`tryRestoreSession()`**
-- 删除对 `playerStore.playerId` 的依赖
-- `playerId` 改为从 `useAuthStore()` 取
+- 删除对 `playerStore.playerId`、`playerStore.getSessionToken` 的依赖
+- 简化为：若 `authStore.user` 存在则尝试连接；服务端自动判断重连
+
+### `src/shared/stores/player.ts`
+
+- 删除 `session` ref、`SessionRecord` type
+- 删除 `setSessionToken()`、`getSessionToken()`、`clearSession()` 方法
+- 删除 `STORAGE_KEY_SESSION` 常量
 
 ---
 
@@ -109,6 +148,17 @@ playerID := strconv.FormatInt(userID, 10)
 
 - `server/internal/room/hub_test.go`：硬编码的 `p_xxx` 格式 playerID 改为数字字符串（如 `"1"`、`"2"`）
 - `server/internal/game/settlement_test.go`：同上
+
+---
+
+## 重连逻辑变化
+
+| | 旧 | 新 |
+|---|---|---|
+| 判断依据 | session token 有效 | `rm.HasPlayer(playerID)` |
+| 客户端行为 | 有 token → 不发 JOIN | 始终发 JOIN |
+| 服务端行为 | `authenticated=true` → `handleReconnect` | `isReturningMember` → `handleReconnect`（先于 JOIN 执行） |
+| 服务端收到 JOIN（重连玩家） | 不会发生（client 跳过） | JOIN 在 `handleReconnect` 发送 `JOIN_ACCEPTED` 后到达；`handleJoin` 检测已加入则忽略或幂等处理 |
 
 ---
 
@@ -125,7 +175,6 @@ playerID := strconv.FormatInt(userID, 10)
 
 ## 不在范围内
 
-- session token 签名算法不变
 - DB schema 不变（`player_id` 保持 VARCHAR）
-- 用户昵称、头像等 player store 其余字段不变
+- 用户昵称、头像等 player store 其余字段不变（昵称迁移见独立 spec）
 - 房间号生成逻辑不变
