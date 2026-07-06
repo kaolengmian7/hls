@@ -46,6 +46,12 @@ onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
       >
         <button
           class="w-full text-left font-serif text-xs text-parchment-300/80 hover:text-gold-300 px-4 py-2 transition-colors"
+          @click="router.push('/profile'); open = false"
+        >
+          个人管理
+        </button>
+        <button
+          class="w-full text-left font-serif text-xs text-parchment-300/80 hover:text-gold-300 px-4 py-2 transition-colors"
           @click="auth.logout()"
         >
           退出登录
