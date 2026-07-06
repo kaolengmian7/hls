@@ -383,10 +383,10 @@ func (r *Room) handleJoin(ctx context.Context, it Intent) {
 
 	// 既有座位复用：playerID 命中且当前未连接 -> 直接回座。
 	//
-	// 这里**不**校验房间状态：玩家关浏览器后凭口令 + 本机 playerId 回归时，
+	// 这里**不**校验房间状态：玩家关浏览器后凭口令重新加入时，
 	// 即便对局已经 PLAYING，只要其座位还在（未被 8h 宽限 GC），也应允许重新接入，
-	// 以恢复其身份、角色与鼠币。这是 sessionToken 失效（清缓存 / 超 TTL）时的兜底路径；
-	// 带有效 token 的重连仍走 handleReconnect。
+	// 以恢复其身份、角色与鼠币。这是 rm.HasPlayer 检测未命中（如服务端重启）时的兜底路径；
+	// HasPlayer 命中的重连走 handleReconnect。
 	if existing, ok := r.players[playerID]; ok {
 		// 已有相同 playerID
 		if existing.Connected {

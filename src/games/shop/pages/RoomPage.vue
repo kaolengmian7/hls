@@ -53,7 +53,7 @@ onMounted(async () => {
   playerStore.ensureIdentity();
   if (roomStore.status === 'connected') return;
 
-  // 刷新或直接打开链接：尝试用本地 sessionToken 透明重连。
+  // 刷新或直接打开链接：尝试用已登录用户身份透明重连。
   const targetCode = (route.params.code as string) || roomStore.code;
   restoring.value = true;
   try {
