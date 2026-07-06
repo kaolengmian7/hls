@@ -199,6 +199,27 @@ func writeError(w http.ResponseWriter, r *http.Request, status int, message stri
 	})
 }
 
+// requireOwner wraps a handler and rejects non-owner users with 401/403.
+func requireOwner(ctx *svc.ServiceContext, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, errKey := extractUserID(r, ctx)
+		if errKey != "" {
+			writeError(w, r, http.StatusUnauthorized, errKey, nil)
+			return
+		}
+		user, err := ctx.UserRepo.FindByID(r.Context(), userID)
+		if err != nil {
+			writeError(w, r, http.StatusUnauthorized, "user_not_found", nil)
+			return
+		}
+		if user.Role != "owner" {
+			writeError(w, r, http.StatusForbidden, "forbidden", nil)
+			return
+		}
+		next(w, r)
+	}
+}
+
 // newPlayerID 生成 14 字符 base64url 玩家 ID。
 func newPlayerID() (string, error) {
 	var buf [10]byte
