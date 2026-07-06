@@ -143,3 +143,69 @@ func TestFindByUsername(t *testing.T) {
 	db, _ := conn.RawDB()
 	db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", u.ID)
 }
+
+func TestUpdatePassword(t *testing.T) {
+	conn := testConn(t)
+	r := repo.NewUserRepo(conn)
+	ctx := context.Background()
+
+	u, _ := r.CreateWithPassword(ctx, "密码测试", "oldhash", "customer")
+
+	if err := r.UpdatePassword(ctx, u.ID, "newhash"); err != nil {
+		t.Fatalf("UpdatePassword() error = %v", err)
+	}
+	updated, _ := r.FindByID(ctx, u.ID)
+	if updated.PasswordHash.String != "newhash" {
+		t.Fatalf("password_hash = %q, want 'newhash'", updated.PasswordHash.String)
+	}
+
+	db, _ := conn.RawDB()
+	db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", u.ID)
+}
+
+func TestUpdateNickname(t *testing.T) {
+	conn := testConn(t)
+	r := repo.NewUserRepo(conn)
+	ctx := context.Background()
+
+	u, _ := r.CreateWithPassword(ctx, "昵称测试", "hash", "customer")
+
+	if err := r.UpdateNickname(ctx, u.ID, "新昵称"); err != nil {
+		t.Fatalf("UpdateNickname() error = %v", err)
+	}
+	updated, _ := r.FindByID(ctx, u.ID)
+	if updated.Nickname != "新昵称" {
+		t.Fatalf("nickname = %q, want '新昵称'", updated.Nickname)
+	}
+
+	db, _ := conn.RawDB()
+	db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", u.ID)
+}
+
+func TestListAll(t *testing.T) {
+	conn := testConn(t)
+	r := repo.NewUserRepo(conn)
+	ctx := context.Background()
+
+	u, _ := r.CreateWithPassword(ctx, "列表测试", "hash", "service")
+
+	users, err := r.ListAll(ctx)
+	if err != nil {
+		t.Fatalf("ListAll() error = %v", err)
+	}
+	found := false
+	for _, s := range users {
+		if s.ID == u.ID {
+			found = true
+			if s.Role != "service" {
+				t.Fatalf("role = %q, want 'service'", s.Role)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("created user not found in ListAll()")
+	}
+
+	db, _ := conn.RawDB()
+	db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", u.ID)
+}

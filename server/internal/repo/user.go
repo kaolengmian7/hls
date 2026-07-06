@@ -183,6 +183,33 @@ func (r *UserRepo) FindByUsername(ctx context.Context, username string) (*User, 
 	return r.findBy(ctx, "username", username)
 }
 
+// UpdatePassword sets a new password hash for the given user.
+func (r *UserRepo) UpdatePassword(ctx context.Context, id int64, passwordHash string) error {
+	_, err := r.db.ExecCtx(ctx,
+		"UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?",
+		passwordHash, id)
+	return err
+}
+
+// UpdateNickname sets a new nickname for the given user.
+func (r *UserRepo) UpdateNickname(ctx context.Context, id int64, nickname string) error {
+	_, err := r.db.ExecCtx(ctx,
+		"UPDATE users SET nickname = ?, updated_at = NOW() WHERE id = ?",
+		nickname, id)
+	return err
+}
+
+// ListAll returns a summary of all users ordered by id.
+func (r *UserRepo) ListAll(ctx context.Context) ([]*UserSummary, error) {
+	var users []*UserSummary
+	err := r.db.QueryRowsCtx(ctx, &users,
+		"SELECT id, COALESCE(username, '') AS username, nickname, role FROM users ORDER BY id")
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 // CreateWithPassword inserts a new user with an auto-generated username and hashed password.
 // nickname defaults to "小小花栗鼠" if empty.
 func (r *UserRepo) CreateWithPassword(ctx context.Context, nickname, passwordHash, role string) (*User, error) {
