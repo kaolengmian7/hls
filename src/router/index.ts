@@ -23,6 +23,16 @@ export const router = createRouter({
       name: 'auth-callback',
       component: () => import('@/pages/AuthCallbackPage.vue'),
     },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/pages/ProfilePage.vue'),
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('@/pages/AdminPage.vue'),
+    },
     ...shopRoutes,
     ...teachRoutes,
     ...auditionRoutes,
@@ -33,7 +43,17 @@ export const router = createRouter({
 
 router.beforeEach((to) => {
   const auth = useAuthStore()
+
   if (to.path.startsWith('/shop') && !auth.token) {
     return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  if (to.path === '/profile' && !auth.token) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  if (to.path === '/admin') {
+    if (!auth.token) return { name: 'login', query: { redirect: to.fullPath } }
+    if (auth.user && auth.user.role !== 'owner') return { name: 'home' }
   }
 });
