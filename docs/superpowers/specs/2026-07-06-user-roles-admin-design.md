@@ -10,7 +10,8 @@
 当前系统使用手机短信验证码登录，用户表无角色字段，无后台管理界面。  
 本期目标：
 - 引入四种角色：店长(owner)、客服(service)、打手(enforcer)、客户(customer)
-- 登录方式改为昵称 + 密码（`nickname` 字段同时作为登录账号和显示名）
+- 登录方式改为账号 + 密码；账号格式 `hls` + 4位随机小写字母/数字，由系统在创建用户时自动生成
+- 昵称（`nickname`）独立于账号，用户可自行修改，默认「小小花栗鼠」
 - 新增 `/admin` 后台用户管理页（仅 owner 可访问）
 - 新增 `/profile` 个人管理页（所有登录用户可访问）
 
@@ -20,27 +21,27 @@
 
 ## 2. 数据库变更
 
-在现有 `users` 表上追加两列（不新增 `username`，用现有 `nickname` 同时作为登录账号）：
+在现有 `users` 表上追加三列：
 
 ```sql
 ALTER TABLE users
+  ADD COLUMN username      VARCHAR(7)   UNIQUE NULL,
   ADD COLUMN password_hash VARCHAR(255) NULL,
   ADD COLUMN role          ENUM('owner','service','enforcer','customer')
                            NOT NULL DEFAULT 'customer';
-
--- nickname 需要唯一索引以支持账号登录
-ALTER TABLE users ADD UNIQUE INDEX uq_nickname (nickname);
 ```
 
-- `password_hash` 允许 NULL，兼容存量微信/手机用户；使用 bcrypt（cost=10）
+- `username` 格式：`hls` + 4位随机小写字母/数字（共7字符），系统自动生成，不可修改
+- `username` / `password_hash` 允许 NULL，兼容存量微信/手机用户
+- `password_hash` 使用 bcrypt（cost=10）
 - `role` 默认 `customer`
-- `nickname` 已存在，加唯一索引后作为登录账号标识符；修改昵称即修改登录账号
+- `nickname` 字段已存在，保持独立，用户可自由修改，默认「小小花栗鼠」
 
 **第一个店长账号由运维手动执行 SQL：**
 
 ```sql
-INSERT INTO users (nickname, password_hash, role, avatar_url)
-VALUES ('admin', '<bcrypt_hash>', 'owner', '');
+INSERT INTO users (username, password_hash, role, nickname, avatar_url)
+VALUES ('hlsadm1', '<bcrypt_hash>', 'owner', '店长', '');
 ```
 
 ---
@@ -51,7 +52,7 @@ VALUES ('admin', '<bcrypt_hash>', 'owner', '');
 
 | 方法 | 路径 | 权限 | 说明 |
 |------|------|------|------|
-| `POST` | `/api/auth/login` | 无 | 昵称+密码登录，返回 `{"token":"..."}` |
+| `POST` | `/api/auth/login` | 无 | 账号+密码登录，返回 `{"token":"..."}` |
 | `GET` | `/api/auth/me` | JWT | 已有，响应补充 `role` 字段 |
 | `GET` | `/api/admin/users` | owner | 用户列表 |
 | `POST` | `/api/admin/users` | owner | 创建用户 |
@@ -65,20 +66,20 @@ VALUES ('admin', '<bcrypt_hash>', 'owner', '');
 **POST /api/auth/login**
 ```json
 // 请求
-{ "nickname": "alice", "password": "secret" }
+{ "username": "hlsab12", "password": "secret" }
 // 响应
 { "token": "<jwt>" }
 ```
 
 **GET /api/auth/me（更新后）**
 ```json
-{ "id": 1, "nickname": "Alice", "avatar_url": "", "role": "customer" }
+{ "id": 1, "username": "hlsab12", "nickname": "Alice", "avatar_url": "", "role": "customer" }
 ```
 
 **GET /api/admin/users**
 ```json
 [
-  { "id": 1, "nickname": "Alice", "role": "customer" }
+  { "id": 1, "username": "hlsab12", "nickname": "Alice", "role": "customer" }
 ]
 ```
 
@@ -86,8 +87,10 @@ VALUES ('admin', '<bcrypt_hash>', 'owner', '');
 ```json
 // 请求
 { "nickname": "Bob", "role": "service" }
-// 密码自动设为 123456，nickname 为空时默认 "小小花栗鼠"
-// nickname 必须唯一，冲突时返回 409
+// username 由服务端自动生成（hls + 4位随机），密码自动设为 123456
+// nickname 为空时默认 "小小花栗鼠"
+// 响应：返回含 username 的用户信息，供店长告知新用户
+{ "id": 2, "username": "hlsxk3m", "nickname": "Bob", "role": "service" }
 ```
 
 **PUT /api/user/password**
@@ -112,13 +115,15 @@ VALUES ('admin', '<bcrypt_hash>', 'owner', '');
 ### 3.5 UserRepo 扩展
 
 新增方法：
-- `FindByNickname(ctx, nickname) (*User, error)` — 登录时按昵称查找
-- `CreateWithPassword(ctx, nickname, passwordHash, role) (*User, error)`
+- `FindByUsername(ctx, username) (*User, error)` — 登录时按账号查找
+- `CreateWithPassword(ctx, username, passwordHash, nickname, role) (*User, error)`
 - `UpdatePassword(ctx, id, passwordHash) error`
 - `UpdateNickname(ctx, id, nickname) error`
 - `ListAll(ctx) ([]*User, error)`
 
-User 结构体新增字段：`PasswordHash sql.NullString`、`Role string`
+User 结构体新增字段：`Username sql.NullString`、`PasswordHash sql.NullString`、`Role string`
+
+账号生成逻辑（`genUsername`）：生成 `hls` + 4位随机小写字母/数字，检查唯一性，最多重试 5 次。
 
 ---
 
@@ -134,7 +139,7 @@ User 结构体新增字段：`PasswordHash sql.NullString`、`Role string`
 
 ### 4.2 LoginPage.vue
 
-替换手机/验证码 UI 为：昵称输入框 + 密码输入框 + 登录按钮。  
+替换手机/验证码 UI 为：账号输入框（placeholder: `hlsXXXX`）+ 密码输入框 + 登录按钮。  
 调用 `POST /api/auth/login`，成功后存 token 并跳转。
 
 ### 4.3 ProfilePage.vue
@@ -147,8 +152,8 @@ User 结构体新增字段：`PasswordHash sql.NullString`、`Role string`
 
 ### 4.4 AdminPage.vue
 
-- 顶部「创建用户」按钮，弹出 Modal（填昵称、角色下拉）
-- 用户列表表格：id / 昵称 / 角色 / 操作
+- 顶部「创建用户」按钮，弹出 Modal（填昵称可选、角色下拉），提交后显示系统生成的账号供店长记录
+- 用户列表表格：id / 账号 / 昵称 / 角色 / 操作
 - 操作列：「重置密码」「重置昵称」，点击前弹 ConfirmDialog 确认
 
 ### 4.5 AuthStore 更新
@@ -156,13 +161,14 @@ User 结构体新增字段：`PasswordHash sql.NullString`、`Role string`
 ```typescript
 interface AuthUser {
   id: number
+  username: string
   nickname: string
   avatar_url: string
   role: 'owner' | 'service' | 'enforcer' | 'customer'
 }
 
 // 新增方法
-async function login(nickname: string, password: string): Promise<void>
+async function login(username: string, password: string): Promise<void>
 ```
 
 ### 4.6 AppHeader / AuthWidget
@@ -209,6 +215,6 @@ router.beforeEach((to) => {
 ## 6. 不在本期范围内
 
 - 角色权限细分（角色对游戏功能的影响）
-- 昵称格式校验（本期只校验非空、唯一）
+- 账号格式校验（本期统一由系统生成，无需校验）
 - 账号封禁/停用
 - 操作日志审计
