@@ -4,8 +4,9 @@ import (
 	"context"
 	"crypto/rand"
 	"database/sql"
-	"strings"
+	"errors"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -172,5 +173,6 @@ func genUsername() (string, error) {
 }
 
 func isDuplicateKey(err error) bool {
-	return strings.Contains(err.Error(), "Duplicate entry")
+	var me *mysql.MySQLError
+	return errors.As(err, &me) && me.Number == 1062
 }
