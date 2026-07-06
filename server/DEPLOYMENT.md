@@ -181,12 +181,8 @@ cp .env.example .env
 ```env
 HLS_MODE=prod
 HLS_API_DOMAIN=api.hls-club.com
-HLS_SESSION_SECRET=<建议沿用旧服务器同一个值>
-HLS_SESSION_TTL_MINUTES=1440
 HLS_CORS_ALLOW_ORIGINS=https://hls-club.com,https://www.hls-club.com,https://hls-shop.vercel.app
 ```
-
-> `HLS_SESSION_SECRET` 建议沿用腾讯云旧机的值，这样玩家现有 sessionToken 不会立即失效；旧值可登录腾讯云查看 `server/.env`。若不在意现有会话，换个新随机值也可以。
 
 启动（此时**先不要改 DNS**）：
 
