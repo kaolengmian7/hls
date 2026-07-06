@@ -38,10 +38,6 @@ export type ClientCallbacks = {
 
 export type ConnectInput = {
   code: string;
-  playerId: string;
-  /** 已存在时（来自 createRoom 或上次会话）直接走 reconnect 流程，无需再发 JOIN。 */
-  sessionToken?: string;
-  /** 仅首次 JOIN 时使用。 */
   nickname: string;
   avatar?: string;
 };
@@ -54,7 +50,6 @@ export class GameClient {
   private input: ConnectInput | null = null;
   private destroyed = false;
   private joinTimer: ReturnType<typeof setTimeout> | null = null;
-  private currentSessionToken = '';
   private hasJoined = false;
 
   constructor(callbacks: ClientCallbacks) {
@@ -64,13 +59,9 @@ export class GameClient {
   /** 启动连接：建立 WebSocket，等待 JOIN_ACCEPTED。 */
   connect(input: ConnectInput): void {
     this.input = input;
-    this.currentSessionToken = input.sessionToken ?? '';
 
-    const params = new URLSearchParams({ playerId: input.playerId });
-    if (this.currentSessionToken) {
-      params.set('token', this.currentSessionToken);
-    }
     const auth = useAuthStore();
+    const params = new URLSearchParams();
     if (auth.token) {
       params.set('jwt', auth.token);
     }
@@ -116,20 +107,11 @@ export class GameClient {
     return reqId;
   }
 
-  /** 当前 sessionToken；用于持久化以便页面刷新后断线重连。 */
-  get sessionToken(): string {
-    return this.currentSessionToken;
-  }
-
   /* ------------------------------ 内部 ------------------------------ */
 
   private handleOpen(): void {
     this.callbacks.onOpen?.();
     if (this.hasJoined || !this.input) return;
-    if (this.currentSessionToken) {
-      // reconnect：服务端校验 token 后直接发 JOIN_ACCEPTED + STATE_SNAPSHOT，无需 JOIN。
-      return;
-    }
     this.send('JOIN', { nickname: this.input.nickname, avatar: this.input.avatar });
   }
 
@@ -164,7 +146,6 @@ export class GameClient {
       }
       const payload = env.payload as EventMap['JOIN_ACCEPTED'];
       this.hasJoined = true;
-      this.currentSessionToken = payload.sessionToken || this.currentSessionToken;
       this.callbacks.onAccepted(payload);
       return;
     }
