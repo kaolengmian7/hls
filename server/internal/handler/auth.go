@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest/httpx"
+	"golang.org/x/crypto/bcrypt"
 
 	"hls.dev/server/internal/svc"
 )
@@ -27,8 +29,10 @@ type QrStatusResponse struct {
 
 type MeResponse struct {
 	ID        int64  `json:"id"`
+	Username  string `json:"username"`
 	Nickname  string `json:"nickname"`
 	AvatarURL string `json:"avatar_url"`
+	Role      string `json:"role"`
 }
 
 // QrStartHandler handles GET /api/auth/wechat/qr/start.
@@ -162,8 +166,54 @@ func MeHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 
 		httpx.OkJsonCtx(r.Context(), w, MeResponse{
 			ID:        user.ID,
+			Username:  user.Username.String,
 			Nickname:  user.Nickname,
 			AvatarURL: user.AvatarURL,
+			Role:      user.Role,
 		})
+	}
+}
+
+type loginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// LoginHandler handles POST /api/auth/login.
+func LoginHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req loginRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeError(w, r, http.StatusBadRequest, "invalid_body", err)
+			return
+		}
+		req.Username = strings.TrimSpace(req.Username)
+		if req.Username == "" || req.Password == "" {
+			writeError(w, r, http.StatusBadRequest, "missing_fields", nil)
+			return
+		}
+		user, err := ctx.UserRepo.FindByUsername(r.Context(), req.Username)
+		if errors.Is(err, sqlx.ErrNotFound) {
+			writeError(w, r, http.StatusUnauthorized, "invalid_credentials", nil)
+			return
+		}
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		if !user.PasswordHash.Valid {
+			writeError(w, r, http.StatusUnauthorized, "invalid_credentials", nil)
+			return
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(req.Password)); err != nil {
+			writeError(w, r, http.StatusUnauthorized, "invalid_credentials", nil)
+			return
+		}
+		token, err := ctx.JWTSigner.Sign(user.ID)
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "sign_error", err)
+			return
+		}
+		httpx.OkJsonCtx(r.Context(), w, map[string]any{"token": token})
 	}
 }

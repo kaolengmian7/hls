@@ -10,7 +10,7 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.3.122
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms v1.3.93
 	github.com/zeromicro/go-zero v1.10.1
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.53.0
 )
 
 require (
