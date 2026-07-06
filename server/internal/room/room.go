@@ -5,7 +5,6 @@ import (
 	stdrand "crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"strings"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -39,8 +38,6 @@ const (
 	idleRoomTimeout    = 8 * time.Hour
 	tickInterval       = 30 * time.Second
 	feedCapacity       = 50
-	// maxNicknameRunes 昵称最大长度（按 Unicode 字符计），与前端 MAX_NICKNAME_LENGTH 对齐。
-	maxNicknameRunes = 16
 )
 
 // playerState 是房间为每个玩家维护的运行时状态（不直接外泄到快照）。
@@ -48,18 +45,11 @@ type playerState struct {
 	disconnectedAt time.Time
 }
 
-// TokenIssuer 抽象一个签发/校验 sessionToken 的能力。
-// 真实实现见 pkg/token；Room 仅依赖接口便于测试。
-type TokenIssuer interface {
-	Sign(roomCode, playerID string) string
-}
-
 // Room 持有单个房间的权威状态及处理循环。
 type Room struct {
 	code     string
 	hub      *Hub
 	logger   logx.Logger
-	tokens   TokenIssuer
 	shopRepo *repo.ShopRepo   // nil = tests / no-persistence mode
 	userIDs  map[string]int64 // playerID → auth user ID
 	vipUsers     map[int64]struct{} // read-only after newRoom; shared reference from Hub
@@ -89,15 +79,15 @@ type Room struct {
 
 type registration struct {
 	client        *Client
-	playerID      string // 仅 reconnect 时携带；新客户端为空
-	authenticated bool   // sessionToken 已验证
+	playerID      string // 已从 JWT 派生；始终非空
+	authenticated bool   // 是否为房间已有成员（isReturningMember）
 }
 
 // newRoom 创建一个空房间，调用方在外部启动 Run goroutine。
 //
 // guaranteedAmount 来自 Hub.CreateRoom 已规范化的保底金额（单位 W），房间生命周期内不变。
 func newRoom(hub *Hub, code string, hostNickname, hostAvatar, hostPlayerID string,
-	hostUserID int64, guaranteedAmount int, shopRepo *repo.ShopRepo, logger logx.Logger, tokens TokenIssuer) *Room {
+	hostUserID int64, guaranteedAmount int, shopRepo *repo.ShopRepo, logger logx.Logger) *Room {
 	now := time.Now()
 	host := &protocol.Player{
 		ID:        hostPlayerID,
@@ -117,7 +107,6 @@ func newRoom(hub *Hub, code string, hostNickname, hostAvatar, hostPlayerID strin
 		code:              code,
 		hub:               hub,
 		logger:            logger,
-		tokens:            tokens,
 		shopRepo:          shopRepo,
 		userIDs:           map[string]int64{hostPlayerID: hostUserID},
 		vipUsers:          vipSnap,
@@ -190,8 +179,8 @@ func (r *Room) Submit(it Intent) {
 }
 
 // RegisterClient 由 handler 在 WebSocket 握手成功后调用：
-//   - authenticated=true 表示 sessionToken 已通过校验，playerID 已知；按 reconnect 处理。
-//   - authenticated=false 表示匿名新连接，等待客户端发 JOIN。
+//   - authenticated=true（isReturningMember）：playerID 已在房间内，按 reconnect 处理。
+//   - authenticated=false：新玩家，等待客户端发 JOIN。
 func (r *Room) RegisterClient(client *Client, playerID string, authenticated bool) {
 	select {
 	case r.regCh <- registration{client: client, playerID: playerID, authenticated: authenticated}:
@@ -292,7 +281,6 @@ func (r *Room) handleReconnect(ctx context.Context, c *Client, playerID string) 
 	}
 	c.playerID = playerID
 	c.hasJoined = true
-	c.tokenVerified = true
 	r.clients[playerID] = c
 	player.Connected = true
 	if s, ok := r.states[playerID]; ok {
@@ -302,7 +290,6 @@ func (r *Room) handleReconnect(ctx context.Context, c *Client, playerID string) 
 	c.SendEvent(protocol.EventJoinAccepted, protocol.JoinAcceptedPayload{
 		Snapshot:     snap,
 		SelfPlayerID: playerID,
-		SessionToken: r.issueToken(playerID),
 	}, "")
 	r.broadcastSnapshot()
 	logger.Infow("player reconnected",
@@ -331,8 +318,6 @@ func (r *Room) dispatch(ctx context.Context, it Intent) {
 		r.handleDismiss(ctx, it.From.playerID)
 	case protocol.IntentChangeRole:
 		r.handleChangeRole(ctx, it)
-	case protocol.IntentChangeNickname:
-		r.handleChangeNickname(ctx, it)
 	case protocol.IntentReady:
 		r.handleReady(ctx, it)
 	case protocol.IntentStartGame:
@@ -428,7 +413,6 @@ func (r *Room) handleJoin(ctx context.Context, it Intent) {
 		c.SendEvent(protocol.EventJoinAccepted, protocol.JoinAcceptedPayload{
 			Snapshot:     snap,
 			SelfPlayerID: playerID,
-			SessionToken: r.issueToken(playerID),
 		}, it.ReqID)
 		r.broadcastExcept(playerID, protocol.EventPlayerJoined, protocol.PlayerJoinedPayload{Player: *existing})
 		r.broadcastSnapshot()
@@ -487,7 +471,6 @@ func (r *Room) handleJoin(ctx context.Context, it Intent) {
 	c.SendEvent(protocol.EventJoinAccepted, protocol.JoinAcceptedPayload{
 		Snapshot:     snap,
 		SelfPlayerID: playerID,
-		SessionToken: r.issueToken(playerID),
 	}, it.ReqID)
 	r.broadcastExcept(playerID, protocol.EventPlayerJoined, protocol.PlayerJoinedPayload{Player: *player})
 	r.broadcastSnapshot()
@@ -592,49 +575,6 @@ func (r *Room) handleChangeRole(ctx context.Context, it Intent) {
 		logx.Field("code", r.code),
 		logx.Field("playerId", pid),
 		logx.Field("role", p.Role))
-}
-
-// handleChangeNickname 处理准备阶段的昵称修改（含可选名牌）。
-//
-// 行为：
-//   - 仅在房间 WAITING 时允许；PLAYING / CLOSED 一律拒绝（INVALID_STATE）。
-//   - 昵称去除首尾空白后不能为空；超出 maxNicknameRunes 时按字符截断。
-//   - 仅更新该玩家的展示昵称，不影响角色 / 准备状态；随后广播快照对账。
-func (r *Room) handleChangeNickname(ctx context.Context, it Intent) {
-	if r.status != protocol.RoomStatusWaiting {
-		r.rejectAction(it.From, it.ReqID, "INVALID_STATE", "")
-		return
-	}
-	var p protocol.ChangeNicknamePayload
-	if err := json.Unmarshal(it.Payload, &p); err != nil {
-		r.rejectAction(it.From, it.ReqID, "INVALID_PARAM", "")
-		return
-	}
-	nickname := strings.TrimSpace(p.Nickname)
-	if nickname == "" {
-		r.rejectAction(it.From, it.ReqID, "INVALID_PARAM", "昵称不能为空")
-		return
-	}
-	if runes := []rune(nickname); len(runes) > maxNicknameRunes {
-		nickname = string(runes[:maxNicknameRunes])
-	}
-	pid := it.From.playerID
-	player, ok := r.players[pid]
-	if !ok {
-		return
-	}
-	if player.Nickname == nickname {
-		return
-	}
-	player.Nickname = nickname
-	if c := r.clients[pid]; c != nil {
-		c.nickname = nickname
-	}
-	r.broadcastSnapshot()
-	logx.WithContext(ctx).Infow("nickname changed",
-		logx.Field("code", r.code),
-		logx.Field("playerId", pid),
-		logx.Field("nickname", nickname))
 }
 
 func (r *Room) handleReady(ctx context.Context, it Intent) {
@@ -1245,10 +1185,3 @@ func shortEventID() (string, error) {
 	return base64.RawURLEncoding.EncodeToString(buf[:])[:10], nil
 }
 
-// issueToken 通过注入的 TokenIssuer 为玩家签发 sessionToken。
-func (r *Room) issueToken(playerID string) string {
-	if r.tokens == nil {
-		return ""
-	}
-	return r.tokens.Sign(r.code, playerID)
-}

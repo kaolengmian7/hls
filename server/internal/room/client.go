@@ -26,7 +26,6 @@ type Client struct {
 	hasJoined bool
 	nickname  string
 	avatar    string
-	tokenVerified bool
 
 	send   chan []byte
 	closed chan struct{}
@@ -41,7 +40,7 @@ type Client struct {
 //
 // 设备休眠或浏览器后台 throttle 时无法及时回 Pong，过短的 pongWait 会把
 // "短暂离线但很快会回来"的玩家误判为掉线。这里取 3 分钟作为单条 WS 连接的存活上限：
-// 真的回不来时由前端 visibilitychange 触发主动重连，由 sessionToken 完成续接。
+// 真的回不来时由前端 visibilitychange 触发主动重连。
 const (
 	writeWait      = 10 * time.Second
 	pongWait       = 3 * time.Minute
