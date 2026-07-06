@@ -92,3 +92,32 @@ func TestApplyEnvOverridesNilConfig(t *testing.T) {
 		t.Fatalf("ApplyEnvOverrides() error = nil, want error")
 	}
 }
+
+func TestApplyEnvOverridesTencentSMS(t *testing.T) {
+	t.Setenv(envTencentSMSSecretID, "my-secret-id")
+	t.Setenv(envTencentSMSSecretKey, "my-secret-key")
+	t.Setenv(envTencentSMSAppID, "1400123456")
+	t.Setenv(envTencentSMSSignName, "MySign")
+	t.Setenv(envTencentSMSTemplateID, "1234567")
+
+	cfg := Config{}
+	if err := ApplyEnvOverrides(&cfg); err != nil {
+		t.Fatalf("ApplyEnvOverrides() error = %v", err)
+	}
+
+	if cfg.TencentSMS.SecretID != "my-secret-id" {
+		t.Fatalf("TencentSMS.SecretID = %q, want %q", cfg.TencentSMS.SecretID, "my-secret-id")
+	}
+	if cfg.TencentSMS.SecretKey != "my-secret-key" {
+		t.Fatalf("TencentSMS.SecretKey = %q, want %q", cfg.TencentSMS.SecretKey, "my-secret-key")
+	}
+	if cfg.TencentSMS.SmsSdkAppID != "1400123456" {
+		t.Fatalf("TencentSMS.SmsSdkAppID = %q, want %q", cfg.TencentSMS.SmsSdkAppID, "1400123456")
+	}
+	if cfg.TencentSMS.SignName != "MySign" {
+		t.Fatalf("TencentSMS.SignName = %q, want %q", cfg.TencentSMS.SignName, "MySign")
+	}
+	if cfg.TencentSMS.TemplateID != "1234567" {
+		t.Fatalf("TencentSMS.TemplateID = %q, want %q", cfg.TencentSMS.TemplateID, "1234567")
+	}
+}

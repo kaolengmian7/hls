@@ -23,6 +23,12 @@ const (
 	envWechatOpenAppSecret      = "HLS_WECHAT_OPEN_APP_SECRET"
 	envWechatOpenCallbackDomain = "HLS_WECHAT_OPEN_CALLBACK_DOMAIN"
 	envWechatOpenFrontendURL    = "HLS_WECHAT_OPEN_FRONTEND_URL"
+
+	envTencentSMSSecretID   = "HLS_TENCENT_SMS_SECRET_ID"
+	envTencentSMSSecretKey  = "HLS_TENCENT_SMS_SECRET_KEY"
+	envTencentSMSAppID      = "HLS_TENCENT_SMS_APP_ID"
+	envTencentSMSSignName   = "HLS_TENCENT_SMS_SIGN_NAME"
+	envTencentSMSTemplateID = "HLS_TENCENT_SMS_TEMPLATE_ID"
 )
 
 // ApplyEnvOverrides applies deployment-time overrides after the YAML config is loaded.
@@ -57,6 +63,22 @@ func ApplyEnvOverrides(cfg *Config) error {
 	}
 	if frontendURL := strings.TrimSpace(os.Getenv(envWechatOpenFrontendURL)); frontendURL != "" {
 		cfg.WechatOpen.FrontendURL = frontendURL
+	}
+
+	if secretID := strings.TrimSpace(os.Getenv(envTencentSMSSecretID)); secretID != "" {
+		cfg.TencentSMS.SecretID = secretID
+	}
+	if secretKey := strings.TrimSpace(os.Getenv(envTencentSMSSecretKey)); secretKey != "" {
+		cfg.TencentSMS.SecretKey = secretKey
+	}
+	if appID := strings.TrimSpace(os.Getenv(envTencentSMSAppID)); appID != "" {
+		cfg.TencentSMS.SmsSdkAppID = appID
+	}
+	if signName := strings.TrimSpace(os.Getenv(envTencentSMSSignName)); signName != "" {
+		cfg.TencentSMS.SignName = signName
+	}
+	if templateID := strings.TrimSpace(os.Getenv(envTencentSMSTemplateID)); templateID != "" {
+		cfg.TencentSMS.TemplateID = templateID
 	}
 
 	if port := strings.TrimSpace(os.Getenv(envPort)); port != "" {
