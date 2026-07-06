@@ -24,7 +24,6 @@ import (
 type Hub struct {
 	ctx          context.Context
 	generator    *code.Generator
-	tokens       TokenIssuer
 	shopRepo     *repo.ShopRepo
 	logger       logx.Logger
 	vipUsers     map[int64]struct{}
@@ -35,7 +34,7 @@ type Hub struct {
 }
 
 // NewHub 创建 Hub。vipUsers 是专属高爆率账号集合；vipHighBoost 是 HIGH 物品权重倍数。
-func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, shopRepo *repo.ShopRepo, logger logx.Logger, vipUserIDs []int64, vipHighBoost float64) *Hub {
+func NewHub(ctx context.Context, gen *code.Generator, shopRepo *repo.ShopRepo, logger logx.Logger, vipUserIDs []int64, vipHighBoost float64) *Hub {
 	vipSet := make(map[int64]struct{}, len(vipUserIDs))
 	for _, uid := range vipUserIDs {
 		vipSet[uid] = struct{}{}
@@ -46,7 +45,6 @@ func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, shopRe
 	return &Hub{
 		ctx:          ctx,
 		generator:    gen,
-		tokens:       tokens,
 		shopRepo:     shopRepo,
 		logger:       logger,
 		vipUsers:     vipSet,
@@ -56,27 +54,26 @@ func NewHub(ctx context.Context, gen *code.Generator, tokens TokenIssuer, shopRe
 }
 
 // CreateRoom 分配一个新房间并预占房主玩家。
-// 返回 room、房主 sessionToken。
 //
 // guaranteedAmount 是房间级"保底金额"（单位 W），传 0 表示采用 game.DefaultGuaranteedAmount；
 // 越界则返回可暴露错误。
-func (h *Hub) CreateRoom(nickname, avatar, hostPlayerID string, hostUserID int64, guaranteedAmount int) (*Room, string, error) {
+func (h *Hub) CreateRoom(nickname, avatar, hostPlayerID string, hostUserID int64, guaranteedAmount int) (*Room, error) {
 	if nickname == "" {
-		return nil, "", errors.NewExposable(errors.CodeInvalidParam, "nickname required")
+		return nil, errors.NewExposable(errors.CodeInvalidParam, "nickname required")
 	}
 	if hostPlayerID == "" {
-		return nil, "", errors.NewExposable(errors.CodeInvalidParam, "hostPlayerId required")
+		return nil, errors.NewExposable(errors.CodeInvalidParam, "hostPlayerId required")
 	}
 	normalizedGuarantee, err := game.NormalizeGuaranteedAmount(guaranteedAmount)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
 	c, err := h.generator.Allocate()
 	if err != nil {
-		return nil, "", errors.WithMessage(err, "allocate code")
+		return nil, errors.WithMessage(err, "allocate code")
 	}
-	r := newRoom(h, c, nickname, avatar, hostPlayerID, hostUserID, normalizedGuarantee, h.shopRepo, h.logger, h.tokens)
+	r := newRoom(h, c, nickname, avatar, hostPlayerID, hostUserID, normalizedGuarantee, h.shopRepo, h.logger)
 
 	h.mu.Lock()
 	h.rooms[c] = r
@@ -106,11 +103,7 @@ func (h *Hub) CreateRoom(nickname, avatar, hostPlayerID string, hostUserID int64
 		logx.Field("hostId", hostPlayerID),
 		logx.Field("guaranteedAmount", normalizedGuarantee))
 
-	tok := ""
-	if h.tokens != nil {
-		tok = h.tokens.Sign(c, hostPlayerID)
-	}
-	return r, tok, nil
+	return r, nil
 }
 
 // GetRoom 按 Code 查找房间；不存在或已关闭返回 nil。
@@ -211,7 +204,6 @@ func (h *Hub) buildRestoredRoom(
 		code:              rr.Code,
 		hub:               h,
 		logger:            h.logger,
-		tokens:            h.tokens,
 		shopRepo:          h.shopRepo,
 		status:            protocol.RoomStatus(rr.Status),
 		hostID:            rr.HostPlayerID,
