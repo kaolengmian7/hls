@@ -28,17 +28,9 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    env_file: .env
     environment:
       HLS_HOST: 0.0.0.0
-      HLS_MODE: ${HLS_MODE:-prod}
-      HLS_CORS_ALLOW_ORIGINS: ${HLS_CORS_ALLOW_ORIGINS:?set HLS_CORS_ALLOW_ORIGINS in server/.env}
-      HLS_DB_DSN: ${HLS_DB_DSN:?set HLS_DB_DSN in server/.env}
-      HLS_JWT_SECRET: ${HLS_JWT_SECRET:?set HLS_JWT_SECRET in server/.env}
-      HLS_JWT_TTL_DAYS: ${HLS_JWT_TTL_DAYS:-7}
-      HLS_WECHAT_OPEN_APP_ID: ${HLS_WECHAT_OPEN_APP_ID:?set HLS_WECHAT_OPEN_APP_ID in server/.env}
-      HLS_WECHAT_OPEN_APP_SECRET: ${HLS_WECHAT_OPEN_APP_SECRET:?set HLS_WECHAT_OPEN_APP_SECRET in server/.env}
-      HLS_WECHAT_OPEN_CALLBACK_DOMAIN: ${HLS_WECHAT_OPEN_CALLBACK_DOMAIN:?set HLS_WECHAT_OPEN_CALLBACK_DOMAIN in server/.env}
-      HLS_WECHAT_OPEN_FRONTEND_URL: ${HLS_WECHAT_OPEN_FRONTEND_URL:?set HLS_WECHAT_OPEN_FRONTEND_URL in server/.env}
     expose:
       - "8088"
     healthcheck:
