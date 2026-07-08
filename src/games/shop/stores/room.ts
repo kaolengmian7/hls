@@ -52,6 +52,7 @@ export const useRoomStore = defineStore('room', () => {
   const code = ref<string>('');
   const status = ref<ConnStatus>('idle');
   const closedReason = ref<string>('');
+  const gameClosed = ref(false);
   const toasts = ref<Toast[]>([]);
 
   let client: GameClient | null = null;
@@ -188,6 +189,7 @@ export const useRoomStore = defineStore('room', () => {
     selfPlayerId.value = '';
     status.value = 'idle';
     closedReason.value = '';
+    gameClosed.value = false;
   }
 
   function teardownClient(): void {
@@ -252,6 +254,9 @@ export const useRoomStore = defineStore('room', () => {
       // 其余 PLAYER_JOINED / PLAYER_LEFT / ROLE_CHANGED / READY_CHANGED /
       // COIN_CHANGED / EQUIPMENT_PURCHASED 都由 STATE_SNAPSHOT 覆盖；
       // 这里不做增量合并，依赖服务端紧随其后的 STATE_SNAPSHOT 对账。
+      case 'GAME_CLOSED':
+        gameClosed.value = true;
+        break;
       default:
         break;
     }
@@ -309,6 +314,7 @@ export const useRoomStore = defineStore('room', () => {
     code,
     status,
     closedReason,
+    gameClosed,
     toasts,
     players,
     me,
