@@ -480,12 +480,9 @@ func (r *Room) handleJoin(ctx context.Context, it Intent) {
 }
 
 func (r *Room) handleLeave(ctx context.Context, playerID string) {
-	if playerID == r.hostID {
-		// 房主主动离开 = 解散（也可改为迁移；当前实现解散）
-		r.handleDismiss(ctx, playerID)
-		return
+	if c, ok := r.clients[playerID]; ok && c != nil {
+		c.Close() // readPump exit triggers handleClientGone, which marks offline
 	}
-	r.removePlayer(ctx, playerID, false)
 }
 
 func (r *Room) handleDismiss(ctx context.Context, playerID string) {
