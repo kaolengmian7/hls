@@ -28,16 +28,8 @@ const (
 	internalClientGone = "__CLIENT_GONE__"
 )
 
-// 各类超时常量。
-//
-// 本游戏定位为"小时级记账场景"：玩家通常每小时回来记一次账，期间应用会被切到后台。
-// 因此宽限期统一拉长到 8h；定时巡检从 5s 放宽到 30s 以避免无谓 wakeup。
 const (
-	hostMigrationGrace = 8 * time.Hour
-	playerDropGrace    = 8 * time.Hour
-	idleRoomTimeout    = 8 * time.Hour
-	tickInterval       = 30 * time.Second
-	feedCapacity       = 50
+	feedCapacity = 50
 )
 
 // playerState 是房间为每个玩家维护的运行时状态（不直接外泄到快照）。
@@ -201,8 +193,6 @@ func (r *Room) OnClientGone(client *Client) {
 
 // Run 房间主循环。每个 Room 一个 goroutine。
 func (r *Room) Run(ctx context.Context) {
-	ticker := time.NewTicker(tickInterval)
-	defer ticker.Stop()
 	defer r.cleanup(ctx)
 
 	for {
@@ -215,8 +205,6 @@ func (r *Room) Run(ctx context.Context) {
 			r.handleRegistration(ctx, reg)
 		case it := <-r.inbox:
 			r.dispatch(ctx, it)
-		case <-ticker.C:
-			r.handleTick(ctx)
 		}
 	}
 }
@@ -1066,103 +1054,8 @@ func (r *Room) handleCloseGame(ctx context.Context, it Intent) {
 
 /* ------------------------------ 定时巡检 ------------------------------ */
 
-func (r *Room) handleTick(ctx context.Context) {
-	now := time.Now()
-
-	// 房主迁移：若房主断线超过 30s 且仍有其他在线玩家，迁移。
-	if hostState, ok := r.states[r.hostID]; ok && !hostState.disconnectedAt.IsZero() {
-		if now.Sub(hostState.disconnectedAt) >= hostMigrationGrace {
-			r.migrateHost(ctx)
-		}
-	}
-
-	// 非房主断线超时清除
-	stalePlayers := make([]string, 0)
-	for pid, s := range r.states {
-		if pid == r.hostID {
-			continue
-		}
-		if !s.disconnectedAt.IsZero() && now.Sub(s.disconnectedAt) >= playerDropGrace {
-			stalePlayers = append(stalePlayers, pid)
-		}
-	}
-	for _, pid := range stalePlayers {
-		r.removePlayer(ctx, pid, true)
-	}
-
-	// 空房 GC
-	if r.hasNoConnectedClients() && now.Sub(r.lastActivity) >= idleRoomTimeout {
-		logx.WithContext(ctx).Infow("room idle, GC",
-			logx.Field("code", r.code))
-		r.stop()
-	}
-}
-
-func (r *Room) hasNoConnectedClients() bool {
-	for _, p := range r.players {
-		if p.Connected {
-			return false
-		}
-	}
-	return true
-}
-
-func (r *Room) migrateHost(ctx context.Context) {
-	for _, pid := range r.playerOrder {
-		if pid == r.hostID {
-			continue
-		}
-		if p, ok := r.players[pid]; ok && p.Connected {
-			oldHost := r.hostID
-			r.hostID = pid
-			if oldP, ok := r.players[oldHost]; ok {
-				oldP.IsHost = false
-			}
-			p.IsHost = true
-			r.broadcast(protocol.EventHostChanged, protocol.HostChangedPayload{NewHostID: pid})
-			r.broadcastSnapshot()
-			logx.WithContext(ctx).Infow("host migrated",
-				logx.Field("code", r.code),
-				logx.Field("from", oldHost),
-				logx.Field("to", pid))
-			return
-		}
-	}
-	// 没有可用继任者
-	logx.WithContext(ctx).Infow("no host successor, dismiss room",
-		logx.Field("code", r.code))
-	r.stop()
-}
-
-func (r *Room) removePlayer(ctx context.Context, pid string, broadcastPlayerLeft bool) {
-	if _, ok := r.players[pid]; !ok {
-		return
-	}
-	delete(r.players, pid)
-	delete(r.states, pid)
-	for i, id := range r.playerOrder {
-		if id == pid {
-			r.playerOrder = append(r.playerOrder[:i], r.playerOrder[i+1:]...)
-			break
-		}
-	}
-	if c := r.clients[pid]; c != nil {
-		c.Close()
-		delete(r.clients, pid)
-	}
-	rpid := pid
-	r.dbWriteAsync(func() error {
-		return r.shopRepo.RemovePlayer(context.Background(), r.code, rpid)
-	})
-	if broadcastPlayerLeft {
-		r.appendFeed("PLAYER_LEFT", map[string]any{"playerId": pid})
-		r.broadcast(protocol.EventPlayerLeft, protocol.PlayerLeftPayload{PlayerID: pid})
-	}
-
-	if pid == r.hostID {
-		r.migrateHost(ctx)
-	}
-	r.broadcastSnapshot()
+func (r *Room) handleTick(_ context.Context) {
+	// GC removed: rooms never auto-close, slots never auto-drop.
 }
 
 /* ------------------------------ 广播工具 ------------------------------ */
