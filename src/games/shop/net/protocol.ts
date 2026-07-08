@@ -208,6 +208,7 @@ export type EventMap = {
   ACTION_REJECTED: { reqId?: string; reason: string; message?: string };
   KICK: { reason: KickReason };
   PONG: Record<string, never>;
+  GAME_CLOSED: Record<string, never>;
 };
 
 export type EventType = keyof EventMap;
