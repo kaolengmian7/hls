@@ -309,13 +309,9 @@ function dismissHostClosed(): void {
 
       <ConfirmDialog
         :open="showLeaveConfirm"
-        :title="isHost ? '关闭商店？' : '离开商店？'"
-        :message="
-          isHost
-            ? '您是房主，离开后这家神秘商店会立刻关闭。'
-            : '离开后仍可凭商店口令再次进入。'
-        "
-        :confirm-text="isHost ? '关闭' : '离开'"
+        title="离开商店？"
+        message="离开后您的位置将保留，可以凭口令重新回来。"
+        confirm-text="离开"
         danger
         @confirm="confirmLeave"
         @cancel="showLeaveConfirm = false"
@@ -323,9 +319,11 @@ function dismissHostClosed(): void {
 
       <ConfirmDialog
         :open="showHostClosedDialog"
-        title="商店已关闭"
-        :message="`商店已关闭（${hostClosedReason || 'CLOSED'}），3 秒后返回首页。`"
-        confirm-text="返回首页"
+        :title="hostClosedReason === 'CLOSED' ? '神秘商店已结单' : '商店已关闭'"
+        :message="hostClosedReason === 'CLOSED'
+          ? '神秘商店已结单，3 秒后返回主页。'
+          : `商店已关闭（${hostClosedReason || 'CLOSED'}），3 秒后返回首页。`"
+        confirm-text="返回主页"
         cancel-text="稍候"
         @confirm="dismissHostClosed"
         @cancel="dismissHostClosed"

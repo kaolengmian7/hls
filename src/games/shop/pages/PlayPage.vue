@@ -303,9 +303,11 @@ function dismissClosed(): void {
 
       <ConfirmDialog
         :open="showClosedDialog"
-        title="商店已关闭"
-        :message="`商店已关闭（${closedReason || 'CLOSED'}），3 秒后返回首页。`"
-        confirm-text="返回首页"
+        :title="closedReason === 'CLOSED' ? '神秘商店已结单' : '商店已关闭'"
+        :message="closedReason === 'CLOSED'
+          ? '神秘商店已结单，3 秒后返回主页。'
+          : `商店已关闭（${closedReason || 'CLOSED'}），3 秒后返回首页。`"
+        confirm-text="返回主页"
         cancel-text="稍候"
         @confirm="dismissClosed"
         @cancel="dismissClosed"
