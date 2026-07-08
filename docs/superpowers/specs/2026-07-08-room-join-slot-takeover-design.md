@@ -19,7 +19,7 @@
 - 鼠币（`coin`）
 - 准备状态（`ready`）
 
-玩家 ID 只是「当前占着该位置的人」。当位置持有者离线后，任意新玩家可顶替进入，继承角色与鼠币（`ready` 重置为 `false`）。
+玩家 ID 只是「当前占着该位置的人」。当位置持有者离线后，任意新玩家可顶替进入，继承角色、鼠币与准备状态（role、coin、ready、isHost 全部继承）。
 
 ## 3. 功能详细设计
 
@@ -48,7 +48,7 @@
 2. 若 playerID 为全新用户：
    a. 扫描 playerOrder，找第一个 connected=false 的离线位置
       → 找到离线位置 → 顶替：
-          新玩家继承 role、coin；ready 重置为 false；isHost 继承
+          新玩家继承 role、coin、ready、isHost
           若 isHost=true → r.hostID 更新为新 playerID
           旧 playerID 从 players / states / clients / userIDs 中删除，写入新 playerID
           DB：RemovePlayer(旧) + AddPlayer(新) + UpdatePlayerState(role, coin, ready)
