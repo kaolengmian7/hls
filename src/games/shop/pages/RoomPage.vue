@@ -14,7 +14,6 @@ const route = useRoute();
 const roomStore = useRoomStore();
 const playerStore = usePlayerStore();
 
-const showLeaveConfirm = ref(false);
 const showHostClosedDialog = ref(false);
 const hostClosedReason = ref('');
 const restoring = ref(false);
@@ -134,7 +133,6 @@ function startGame(): void {
 }
 
 function confirmLeave(): void {
-  showLeaveConfirm.value = false;
   roomStore.leaveRoom();
   router.replace({ name: 'home' });
 }
@@ -192,7 +190,7 @@ function dismissHostClosed(): void {
           <div class="badge">
             <span class="rune-mark mr-1">🐿</span>{{ players.length }} / {{ MAX_PLAYERS }}
           </div>
-          <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300" @click="showLeaveConfirm = true">
+          <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300" @click="confirmLeave">
             离开商店
           </button>
         </div>
@@ -306,16 +304,6 @@ function dismissHostClosed(): void {
           </div>
         </div>
       </main>
-
-      <ConfirmDialog
-        :open="showLeaveConfirm"
-        title="离开商店？"
-        message="离开后您的位置将保留，可以凭口令重新回来。"
-        confirm-text="离开"
-        danger
-        @confirm="confirmLeave"
-        @cancel="showLeaveConfirm = false"
-      />
 
       <ConfirmDialog
         :open="showHostClosedDialog"
