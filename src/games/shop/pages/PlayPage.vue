@@ -22,7 +22,6 @@ const playerStore = usePlayerStore();
 const showLottery = ref(false);
 const showSettlement = ref(false);
 const showSettlementHistory = ref(false);
-const showLeaveConfirm = ref(false);
 const showClosedDialog = ref(false);
 const closedReason = ref('');
 const restoring = ref(false);
@@ -92,7 +91,6 @@ function handleCloseGame(): void {
 }
 
 function confirmLeave(): void {
-  showLeaveConfirm.value = false;
   roomStore.leaveRoom();
   router.replace({ name: 'home' });
 }
@@ -133,7 +131,7 @@ function dismissClosed(): void {
           </div>
 
           <div class="flex items-center gap-2">
-            <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300 text-[11px]" @click="showLeaveConfirm = true">
+            <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300 text-[11px]" @click="confirmLeave">
               离开
             </button>
           </div>
@@ -285,20 +283,6 @@ function dismissClosed(): void {
       <SettlementRecordModal
         :open="showSettlementHistory"
         @close="showSettlementHistory = false"
-      />
-
-      <ConfirmDialog
-        :open="showLeaveConfirm"
-        :title="roomStore.isHost ? '关闭商店？' : '中途离开？'"
-        :message="
-          roomStore.isHost
-            ? '您是房主，离开后这家神秘商店会立刻关闭。'
-            : '中途离开后，本局记录不会继续跟随您，确认离开吗？'
-        "
-        :confirm-text="roomStore.isHost ? '关闭' : '离开'"
-        danger
-        @confirm="confirmLeave"
-        @cancel="showLeaveConfirm = false"
       />
 
       <ConfirmDialog
