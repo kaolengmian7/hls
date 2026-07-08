@@ -422,15 +422,79 @@ func (r *Room) handleJoin(ctx context.Context, it Intent) {
 		return
 	}
 
-	// 全新玩家：对局已开始则不允许中途加入。
-	if r.status != protocol.RoomStatusWaiting {
-		c.SendEvent(protocol.EventJoinRejected, protocol.JoinRejectedPayload{
-			Reason: protocol.RejectPlaying,
+	// 全新玩家：优先顶替离线位置，其次占用空位。
+	// （已移除 PLAYING 状态拦截：游戏中同样允许顶替离线位）
+
+	// 扫描第一个离线位置。
+	var takeoverPID string
+	for _, pid := range r.playerOrder {
+		if pl, ok := r.players[pid]; ok && !pl.Connected {
+			takeoverPID = pid
+			break
+		}
+	}
+
+	if takeoverPID != "" {
+		// 顶替路径：继承角色、鼠币、ready、isHost。
+		old := r.players[takeoverPID]
+		newPlayer := &protocol.Player{
+			ID:        playerID,
+			Nickname:  p.Nickname,
+			Avatar:    p.Avatar,
+			Role:      old.Role,
+			Coin:      old.Coin,
+			Ready:     old.Ready,
+			IsHost:    old.IsHost,
+			Connected: true,
+		}
+		delete(r.players, takeoverPID)
+		r.players[playerID] = newPlayer
+		for i, pid := range r.playerOrder {
+			if pid == takeoverPID {
+				r.playerOrder[i] = playerID
+				break
+			}
+		}
+		if r.hostID == takeoverPID {
+			r.hostID = playerID
+		}
+		delete(r.states, takeoverPID)
+		r.states[playerID] = &playerState{}
+		r.clients[playerID] = c
+		c.hasJoined = true
+		c.playerID = playerID
+		c.nickname = p.Nickname
+		c.avatar = p.Avatar
+		delete(r.userIDs, takeoverPID)
+		r.userIDs[playerID] = c.userID
+		oldPID := takeoverPID
+		newUID := c.userID
+		isHost2 := newPlayer.IsHost
+		role2, coin2, ready2 := string(newPlayer.Role), newPlayer.Coin, newPlayer.Ready
+		r.dbWriteAsync(func() error {
+			bctx := context.Background()
+			if err2 := r.shopRepo.RemovePlayer(bctx, r.code, oldPID); err2 != nil {
+				return err2
+			}
+			if err2 := r.shopRepo.AddPlayer(bctx, r.code, newUID, playerID, isHost2); err2 != nil {
+				return err2
+			}
+			return r.shopRepo.UpdatePlayerState(bctx, r.code, playerID, role2, coin2, ready2)
+		})
+		snap := r.buildSnapshot()
+		c.SendEvent(protocol.EventJoinAccepted, protocol.JoinAcceptedPayload{
+			Snapshot:     snap,
+			SelfPlayerID: playerID,
 		}, it.ReqID)
-		c.Close()
+		r.broadcastSnapshot()
+		logger.Infow("player took over slot",
+			logx.Field("code", r.code),
+			logx.Field("newPlayerId", playerID),
+			logx.Field("oldPlayerId", oldPID))
 		return
 	}
 
+	// 空位路径：无离线位置，尝试占用新位置。
 	if len(r.players) >= game.MaxPlayers {
 		c.SendEvent(protocol.EventJoinRejected, protocol.JoinRejectedPayload{
 			Reason: protocol.RejectFull,
