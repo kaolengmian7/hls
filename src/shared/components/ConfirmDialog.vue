@@ -6,6 +6,10 @@ defineProps<{
   confirmText?: string;
   cancelText?: string;
   danger?: boolean;
+  /** 为 true 时背板点击不触发 cancel */
+  persistent?: boolean;
+  /** 为 true 时隐藏取消按钮 */
+  noCancel?: boolean;
 }>();
 const emit = defineEmits<{
   confirm: [];
@@ -18,7 +22,7 @@ const emit = defineEmits<{
     <div
       v-if="open"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-      @click.self="emit('cancel')"
+      @click.self="!persistent && emit('cancel')"
     >
       <div class="card rpg-corners w-[92%] max-w-sm p-7 animate-slide-up text-center">
         <div class="rune-mark text-2xl text-gold-300 animate-flicker">⚜</div>
@@ -28,7 +32,7 @@ const emit = defineEmits<{
           {{ message }}
         </p>
         <div class="mt-6 flex gap-3 justify-center">
-          <button class="btn-ghost px-4 py-2" @click="emit('cancel')">
+          <button v-if="!noCancel" class="btn-ghost px-4 py-2" @click="emit('cancel')">
             {{ cancelText ?? '稍候' }}
           </button>
           <button :class="danger ? 'btn-danger' : 'btn-primary'" @click="emit('confirm')">
