@@ -19,6 +19,7 @@ const (
 	EventActionRejected     = "ACTION_REJECTED"
 	EventKick               = "KICK"
 	EventPong               = "PONG"
+	EventGameClosed         = "GAME_CLOSED"
 )
 
 // JoinRejectReason / KickReason 枚举。
@@ -142,3 +143,6 @@ type ActionRejectedPayload struct {
 type KickPayload struct {
 	Reason string `json:"reason"`
 }
+
+// GameClosedPayload 结单通知；在 KICK 之前广播，让所有客户端先弹弹窗。
+type GameClosedPayload struct{}
