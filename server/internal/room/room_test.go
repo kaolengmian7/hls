@@ -247,3 +247,35 @@ func TestHandleTickNoGC(t *testing.T) {
 	default:
 	}
 }
+
+// TestHandleCloseGameBroadcastsGameClosedBeforeKick verifies that GAME_CLOSED
+// is sent to all clients before the KICK message when the host closes the game.
+func TestHandleCloseGameBroadcastsGameClosedBeforeKick(t *testing.T) {
+	ctx := context.Background()
+	rm := newTestRoom(t)
+	rm.status = protocol.RoomStatusPlaying
+	rm.players["h1"].Connected = true
+
+	sconn, _ := wsTestPair(t)
+	c := NewClient(sconn, rm, "h1", 0, logx.WithContext(ctx))
+	rm.clients["h1"] = c
+
+	rm.handleCloseGame(ctx, Intent{Type: protocol.IntentCloseGame, From: c})
+
+	// Read two messages directly from the buffered send channel.
+	// writePump is never started in tests, so messages stay buffered.
+	var m1, m2 map[string]any
+	if err := json.Unmarshal(<-c.send, &m1); err != nil {
+		t.Fatalf("parse msg1: %v", err)
+	}
+	if err := json.Unmarshal(<-c.send, &m2); err != nil {
+		t.Fatalf("parse msg2: %v", err)
+	}
+
+	if got := m1["type"]; got != protocol.EventGameClosed {
+		t.Errorf("first message: got %q, want %q", got, protocol.EventGameClosed)
+	}
+	if got := m2["type"]; got != protocol.EventKick {
+		t.Errorf("second message: got %q, want %q", got, protocol.EventKick)
+	}
+}

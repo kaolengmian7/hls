@@ -1042,6 +1042,7 @@ func (r *Room) handleCloseGame(ctx context.Context, it Intent) {
 		return
 	}
 	logx.WithContext(ctx).Infow("close game", logx.Field("code", r.code), logx.Field("by", it.From.playerID))
+	r.broadcast(protocol.EventGameClosed, protocol.GameClosedPayload{})
 	for _, c := range r.clients {
 		if c == nil {
 			continue
@@ -1049,7 +1050,7 @@ func (r *Room) handleCloseGame(ctx context.Context, it Intent) {
 		c.SendEvent(protocol.EventKick, protocol.KickPayload{Reason: protocol.KickClosed}, "")
 		c.Close()
 	}
-	r.stop() // triggers cleanup() → DB CloseRoom
+	r.stop()
 }
 
 /* ------------------------------ 定时巡检 ------------------------------ */
