@@ -11,7 +11,6 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"hls.dev/server/internal/game"
-	"hls.dev/server/internal/room"
 	"hls.dev/server/internal/svc"
 	"hls.dev/server/pkg/code"
 	"hls.dev/server/pkg/errors"
@@ -41,19 +40,6 @@ func CreateRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		userID, errKey := extractUserID(r, ctx)
 		if errKey != "" {
 			writeError(w, r, http.StatusUnauthorized, errKey, nil)
-			return
-		}
-		activeCode, err := ctx.ShopRepo.FindActiveRoomForUser(r.Context(), userID)
-		if err != nil {
-			writeError(w, r, http.StatusInternalServerError, "db error", err)
-			return
-		}
-		if activeCode != "" {
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.WriteHeader(http.StatusConflict)
-			_ = json.NewEncoder(w).Encode(map[string]any{
-				"ok": false, "message": "already_in_game", "activeRoomCode": activeCode,
-			})
 			return
 		}
 		if r.Method != http.MethodPost {
@@ -93,13 +79,6 @@ func CreateRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	}
 }
 
-// QueryRoomResponse 是 QueryRoomHandler 的响应体。
-// 当请求方不是房间成员且自己已在另一局时，额外附带 activeRoomCode。
-type QueryRoomResponse struct {
-	room.RoomSummary
-	ActiveRoomCode string `json:"activeRoomCode,omitempty"`
-}
-
 // QueryRoomHandler 处理 GET /api/rooms/:code。
 func QueryRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -118,13 +97,7 @@ func QueryRoomHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			writeError(w, r, http.StatusNotFound, "room not found", nil)
 			return
 		}
-		resp := QueryRoomResponse{RoomSummary: summary}
-		if !summary.IsMember && errKey == "" && ctx.ShopRepo != nil {
-			if ac, err := ctx.ShopRepo.FindActiveRoomForUser(r.Context(), uid); err == nil && ac != "" && ac != c {
-				resp.ActiveRoomCode = ac
-			}
-		}
-		httpx.OkJsonCtx(r.Context(), w, resp)
+		httpx.OkJsonCtx(r.Context(), w, summary)
 	}
 }
 
