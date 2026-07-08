@@ -23,6 +23,7 @@ const showLottery = ref(false);
 const showSettlement = ref(false);
 const showSettlementHistory = ref(false);
 const showClosedDialog = ref(false);
+const showGameClosedDialog = ref(false);
 const closedReason = ref('');
 const restoring = ref(false);
 
@@ -73,7 +74,7 @@ watch(
   () => roomStore.status,
   (status) => {
     // 恢复连接阶段失败不弹"连接已断开"对话框，由 onMounted 静默跳回首页。
-    if (status === 'closed' && !restoring.value) {
+    if (status === 'closed' && !restoring.value && !showGameClosedDialog.value) {
       closedReason.value = roomStore.closedReason || 'CLOSED';
       showClosedDialog.value = true;
       setTimeout(() => {
@@ -86,8 +87,21 @@ watch(
   },
 );
 
+watch(
+  () => roomStore.gameClosed,
+  (closed) => {
+    if (closed) showGameClosedDialog.value = true;
+  },
+);
+
 function handleCloseGame(): void {
   roomStore.sendIntent('CLOSE_GAME', {})
+}
+
+function handleGameClosed(): void {
+  showGameClosedDialog.value = false;
+  roomStore.leaveRoom();
+  router.replace({ name: 'home' });
 }
 
 function confirmLeave(): void {
@@ -295,6 +309,15 @@ function dismissClosed(): void {
         cancel-text="稍候"
         @confirm="dismissClosed"
         @cancel="dismissClosed"
+      />
+      <ConfirmDialog
+        :open="showGameClosedDialog"
+        title="神秘商店已结单"
+        message="商店已结束营业，感谢参与！"
+        confirm-text="确认回到主页"
+        persistent
+        no-cancel
+        @confirm="handleGameClosed"
       />
     </div>
   </div>
