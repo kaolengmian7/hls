@@ -80,17 +80,6 @@ async function handleCreate(): Promise<void> {
     });
     router.push({ name: 'shop-room', params: { code: resp.code } });
   } catch (err) {
-    if (err instanceof ApiError && err.status === 409) {
-      const body = err.body as { activeRoomCode?: string } | null;
-      const ac = body?.activeRoomCode;
-      if (ac) {
-        roomStore.pushToast('warn', `您已在商店 ${ac} 中，请先离开当前商店`);
-        codeInput.value = ac;
-      } else {
-        roomStore.pushToast('error', '您已在另一个商店中');
-      }
-      return;
-    }
     const message =
       err instanceof ApiError ? err.message : (err as Error).message;
     roomStore.pushToast('error', `创建商店失败：${message}`);
@@ -113,21 +102,9 @@ async function handleJoin(): Promise<void> {
       return;
     }
 
-    if (summary.activeRoomCode && summary.activeRoomCode !== codeInput.value) {
-      roomStore.pushToast('warn', `您已在商店 ${summary.activeRoomCode} 中，请先离开当前商店`);
-      return;
-    }
-
-    const isMember = summary.isMember === true;
-    if (!isMember) {
-      if (summary.status === 'PLAYING') {
-        roomStore.pushToast('warn', '商店已经开张，暂时不能中途加入');
-        return;
-      }
-      if ((summary.playerCount ?? 0) >= 3) {
-        roomStore.pushToast('warn', '店内 3 个位置已满');
-        return;
-      }
+    // Leave current room (if any) before joining new one.
+    if (roomStore.status === 'connected') {
+      roomStore.leaveRoom();
     }
 
     await roomStore.connect({
