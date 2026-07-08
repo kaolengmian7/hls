@@ -34,7 +34,6 @@ export type RoomSummary = {
   playerCount?: number;
   /** 携带 playerId 查询时回填：该玩家当前是否仍在房间内（可凭口令回归恢复身份/鼠币）。 */
   isMember?: boolean;
-  activeRoomCode?: string;
 };
 
 export class ApiError extends Error {

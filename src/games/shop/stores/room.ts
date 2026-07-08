@@ -179,13 +179,7 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   function leaveRoom(): void {
-    if (snapshot.value && me.value?.isHost) {
-      // 房主：通知服务端解散
-      client?.send('DISMISS_ROOM', {});
-    } else {
-      client?.send('LEAVE', {});
-    }
-    teardownClient();
+    teardownClient(); // destroy() inside sends LEAVE automatically
     snapshot.value = null;
     latestLotteryReveal.value = [];
     awaitingSelfLotteryReveal = false;
