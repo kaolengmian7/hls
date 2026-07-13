@@ -289,7 +289,7 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
                 : '1px solid rgba(212,175,55,0.35)',
               boxShadow: revealed
                 ? 'inset 0 0 56px rgba(249,115,22,0.4), 0 0 36px rgba(212,175,55,0.55)'
-                : 'inset 0 0 18px rgba(0,0,0,0.45)',
+                : 'inset 0 0 18px rgba(0,0,0,0.15)',
               background: revealed ? 'rgba(249,115,22,0.06)' : 'transparent',
             }"
           >
