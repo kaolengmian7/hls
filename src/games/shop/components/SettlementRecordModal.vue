@@ -39,53 +39,48 @@ const records = computed(() => roomStore.settlementRecords);
   <transition name="fade">
     <div
       v-if="open"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
       @click.self="emit('close')"
     >
-      <div class="card rpg-corners w-full max-w-3xl max-h-[82vh] flex flex-col animate-slide-up">
-        <div class="flex items-center justify-between p-5 border-b border-gold-500/25">
-          <h3 class="rpg-title text-xl">
-            <span class="rune-mark mr-1">⚜</span>结算记录
-          </h3>
-          <button class="btn-ghost py-1.5 px-3" @click="emit('close')">关闭</button>
-        </div>
+      <div class="sdv-panel w-[92%] max-w-lg max-h-[80vh] flex flex-col animate-pixel-slide">
+        <div class="sdv-panel-title">结算记录</div>
         <div class="flex-1 overflow-y-auto p-5">
           <div v-if="records.length === 0" class="text-center py-10">
-            <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
-            <div class="font-body text-parchment-300/75 mt-2">暂时还没有结算记录</div>
+            <div class="text-2xl text-sdv-gold/60 animate-pixel-pulse">✶</div>
+            <div class="font-body text-sdv-text-light/75 mt-2">暂时还没有结算记录</div>
           </div>
           <ul v-else class="space-y-4">
             <li
               v-for="r in records"
               :key="r.id"
-              class="rounded-md p-4 chronicle-entry"
+              class="sdv-menu-row rounded-md p-4"
             >
               <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
                 <div class="flex items-center gap-2">
-                  <span class="font-serif text-[11px] tracking-widest text-gold-300/70">
+                  <span class="font-pixel text-[11px] tracking-widest text-sdv-gold/70">
                     ✦ {{ format(r.at) }}
                   </span>
                   <span
-                    class="badge"
+                    class="sdv-badge"
                     :class="
                       r.outcome === 'EVACUATED'
-                        ? '!border-forest-400/70 !text-forest-300'
-                        : '!border-oxblood-300/70 !text-oxblood-300'
+                        ? '!border-sdv-btn-green/70 !text-sdv-btn-green'
+                        : '!border-red-400/70 !text-red-400'
                     "
                   >
                     {{ r.outcome === 'EVACUATED' ? '撤离成功' : '炸单翻车' }}
                   </span>
                 </div>
-                <div class="font-serif text-xs text-gold-200">
+                <div class="font-pixel text-xs text-sdv-gold">
                   库藏 {{ r.guaranteeBefore }}W →
                   <span
                     :class="
-                      r.outcome === 'EVACUATED' ? 'text-forest-300' : 'text-oxblood-300'
+                      r.outcome === 'EVACUATED' ? 'text-sdv-btn-green' : 'text-red-400'
                     "
                   >
                     {{ r.guaranteeAfter }}W
                   </span>
-                  <span v-if="r.guaranteeDelta > 0" class="ml-1 text-parchment-300/80">
+                  <span v-if="r.guaranteeDelta > 0" class="ml-1 text-sdv-text-muted">
                     ({{ r.outcome === 'EVACUATED' ? '−' : '+' }}{{ r.guaranteeDelta }}W)
                   </span>
                 </div>
@@ -93,39 +88,39 @@ const records = computed(() => roomStore.settlementRecords);
               <table class="w-full text-xs">
                 <thead>
                   <tr class="text-left">
-                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">成员</th>
-                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">击杀</th>
-                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">小红</th>
-                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">6 格</th>
-                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80">9+ 格</th>
-                    <th class="py-1 font-serif tracking-[0.18em] uppercase text-gold-300/80 text-right">所得</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">成员</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">击杀</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">小红</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">6 格</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">9+ 格</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80 text-right">所得</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="pp in r.perPlayer"
                     :key="pp.playerId"
-                    class="border-t border-gold-500/15"
+                    class="border-t border-sdv-border/15"
                   >
-                    <td class="py-1.5 font-serif text-parchment-100">{{ nameOf(pp.playerId) }}</td>
-                    <td class="py-1.5 text-parchment-300/90">{{ pp.kills }}</td>
+                    <td class="py-1.5 font-pixel text-sdv-text-light">{{ nameOf(pp.playerId) }}</td>
+                    <td class="py-1.5 text-sdv-text-light/90">{{ pp.kills }}</td>
                     <template v-if="isEscort(pp)">
-                      <td colspan="3" class="py-1.5 text-parchment-300/90">
-                        <span class="badge !border-sapphire-300/50 !text-sapphire-300 text-[10px] mr-1">护航</span>
+                      <td colspan="3" class="py-1.5 text-sdv-text-light/90">
+                        <span class="sdv-badge !border-sdv-text-nav/50 !text-sdv-text-nav text-[10px] mr-1">护航</span>
                         救助板板：
-                        <span :class="pp.rescue ? 'text-forest-300' : 'text-parchment-400/70'">
+                        <span :class="pp.rescue ? 'text-sdv-btn-green' : 'text-sdv-text-muted'">
                           {{ pp.rescue ? '是 (+1)' : '否' }}
                         </span>
                       </td>
                     </template>
                     <template v-else>
-                      <td class="py-1.5 text-parchment-300/90">{{ pp.smallReds }}</td>
-                      <td class="py-1.5 text-parchment-300/90">{{ pp.sixGrids }}</td>
-                      <td class="py-1.5 text-parchment-300/90">{{ pp.nineGrids }}</td>
+                      <td class="py-1.5 text-sdv-text-light/90">{{ pp.smallReds }}</td>
+                      <td class="py-1.5 text-sdv-text-light/90">{{ pp.sixGrids }}</td>
+                      <td class="py-1.5 text-sdv-text-light/90">{{ pp.nineGrids }}</td>
                     </template>
                     <td
-                      class="py-1.5 text-right font-serif font-bold"
-                      :class="pp.coinDelta > 0 ? 'text-forest-300' : 'text-parchment-400/70'"
+                      class="py-1.5 text-right font-pixel font-bold"
+                      :class="pp.coinDelta > 0 ? 'text-sdv-btn-green' : 'text-sdv-text-muted'"
                     >
                       +{{ pp.coinDelta }}
                     </td>
@@ -135,20 +130,15 @@ const records = computed(() => roomStore.settlementRecords);
             </li>
           </ul>
         </div>
+        <div class="p-4 flex justify-end border-t border-sdv-border/30">
+          <button class="sdv-btn-secondary py-1.5 px-4" @click="emit('close')">关闭</button>
+        </div>
       </div>
     </div>
   </transition>
 </template>
 
 <style scoped>
-.chronicle-entry {
-  background:
-    linear-gradient(180deg, rgba(212, 175, 55, 0.05), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #1a0f0a, #120804);
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  box-shadow: inset 0 1px 0 rgba(244, 230, 194, 0.06);
-}
-
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.18s ease;

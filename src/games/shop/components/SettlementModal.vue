@@ -205,21 +205,16 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   <transition name="fade">
     <div
       v-if="open"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
       @click.self="emit('close')"
     >
-      <div class="card rpg-corners w-full max-w-2xl max-h-[92vh] flex flex-col animate-slide-up">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gold-500/25">
-          <h3 class="rpg-title text-xl">
-            <span class="rune-mark mr-1">⚖</span>本轮结算
-          </h3>
-          <button class="btn-ghost py-1.5 px-3 text-xs" @click="emit('close')">取消</button>
-        </div>
+      <div class="sdv-panel w-[95%] max-w-2xl max-h-[90vh] flex flex-col animate-pixel-slide">
+        <div class="sdv-panel-title">本轮结算</div>
 
         <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
           <section>
-            <div class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2">
-              <span class="rune-mark mr-1">❖</span>本轮结果
+            <div class="font-pixel text-[11px] uppercase tracking-[0.32em] text-sdv-gold/85 mb-2">
+              ❖ 本轮结果
             </div>
             <div class="grid grid-cols-2 gap-3">
               <button
@@ -230,11 +225,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               >
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">🛡️</span>
-                  <div class="font-display tracking-[0.2em] text-lg uppercase text-forest-300">
+                  <div class="font-pixel tracking-[0.2em] text-lg uppercase text-sdv-btn-green">
                     撤离成功
                   </div>
                 </div>
-                <div class="font-body text-[11px] mt-1 text-parchment-300/85">
+                <div class="font-body text-[11px] mt-1 text-sdv-text-muted">
                   保底 -X · 全员奖励 3 鼠币
                 </div>
               </button>
@@ -246,11 +241,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               >
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">💀</span>
-                  <div class="font-display tracking-[0.2em] text-lg uppercase text-oxblood-300">
+                  <div class="font-pixel tracking-[0.2em] text-lg uppercase text-red-400">
                     炸单翻车
                   </div>
                 </div>
-                <div class="font-body text-[11px] mt-1 text-parchment-300/85">
+                <div class="font-body text-[11px] mt-1 text-sdv-text-muted">
                   保底 +X · 默认 +60W
                 </div>
               </button>
@@ -258,8 +253,8 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
           </section>
 
           <section>
-            <label class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2 block">
-              <span class="rune-mark mr-1">❖</span>{{ outcome === 'EVACUATED' ? '保底扣减（W）' : '保底增加（W）' }}
+            <label class="font-pixel text-[11px] uppercase tracking-[0.32em] text-sdv-gold/85 mb-2 block">
+              ❖ {{ outcome === 'EVACUATED' ? '保底扣减（W）' : '保底增加（W）' }}
             </label>
             <div class="flex items-center gap-2">
               <input
@@ -269,62 +264,62 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 class="input flex-1"
                 :placeholder="outcome === 'EVACUATED' ? '例如 200' : '60'"
               />
-              <span class="font-serif text-sm text-gold-200 whitespace-nowrap">
+              <span class="font-pixel text-sm text-sdv-gold whitespace-nowrap">
                 当前保底 {{ currentGuarantee }}W
               </span>
             </div>
             <div
               v-if="newGuarantee !== null"
               class="font-body text-xs mt-2"
-              :class="newGuarantee > GUARANTEE_MAX ? 'text-oxblood-300' : 'text-parchment-300/85'"
+              :class="newGuarantee > GUARANTEE_MAX ? 'text-red-400' : 'text-sdv-text-muted'"
             >
               结算后保底：
-              <span class="font-serif font-bold text-parchment-50">{{ newGuarantee }}W</span>
-              <span class="ml-1 text-parchment-400/80">
+              <span class="font-pixel font-bold text-sdv-text-light">{{ newGuarantee }}W</span>
+              <span class="ml-1 text-sdv-text-muted">
                 ({{ outcome === 'EVACUATED' ? '−' : '+' }}{{ guaranteeDelta }}W)
               </span>
             </div>
           </section>
 
           <section>
-            <div class="font-serif text-[11px] uppercase tracking-[0.32em] text-gold-300/85 mb-2">
-              <span class="rune-mark mr-1">❖</span>三人本轮记录
+            <div class="font-pixel text-[11px] uppercase tracking-[0.32em] text-sdv-gold/85 mb-2">
+              ❖ 三人本轮记录
             </div>
-            <div class="rounded-md overflow-hidden border border-gold-500/30">
+            <div class="rounded-md overflow-hidden border border-sdv-border/30">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="bg-ink-700/80">
-                    <th class="text-left font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2">成员</th>
+                  <tr class="bg-sdv-bg/80">
+                    <th class="text-left font-pixel text-[11px] uppercase tracking-[0.18em] text-sdv-gold/85 px-3 py-2">成员</th>
                     <th
                       v-for="h in STAT_HEADERS"
                       :key="h.key"
-                      class="text-center font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-2 py-2 w-20"
+                      class="text-center font-pixel text-[11px] uppercase tracking-[0.18em] text-sdv-gold/85 px-2 py-2 w-20"
                     >
                       {{ h.label }}
                     </th>
-                    <th class="text-right font-serif text-[11px] uppercase tracking-[0.18em] text-gold-300/85 px-3 py-2 w-20">所得</th>
+                    <th class="text-right font-pixel text-[11px] uppercase tracking-[0.18em] text-sdv-gold/85 px-3 py-2 w-20">所得</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="p in players"
                     :key="p.id"
-                    class="border-t border-gold-500/15"
+                    class="border-t border-sdv-border/15"
                   >
                     <td class="px-3 py-2">
                       <div class="flex items-center gap-2 min-w-0">
                         <Avatar :seed="p.id" :name="p.nickname" size="sm" />
                         <div class="min-w-0">
-                          <div class="font-serif font-semibold text-parchment-50 truncate flex items-center gap-1">
-                            <span v-if="p.isHost" class="text-gold-300">👑</span>
+                          <div class="font-pixel font-semibold text-sdv-text-light truncate flex items-center gap-1">
+                            <span v-if="p.isHost" class="text-sdv-gold">👑</span>
                             {{ p.nickname }}
                           </div>
                           <span
-                            class="badge text-[10px]"
+                            class="sdv-badge text-[10px]"
                             :class="
                               p.role === 'BOSS'
-                                ? '!border-ember-400/60 !text-ember-300'
-                                : '!border-sapphire-300/60 !text-sapphire-300'
+                                ? '!border-ember-400/60 !text-sdv-gold'
+                                : '!border-sdv-text-nav/60 !text-sdv-text-nav'
                             "
                           >
                             {{ p.role ? ROLE_LABEL[p.role] : '' }}
@@ -343,7 +338,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                       </td>
                       <td colspan="3" class="px-2 py-2">
                         <div class="flex items-center justify-center gap-2">
-                          <span class="font-serif text-[11px] text-parchment-300/80 whitespace-nowrap">救助板板</span>
+                          <span class="font-pixel text-[11px] text-sdv-text-muted whitespace-nowrap">救助板板</span>
                           <button
                             type="button"
                             class="rescue-toggle"
@@ -373,12 +368,12 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                         />
                       </td>
                     </template>
-                    <td class="px-3 py-2 text-right font-serif font-bold">
+                    <td class="px-3 py-2 text-right font-pixel font-bold">
                       <template v-if="previewCoinDelta(p.id) === null">
-                        <span class="text-oxblood-300 text-xs">逆数</span>
+                        <span class="text-red-400 text-xs">逆数</span>
                       </template>
                       <template v-else>
-                        <span class="text-forest-300">+{{ previewCoinDelta(p.id) }}</span>
+                        <span class="text-sdv-btn-green">+{{ previewCoinDelta(p.id) }}</span>
                       </template>
                     </td>
                   </tr>
@@ -387,36 +382,34 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
             </div>
           </section>
 
-          <section class="rounded-md border border-gold-500/25 bg-ink-700/55 px-4 py-3 text-xs leading-relaxed">
-            <div class="font-serif tracking-[0.18em] uppercase text-gold-300/90 mb-1">
-              <span class="rune-mark mr-1">❖</span>结算规则
+          <section class="rounded-md border border-sdv-border/25 bg-sdv-bg/55 px-4 py-3 text-xs leading-relaxed">
+            <div class="font-pixel tracking-[0.18em] uppercase text-sdv-gold/90 mb-1">
+              ❖ 结算规则
             </div>
-            <div class="font-body text-ember-300/90">
-              <span class="font-serif tracking-wide">板板</span>：击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心 / 海洋之泪奖励 10 鼠币
+            <div class="font-body text-sdv-gold/90">
+              <span class="font-pixel tracking-wide">板板</span>：击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心 / 海洋之泪奖励 10 鼠币
             </div>
-            <div class="font-body text-sapphire-300/90 mt-0.5">
-              <span class="font-serif tracking-wide">护航</span>：击杀 1 人奖励 1 鼠币，救助板板奖励 1 鼠币
+            <div class="font-body text-sdv-text-nav/90 mt-0.5">
+              <span class="font-pixel tracking-wide">护航</span>：击杀 1 人奖励 1 鼠币，救助板板奖励 1 鼠币
             </div>
-            <div class="font-body text-forest-300/90 mt-0.5">
+            <div class="font-body text-sdv-btn-green/90 mt-0.5">
               撤离成功 · 全员奖励 3 鼠币
             </div>
           </section>
         </div>
 
-        <div class="px-5 py-4 border-t border-gold-500/25 flex items-center justify-between gap-3">
-          <div class="font-body text-xs text-oxblood-300 min-h-[1em]">
+        <div class="p-4 flex gap-3 justify-end border-t border-sdv-border/30">
+          <div class="font-body text-xs text-red-400 min-h-[1em] flex items-center mr-auto">
             {{ validation.ok ? '' : validation.reason }}
           </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <button class="btn-ghost py-2 px-4" @click="emit('close')">取消</button>
-            <button
-              class="btn-primary py-2 px-4"
-              :disabled="!canSubmit"
-              @click="submit"
-            >
-              {{ submitting ? '结算中…' : '⚖ 确认结算' }}
-            </button>
-          </div>
+          <button class="sdv-btn-secondary py-2 px-4" @click="emit('close')">取消</button>
+          <button
+            class="sdv-btn py-2 px-4"
+            :disabled="!canSubmit"
+            @click="submit"
+          >
+            {{ submitting ? '结算中…' : '⚖ 确认结算' }}
+          </button>
         </div>
       </div>
     </div>

@@ -202,7 +202,7 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
 </script>
 
 <template>
-  <div class="card rpg-corners p-6 relative overflow-hidden">
+  <div class="sdv-panel p-6 relative overflow-hidden">
     <div
       class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-ember-500/15 blur-3xl"
     />
@@ -211,14 +211,14 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
     />
     <div class="relative">
       <div class="flex items-center justify-between mb-4 gap-2">
-        <h3 class="rpg-title text-xl">
-          <span class="rune-mark mr-1">⚜</span>板板专属 · 神秘商店
+        <h3 class="font-pixel text-xl text-sdv-gold">
+          ⚜ 板板专属 · 神秘商店
         </h3>
-        <span class="badge !border-ember-400/60 !text-ember-300 animate-flicker">
-          <span class="rune-mark mr-1">★</span>神秘商店
+        <span class="sdv-badge !border-ember-400/60 !text-sdv-gold animate-pixel-pulse">
+          ★ 神秘商店
         </span>
       </div>
-      <div class="rpg-divider mb-5" />
+      <div class="sdv-divider mb-5" />
 
       <!-- 老虎机卷轴 -->
       <div
@@ -236,8 +236,8 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
           class="flex flex-col items-center justify-center text-center px-6"
           :style="{ height: VIEWPORT_H + 'px' }"
         >
-          <div class="rune-mark text-3xl text-gold-400/70 animate-flicker">✶</div>
-          <div class="font-body text-parchment-300/80 text-sm mt-2">
+          <div class="text-3xl text-sdv-gold/70 animate-pixel-pulse">✶</div>
+          <div class="font-body text-sdv-text-muted text-sm mt-2">
             点击开启神秘货柜，看看板板这次摸到什么好货。
           </div>
         </div>
@@ -294,33 +294,33 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
             }"
           >
             <span
-              class="absolute left-1 top-1/2 -translate-y-1/2 text-gold-400/80 text-xs"
-              :class="spinning ? 'animate-flicker' : ''"
+              class="absolute left-1 top-1/2 -translate-y-1/2 text-sdv-gold/80 text-xs"
+              :class="spinning ? 'animate-pixel-pulse' : ''"
               >▶</span
             >
             <span
-              class="absolute right-1 top-1/2 -translate-y-1/2 text-gold-400/80 text-xs"
-              :class="spinning ? 'animate-flicker' : ''"
+              class="absolute right-1 top-1/2 -translate-y-1/2 text-sdv-gold/80 text-xs"
+              :class="spinning ? 'animate-pixel-pulse' : ''"
               >◀</span
             >
             <!-- 四角装饰：revealed 时淡入 -->
             <span
-              class="absolute text-gold-400 text-sm transition-opacity duration-500"
+              class="absolute text-sdv-gold text-sm transition-opacity duration-500"
               :style="{ opacity: revealed ? 0.9 : 0, top: '8px', left: '8px' }"
               >✦</span
             >
             <span
-              class="absolute text-gold-400 text-sm transition-opacity duration-500"
+              class="absolute text-sdv-gold text-sm transition-opacity duration-500"
               :style="{ opacity: revealed ? 0.9 : 0, top: '8px', right: '8px' }"
               >✦</span
             >
             <span
-              class="absolute text-gold-400 text-sm transition-opacity duration-500"
+              class="absolute text-sdv-gold text-sm transition-opacity duration-500"
               :style="{ opacity: revealed ? 0.9 : 0, bottom: '8px', left: '8px' }"
               >✦</span
             >
             <span
-              class="absolute text-gold-400 text-sm transition-opacity duration-500"
+              class="absolute text-sdv-gold text-sm transition-opacity duration-500"
               :style="{ opacity: revealed ? 0.9 : 0, bottom: '8px', right: '8px' }"
               >✦</span
             >
@@ -330,19 +330,19 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
 
       <!-- 开奖详情：减速停稳后展示价值与保底变化 -->
       <div v-if="revealed" class="text-center mt-4 animate-slide-up">
-        <div class="font-serif text-xs text-gold-300/80 tracking-[0.32em] uppercase mb-1">
+        <div class="font-pixel text-xs text-sdv-gold/80 tracking-[0.32em] uppercase mb-1">
           ✦ 本次开出的红 ✦
         </div>
-        <div class="text-xs font-serif text-parchment-300/80">
-          <span class="text-forest-300 font-semibold">
+        <div class="text-xs font-pixel text-sdv-text-light/80">
+          <span class="text-sdv-btn-green font-semibold">
             价值 {{ formatValueW(result!.item.value) }}
           </span>
         </div>
         <div
           v-if="result!.guaranteeDelta > 0"
-          class="text-[11px] mt-1.5 font-serif text-gold-200 tracking-wider"
+          class="text-[11px] mt-1.5 font-pixel text-sdv-gold tracking-wider"
         >
-          <span class="rune-mark mr-1">⚜</span>
+          ⚜
           保底
           {{
             formatGuaranteeShift(
@@ -355,16 +355,16 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
       </div>
 
       <div class="mt-5">
-        <button class="btn-boss w-full py-3" :disabled="!canDraw" @click="drawOne">
+        <button class="sdv-btn w-full py-3" :disabled="!canDraw" @click="drawOne">
           <template v-if="spinning">
-            <span class="rune-mark animate-flicker">🎰</span> 货柜滚动中…
+            <span class="animate-pixel-pulse">🎰</span> 货柜滚动中…
           </template>
           <template v-else>
-            <span class="rune-mark">🎁</span> 开启神秘商店 · {{ SINGLE_DRAW_COST }} 鼠币
+            🎁 开启神秘商店 · {{ SINGLE_DRAW_COST }} 鼠币
           </template>
         </button>
       </div>
-      <p class="font-body text-[12px] text-parchment-300/75 mt-3 leading-relaxed text-center">
+      <p class="font-body text-[12px] text-sdv-text-muted mt-3 leading-relaxed text-center">
         按照市场价加入保底
       </p>
     </div>
