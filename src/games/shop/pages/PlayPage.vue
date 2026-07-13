@@ -136,8 +136,8 @@ function dismissClosed(): void {
           <div class="flex items-center gap-3 min-w-0">
             <div class="text-2xl animate-pixel-pulse">⚜</div>
             <div class="min-w-0">
-              <div class="font-pixel text-hls-gold text-base sm:text-lg leading-tight">花栗鼠的神秘商店</div>
-              <div class="font-pixel text-[10px] tracking-[0.3em] uppercase text-hls-gold/70 mt-0.5">
+              <div class="font-body font-bold text-hls-gold text-base sm:text-lg leading-tight">花栗鼠的神秘商店</div>
+              <div class="font-body text-[10px] uppercase text-hls-gold/70 mt-0.5">
                 口令 · {{ code }}
               </div>
             </div>
@@ -157,7 +157,7 @@ function dismissClosed(): void {
 
             <!-- 本局数据 -->
             <div>
-              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-hls-gold/60 mb-2">
+              <div class="font-body text-[10px] uppercase text-hls-gold/60 mb-2">
                 ⚜ 本局数据
               </div>
               <div class="grid grid-cols-2 gap-2">
@@ -165,8 +165,8 @@ function dismissClosed(): void {
                   class="hls-stat text-center"
                   title="商店保底"
                 >
-                  <div class="font-pixel text-[10px] uppercase tracking-[0.2em] text-hls-gold/80">保底</div>
-                  <div class="text-base font-bold font-pixel text-hls-gold mt-0.5">
+                  <div class="font-body text-[10px] uppercase text-hls-gold/80">保底</div>
+                  <div class="text-base font-bold font-body text-hls-gold mt-0.5">
                     {{ roomStore.guaranteedAmount }}<span class="text-hls-gold/80 ml-0.5 text-[11px]">W</span>
                   </div>
                 </div>
@@ -174,8 +174,8 @@ function dismissClosed(): void {
                   class="hls-stat text-center"
                   title="历次撤离成功累计扣减额"
                 >
-                  <div class="font-pixel text-[10px] uppercase tracking-[0.2em] text-hls-btn-green/70">得吃</div>
-                  <div class="text-base font-bold font-pixel text-hls-btn-green mt-0.5">
+                  <div class="font-body text-[10px] uppercase text-hls-btn-green/70">得吃</div>
+                  <div class="text-base font-bold font-body text-hls-btn-green mt-0.5">
                     {{ roomStore.evacuatedTotal }}<span class="text-hls-btn-green/80 ml-0.5 text-[11px]">W</span>
                   </div>
                 </div>
@@ -184,7 +184,7 @@ function dismissClosed(): void {
 
             <!-- 操作 -->
             <div>
-              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-hls-gold/60 mb-2">
+              <div class="font-body text-[10px] uppercase text-hls-gold/60 mb-2">
                 🗂 操作
               </div>
               <div class="flex flex-wrap gap-2">
@@ -211,7 +211,7 @@ function dismissClosed(): void {
 
             <!-- 店内成员 -->
             <div>
-              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-hls-gold/60 mb-2">
+              <div class="font-body text-[10px] uppercase text-hls-gold/60 mb-2">
                 👥 店内成员
               </div>
               <div class="grid grid-cols-3 gap-2 lg:grid-cols-1">
@@ -234,7 +234,7 @@ function dismissClosed(): void {
                     />
                   </div>
                   <div class="flex-1 min-w-0 w-full">
-                    <div class="font-pixel font-semibold text-hls-text-light flex flex-wrap items-center gap-1 justify-center lg:justify-start">
+                    <div class="font-body font-semibold text-hls-text-light flex flex-wrap items-center gap-1 justify-center lg:justify-start">
                       <span v-if="p.isHost" class="text-hls-gold shrink-0" title="房主">👑</span>
                       <span class="flex-1 min-w-0 truncate text-xs lg:text-sm lg:break-all lg:whitespace-normal">{{ p.nickname }}</span>
                       <span
@@ -280,7 +280,7 @@ function dismissClosed(): void {
             <div class="hls-panel p-10 text-center">
               <div class="hls-panel-title">正在确认角色</div>
               <div class="p-6">
-                <div class="font-pixel text-hls-text-light mt-2">
+                <div class="font-body text-hls-text-light mt-2">
                   正在确认您的店内角色…
                 </div>
               </div>

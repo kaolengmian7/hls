@@ -57,7 +57,7 @@ const records = computed(() => roomStore.settlementRecords);
             >
               <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
                 <div class="flex items-center gap-2">
-                  <span class="font-pixel text-[11px] tracking-widest text-hls-gold/70">
+                  <span class="font-body text-[11px] text-hls-gold/70">
                     ✦ {{ format(r.at) }}
                   </span>
                   <span
@@ -71,7 +71,7 @@ const records = computed(() => roomStore.settlementRecords);
                     {{ r.outcome === 'EVACUATED' ? '撤离成功' : '炸单翻车' }}
                   </span>
                 </div>
-                <div class="font-pixel text-xs text-hls-gold">
+                <div class="font-body text-xs text-hls-gold">
                   库藏 {{ r.guaranteeBefore }}W →
                   <span
                     :class="
@@ -88,12 +88,12 @@ const records = computed(() => roomStore.settlementRecords);
               <table class="w-full text-xs">
                 <thead>
                   <tr class="text-left">
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">成员</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">击杀</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">小红</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">6 格</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">9+ 格</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80 text-right">所得</th>
+                    <th class="py-1 font-body font-medium tracking-[0.18em] uppercase text-hls-gold/80">成员</th>
+                    <th class="py-1 font-body font-medium tracking-[0.18em] uppercase text-hls-gold/80">击杀</th>
+                    <th class="py-1 font-body font-medium tracking-[0.18em] uppercase text-hls-gold/80">小红</th>
+                    <th class="py-1 font-body font-medium tracking-[0.18em] uppercase text-hls-gold/80">6 格</th>
+                    <th class="py-1 font-body font-medium tracking-[0.18em] uppercase text-hls-gold/80">9+ 格</th>
+                    <th class="py-1 font-body font-medium tracking-[0.18em] uppercase text-hls-gold/80 text-right">所得</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -102,7 +102,7 @@ const records = computed(() => roomStore.settlementRecords);
                     :key="pp.playerId"
                     class="border-t border-hls-border/15"
                   >
-                    <td class="py-1.5 font-pixel text-hls-text-light">{{ nameOf(pp.playerId) }}</td>
+                    <td class="py-1.5 font-body text-hls-text-light">{{ nameOf(pp.playerId) }}</td>
                     <td class="py-1.5 text-hls-text-light/90">{{ pp.kills }}</td>
                     <template v-if="isEscort(pp)">
                       <td colspan="3" class="py-1.5 text-hls-text-light/90">
@@ -119,7 +119,7 @@ const records = computed(() => roomStore.settlementRecords);
                       <td class="py-1.5 text-hls-text-light/90">{{ pp.nineGrids }}</td>
                     </template>
                     <td
-                      class="py-1.5 text-right font-pixel font-bold"
+                      class="py-1.5 text-right font-body font-bold"
                       :class="pp.coinDelta > 0 ? 'text-hls-btn-green' : 'text-hls-text-muted'"
                     >
                       +{{ pp.coinDelta }}

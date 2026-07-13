@@ -70,7 +70,7 @@ async function updatePassword() {
 
 <template>
   <div class="min-h-screen px-4 py-8 max-w-md mx-auto space-y-6">
-    <h1 class="font-pixel text-2xl tracking-widest text-hls-gold">个人管理</h1>
+    <h1 class="font-body font-bold text-2xl text-hls-gold">个人管理</h1>
 
     <div v-if="auth.user" class="font-body text-xs text-hls-text-nav/60">
       账号：{{ auth.user.username }}

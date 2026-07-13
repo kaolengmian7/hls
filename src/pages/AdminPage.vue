@@ -113,7 +113,7 @@ async function handleConfirm() {
 <template>
   <div class="min-h-screen px-4 py-8 max-w-3xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
-      <h1 class="font-pixel text-2xl tracking-widest text-hls-gold">后台管理</h1>
+      <h1 class="font-body font-bold text-2xl text-hls-gold">后台管理</h1>
       <button class="hls-btn py-2 px-5" @click="openCreate">▶ 创建用户</button>
     </div>
 
@@ -125,11 +125,11 @@ async function handleConfirm() {
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b-2 border-hls-border/50">
-            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">ID</th>
-            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">账号</th>
-            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">昵称</th>
-            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">角色</th>
-            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">操作</th>
+            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">ID</th>
+            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">账号</th>
+            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">昵称</th>
+            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">角色</th>
+            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -167,8 +167,8 @@ async function handleConfirm() {
             <div v-if="createResult" class="space-y-3">
               <p class="font-body text-sm text-hls-text-dark text-center">创建成功！</p>
               <div class="hls-stat space-y-2">
-                <p class="font-body text-sm text-hls-text-muted">账号：<span class="font-pixel text-hls-text-dark">{{ createResult.username }}</span></p>
-                <p class="font-body text-sm text-hls-text-muted">初始密码：<span class="font-pixel text-hls-gold-dark">{{ createResult.password }}</span></p>
+                <p class="font-body text-sm text-hls-text-muted">账号：<span class="font-body font-medium text-hls-text-dark">{{ createResult.username }}</span></p>
+                <p class="font-body text-sm text-hls-text-muted">初始密码：<span class="font-body font-medium text-hls-gold-dark">{{ createResult.password }}</span></p>
               </div>
               <button class="hls-btn w-full py-2" @click="showCreate = false">关闭</button>
             </div>

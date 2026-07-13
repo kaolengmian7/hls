@@ -41,7 +41,7 @@ async function handleLogin() {
           <p v-if="error" class="font-body text-sm text-red-400 text-center">{{ error }}</p>
 
           <div>
-            <label class="font-pixel text-sm text-hls-text-dark tracking-wider block mb-1">账号</label>
+            <label class="font-body font-medium text-sm text-hls-text-dark block mb-1">账号</label>
             <input
               v-model="username"
               type="text"
@@ -53,7 +53,7 @@ async function handleLogin() {
           </div>
 
           <div>
-            <label class="font-pixel text-sm text-hls-text-dark tracking-wider block mb-1">密码</label>
+            <label class="font-body font-medium text-sm text-hls-text-dark block mb-1">密码</label>
             <input
               v-model="password"
               type="password"

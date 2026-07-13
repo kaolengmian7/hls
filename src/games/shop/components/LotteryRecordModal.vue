@@ -39,13 +39,13 @@ const records = computed(() => roomStore.lotteryRecords);
           <table class="w-full text-sm">
             <thead>
               <tr class="text-left">
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">时辰</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">开启人</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">耗金</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">所得</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">阶位</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">价值</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">库藏变动</th>
+                <th class="py-2 font-body font-medium text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">时辰</th>
+                <th class="py-2 font-body font-medium text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">开启人</th>
+                <th class="py-2 font-body font-medium text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">耗金</th>
+                <th class="py-2 font-body font-medium text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">所得</th>
+                <th class="py-2 font-body font-medium text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">阶位</th>
+                <th class="py-2 font-body font-medium text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">价值</th>
+                <th class="py-2 font-body font-medium text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">库藏变动</th>
               </tr>
             </thead>
             <tbody>
@@ -54,11 +54,11 @@ const records = computed(() => roomStore.lotteryRecords);
                 :key="r.id"
                 class="hls-menu-row border-t border-hls-border/30 hover:bg-hls-bg/60 transition-colors"
               >
-                <td class="py-2 font-pixel text-hls-text-light/90">{{ format(r.at) }}</td>
-                <td class="py-2 font-pixel text-hls-text-light">{{ nameOf(r.playerId) }}</td>
+                <td class="py-2 font-body text-hls-text-light/90">{{ format(r.at) }}</td>
+                <td class="py-2 font-body text-hls-text-light">{{ nameOf(r.playerId) }}</td>
                 <td class="py-2 coin-tag">💰 {{ r.cost }}</td>
                 <td
-                  class="py-2 font-pixel font-bold"
+                  class="py-2 font-body font-bold"
                   :class="RARITY_COLOR[r.item.rarity as Rarity] ?? 'text-hls-text-light'"
                 >
                   {{ r.item.name }}
@@ -66,8 +66,8 @@ const records = computed(() => roomStore.lotteryRecords);
                 <td class="py-2 font-body text-hls-text-light/80">
                   {{ RARITY_LABEL[r.item.rarity as Rarity] ?? r.item.rarity }}
                 </td>
-                <td class="py-2 text-hls-btn-green font-pixel">{{ formatValueW(r.item.value) }}</td>
-                <td class="py-2 text-hls-gold whitespace-nowrap font-pixel">
+                <td class="py-2 text-hls-btn-green font-body">{{ formatValueW(r.item.value) }}</td>
+                <td class="py-2 text-hls-gold whitespace-nowrap font-body">
                   {{ formatGuaranteeShift(r.guaranteeDelta, r.guaranteeBefore, r.guaranteeAfter) || '—' }}
                 </td>
               </tr>

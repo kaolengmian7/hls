@@ -211,7 +211,7 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
     />
     <div class="relative">
       <div class="flex items-center justify-between mb-4 gap-2">
-        <h3 class="font-pixel text-xl text-hls-gold">
+        <h3 class="font-body font-bold text-xl text-hls-gold">
           ⚜ 板板专属 · 神秘商店
         </h3>
         <span class="hls-badge !border-hls-gold/60 !text-hls-gold animate-pixel-pulse">
@@ -330,17 +330,17 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
 
       <!-- 开奖详情：减速停稳后展示价值与保底变化 -->
       <div v-if="revealed" class="text-center mt-4 animate-slide-up">
-        <div class="font-pixel text-xs text-hls-gold/80 tracking-[0.32em] uppercase mb-1">
+        <div class="font-body text-xs text-hls-gold/80 uppercase mb-1">
           ✦ 本次开出的红 ✦
         </div>
-        <div class="text-xs font-pixel text-hls-text-light/80">
+        <div class="text-xs font-body text-hls-text-light/80">
           <span class="text-hls-btn-green font-semibold">
             价值 {{ formatValueW(result!.item.value) }}
           </span>
         </div>
         <div
           v-if="result!.guaranteeDelta > 0"
-          class="text-[11px] mt-1.5 font-pixel text-hls-gold tracking-wider"
+          class="text-[11px] mt-1.5 font-body text-hls-gold"
         >
           ⚜
           保底

@@ -63,7 +63,7 @@ defineExpose({ shake, reset, passed })
       />
       <!-- label -->
       <span
-        class="absolute inset-0 flex items-center justify-center text-xs font-pixel tracking-widest pointer-events-none"
+        class="absolute inset-0 flex items-center justify-center text-xs font-body tracking-widest pointer-events-none"
         :class="passed ? 'text-green-400' : 'text-hls-text-muted/70'"
       >
         {{ passed ? '验证通过 ✓' : '拖动滑块完成验证' }}

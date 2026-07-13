@@ -35,7 +35,7 @@ onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
         @click="open = !open"
       >
         <Avatar :seed="String(auth.user.id)" :name="auth.user.nickname" size="sm" />
-        <span class="font-pixel text-sm text-hls-text-nav tracking-wide max-w-[80px] truncate">
+        <span class="font-body text-sm text-hls-text-nav max-w-[80px] truncate">
           {{ auth.user.nickname || '用户' }}
         </span>
       </button>
@@ -45,13 +45,13 @@ onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
         class="absolute right-0 top-full mt-2 min-w-[120px] hls-panel-deep py-1 z-50"
       >
         <button
-          class="w-full text-left font-pixel text-sm text-hls-text-nav hover:text-hls-gold px-4 py-2 transition-colors"
+          class="w-full text-left font-body text-sm text-hls-text-nav hover:text-hls-gold px-4 py-2 transition-colors"
           @click="router.push('/profile'); open = false"
         >
           个人管理
         </button>
         <button
-          class="w-full text-left font-pixel text-sm text-hls-text-nav hover:text-hls-gold px-4 py-2 transition-colors"
+          class="w-full text-left font-body text-sm text-hls-text-nav hover:text-hls-gold px-4 py-2 transition-colors"
           @click="auth.logout()"
         >
           退出登录

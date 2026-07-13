@@ -36,12 +36,12 @@ const frameClass = computed(() => {
         <Avatar :seed="player.id" :name="player.nickname" size="lg" />
         <span
           v-if="player.ready"
-          class="absolute -bottom-1 -right-1 w-6 h-6 flex items-center justify-center font-pixel text-xs bg-hls-btn-green border-2 border-hls-btn-green-border text-white"
+          class="absolute -bottom-1 -right-1 w-6 h-6 flex items-center justify-center font-body text-xs bg-hls-btn-green border-2 border-hls-btn-green-border text-white"
           title="已准备"
         >✓</span>
       </div>
       <div class="text-center">
-        <div class="font-pixel text-base text-hls-text-light flex items-center justify-center gap-1.5">
+        <div class="font-body font-bold text-base text-hls-text-light flex items-center justify-center gap-1.5">
           <span v-if="player.isHost" title="房主" class="text-hls-gold">👑</span>
           <span class="truncate max-w-[140px]">{{ player.nickname }}</span>
           <span v-if="isSelf" class="hls-badge hls-badge-gold !text-xs py-0 px-2">我</span>
@@ -62,7 +62,7 @@ const frameClass = computed(() => {
     <template v-else>
       <div class="flex-1 flex flex-col items-center justify-center gap-2 text-hls-text-nav/50">
         <div class="font-pixel text-3xl animate-pixel-pulse">✦</div>
-        <div class="font-pixel text-sm tracking-widest">空位等待加入…</div>
+        <div class="font-body text-sm">空位等待加入…</div>
       </div>
     </template>
   </div>

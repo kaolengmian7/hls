@@ -213,7 +213,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 
         <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
           <section>
-            <div class="font-pixel text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2">
+            <div class="font-body font-medium text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2">
               ❖ 本轮结果
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -225,7 +225,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               >
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">🛡️</span>
-                  <div class="font-pixel tracking-[0.2em] text-lg uppercase text-hls-btn-green">
+                  <div class="font-body font-bold text-lg uppercase text-hls-btn-green">
                     撤离成功
                   </div>
                 </div>
@@ -241,7 +241,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               >
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">💀</span>
-                  <div class="font-pixel tracking-[0.2em] text-lg uppercase text-red-400">
+                  <div class="font-body font-bold text-lg uppercase text-red-400">
                     炸单翻车
                   </div>
                 </div>
@@ -253,7 +253,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
           </section>
 
           <section>
-            <label class="font-pixel text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2 block">
+            <label class="font-body font-medium text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2 block">
               ❖ {{ outcome === 'EVACUATED' ? '保底扣减（W）' : '保底增加（W）' }}
             </label>
             <div class="flex items-center gap-2">
@@ -264,7 +264,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                 class="input flex-1"
                 :placeholder="outcome === 'EVACUATED' ? '例如 200' : '60'"
               />
-              <span class="font-pixel text-sm text-hls-gold whitespace-nowrap">
+              <span class="font-body text-sm text-hls-gold whitespace-nowrap">
                 当前保底 {{ currentGuarantee }}W
               </span>
             </div>
@@ -274,7 +274,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               :class="newGuarantee > GUARANTEE_MAX ? 'text-red-400' : 'text-hls-text-muted'"
             >
               结算后保底：
-              <span class="font-pixel font-bold text-hls-text-light">{{ newGuarantee }}W</span>
+              <span class="font-body font-bold text-hls-text-light">{{ newGuarantee }}W</span>
               <span class="ml-1 text-hls-text-muted">
                 ({{ outcome === 'EVACUATED' ? '−' : '+' }}{{ guaranteeDelta }}W)
               </span>
@@ -282,22 +282,22 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
           </section>
 
           <section>
-            <div class="font-pixel text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2">
+            <div class="font-body font-medium text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2">
               ❖ 三人本轮记录
             </div>
             <div class="rounded-md overflow-hidden border border-hls-border/30">
               <table class="w-full text-sm">
                 <thead>
                   <tr class="bg-hls-bg/80">
-                    <th class="text-left font-pixel text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-3 py-2">成员</th>
+                    <th class="text-left font-body font-medium text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-3 py-2">成员</th>
                     <th
                       v-for="h in STAT_HEADERS"
                       :key="h.key"
-                      class="text-center font-pixel text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-2 py-2 w-20"
+                      class="text-center font-body font-medium text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-2 py-2 w-20"
                     >
                       {{ h.label }}
                     </th>
-                    <th class="text-right font-pixel text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-3 py-2 w-20">所得</th>
+                    <th class="text-right font-body font-medium text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-3 py-2 w-20">所得</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -310,7 +310,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                       <div class="flex items-center gap-2 min-w-0">
                         <Avatar :seed="p.id" :name="p.nickname" size="sm" />
                         <div class="min-w-0">
-                          <div class="font-pixel font-semibold text-hls-text-light truncate flex items-center gap-1">
+                          <div class="font-body font-semibold text-hls-text-light truncate flex items-center gap-1">
                             <span v-if="p.isHost" class="text-hls-gold">👑</span>
                             {{ p.nickname }}
                           </div>
@@ -338,7 +338,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                       </td>
                       <td colspan="3" class="px-2 py-2">
                         <div class="flex items-center justify-center gap-2">
-                          <span class="font-pixel text-[11px] text-hls-text-muted whitespace-nowrap">救助板板</span>
+                          <span class="font-body text-[11px] text-hls-text-muted whitespace-nowrap">救助板板</span>
                           <button
                             type="button"
                             class="rescue-toggle"
@@ -368,7 +368,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                         />
                       </td>
                     </template>
-                    <td class="px-3 py-2 text-right font-pixel font-bold">
+                    <td class="px-3 py-2 text-right font-body font-bold">
                       <template v-if="previewCoinDelta(p.id) === null">
                         <span class="text-red-400 text-xs">逆数</span>
                       </template>
@@ -383,14 +383,14 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
           </section>
 
           <section class="rounded-md border border-hls-border/25 bg-hls-bg/55 px-4 py-3 text-xs leading-relaxed">
-            <div class="font-pixel tracking-[0.18em] uppercase text-hls-gold/90 mb-1">
+            <div class="font-body font-medium uppercase text-hls-gold/90 mb-1">
               ❖ 结算规则
             </div>
             <div class="font-body text-hls-gold/90">
-              <span class="font-pixel tracking-wide">板板</span>：击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心 / 海洋之泪奖励 10 鼠币
+              <span class="font-body font-medium">板板</span>：击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心 / 海洋之泪奖励 10 鼠币
             </div>
             <div class="font-body text-hls-text-nav/90 mt-0.5">
-              <span class="font-pixel tracking-wide">护航</span>：击杀 1 人奖励 1 鼠币，救助板板奖励 1 鼠币
+              <span class="font-body font-medium">护航</span>：击杀 1 人奖励 1 鼠币，救助板板奖励 1 鼠币
             </div>
             <div class="font-body text-hls-btn-green/90 mt-0.5">
               撤离成功 · 全员奖励 3 鼠币

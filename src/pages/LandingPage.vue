@@ -45,7 +45,7 @@ const games = [
 
     <!-- 顶部导航 -->
     <AppHeader>
-      <div class="flex gap-6 font-pixel text-xs tracking-widest text-hls-text-nav/60">
+      <div class="flex gap-6 font-body text-xs text-hls-text-nav/60">
         <a href="#games" class="hover:text-hls-gold transition-colors">玩法</a>
         <span>微信服务号</span>
       </div>
@@ -87,7 +87,7 @@ const games = [
           >
             <div class="text-2xl shrink-0">{{ game.icon }}</div>
             <div class="flex-1 min-w-0">
-              <div class="font-pixel text-base tracking-wider text-hls-text-dark">
+              <div class="font-body font-bold text-base text-hls-text-dark">
                 {{ game.title }}
               </div>
               <div class="font-body text-xs leading-relaxed text-hls-text-muted whitespace-pre-line mt-0.5">

@@ -149,7 +149,7 @@ async function handleJoin(): Promise<void> {
         <div class="p-7 sm:p-9 space-y-5">
 
           <div>
-            <label class="font-pixel text-sm text-hls-text-dark tracking-wider block mb-1">
+            <label class="font-body font-medium text-sm text-hls-text-dark block mb-1">
               商店保底
             </label>
             <div class="relative">
@@ -162,11 +162,11 @@ async function handleJoin(): Promise<void> {
                 :placeholder="String(DEFAULT_GUARANTEED_AMOUNT)"
                 @input="onGuaranteeInput"
               />
-              <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center font-pixel text-hls-text-dark">W</span>
+              <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center font-body text-hls-text-dark">W</span>
             </div>
             <p class="font-body text-xs mt-1.5" :class="guaranteeValid ? 'text-hls-text-muted' : 'text-red-400'">
               <template v-if="guaranteeValid">
-                当前保底：<span class="font-pixel text-hls-gold-dark">{{ guaranteeNumber }}W</span>
+                当前保底：<span class="font-body font-medium text-hls-gold-dark">{{ guaranteeNumber }}W</span>
                 · 可填 {{ MIN_GUARANTEED_AMOUNT }} ~ {{ MAX_GUARANTEED_AMOUNT }}
               </template>
               <template v-else>
@@ -183,7 +183,7 @@ async function handleJoin(): Promise<void> {
           <div class="hls-divider-label"><span>OR</span></div>
 
           <div>
-            <label class="font-pixel text-sm text-hls-text-dark tracking-wider block mb-1">
+            <label class="font-body font-medium text-sm text-hls-text-dark block mb-1">
               商店口令（六位）
             </label>
             <input

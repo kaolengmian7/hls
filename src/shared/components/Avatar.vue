@@ -27,7 +27,7 @@ const sizeCls = computed(() => {
 
 <template>
   <div
-    class="avatar-portrait flex items-center justify-center font-pixel font-bold text-white shadow-inner select-none"
+    class="avatar-portrait flex items-center justify-center font-body font-bold text-white shadow-inner select-none"
     :class="sizeCls"
     :style="{ backgroundColor: bg }"
   >

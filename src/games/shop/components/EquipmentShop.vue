@@ -24,10 +24,10 @@ function bundledNames(eq: Equipment): string {
 <template>
   <div class="hls-panel-deep p-6">
     <div class="flex items-center justify-between mb-3 gap-2">
-      <h3 class="font-pixel text-hls-gold text-xl">
+      <h3 class="font-body font-bold text-hls-gold text-xl">
         ⚔ 护航补给架
       </h3>
-      <span class="font-pixel text-xs tracking-[0.2em] uppercase text-hls-gold">
+      <span class="font-body text-xs uppercase text-hls-gold">
         当前鼠币 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
       </span>
     </div>
@@ -42,7 +42,7 @@ function bundledNames(eq: Equipment): string {
         <div class="flex items-center gap-3">
           <div class="text-3xl filter drop-shadow">{{ eq.icon }}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-pixel font-bold text-hls-text-light truncate text-base">{{ eq.name }}</div>
+            <div class="font-body font-bold text-hls-text-light truncate text-base">{{ eq.name }}</div>
             <div class="font-body text-xs text-hls-text-light/85">{{ eq.description }}</div>
           </div>
         </div>

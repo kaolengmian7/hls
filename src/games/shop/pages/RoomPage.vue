@@ -155,7 +155,7 @@ function dismissHostClosed(): void {
         <div class="p-6">
           <div class="font-pixel text-3xl text-hls-gold mb-3 animate-pixel-pulse">✶</div>
           <div class="font-body text-sm text-hls-text-dark">正在根据商店口令返回花栗鼠的神秘商店…</div>
-          <div class="mt-4 font-pixel text-xs tracking-[0.3em] uppercase text-hls-text-muted">
+          <div class="mt-4 font-body text-xs uppercase text-hls-text-muted">
             口令 · {{ code }}
           </div>
         </div>
@@ -170,10 +170,10 @@ function dismissHostClosed(): void {
       >
         <div class="flex items-center gap-3 flex-wrap">
           <div class="leading-tight">
-            <div class="font-pixel text-hls-gold/70 text-[10px] tracking-[0.32em] uppercase">
-              <span class="font-pixel mr-1">⚜</span>商店口令
+            <div class="font-body text-hls-gold/70 text-[10px] uppercase">
+              <span class="mr-1">⚜</span>商店口令
             </div>
-            <div class="font-pixel text-2xl text-hls-gold tracking-[.4em]">{{ code }}</div>
+            <div class="font-body font-bold text-2xl text-hls-gold tracking-[.4em]">{{ code }}</div>
           </div>
           <button class="hls-btn-ghost" @click="copyCode">复制口令</button>
           <button class="hls-btn-ghost" @click="copyLink">复制邀请链接</button>
@@ -183,15 +183,15 @@ function dismissHostClosed(): void {
             class="hls-stat leading-tight text-right"
             :title="`商店保底`"
           >
-            <div class="font-pixel text-hls-gold/70 text-[10px] uppercase tracking-[0.3em]">
+            <div class="font-body text-hls-gold/70 text-[10px] uppercase">
               商店保底
             </div>
-            <div class="font-pixel text-base text-hls-gold font-bold">
+            <div class="font-body text-base text-hls-gold font-bold">
               {{ roomStore.guaranteedAmount }}<span class="text-hls-gold/80 ml-0.5">W</span>
             </div>
           </div>
           <div class="hls-badge">
-            <span class="font-pixel mr-1">🐿</span>{{ players.length }} / {{ MAX_PLAYERS }}
+            🐿 {{ players.length }} / {{ MAX_PLAYERS }}
           </div>
           <button class="hls-btn-danger" @click="confirmLeave">
             离开商店
@@ -201,7 +201,7 @@ function dismissHostClosed(): void {
 
       <main class="flex-1 px-4 sm:px-8 py-8 max-w-4xl mx-auto w-full">
         <div class="text-center mb-6">
-          <h2 class="font-pixel text-2xl sm:text-3xl text-hls-gold">角色分配</h2>
+          <h2 class="font-body font-bold text-2xl sm:text-3xl text-hls-gold">角色分配</h2>
           <div class="mx-auto max-w-md mt-2 hls-divider" />
           <p class="mt-2 font-body text-hls-text-light/80 text-sm">
             本局固定 3 个角色：1 个板板，2 个护航。
@@ -219,8 +219,8 @@ function dismissHostClosed(): void {
 
         <div class="hls-panel mt-7 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="font-pixel text-xl text-hls-gold">
-              <span class="font-pixel mr-1">⚜</span>选择角色
+            <h3 class="font-body font-bold text-xl text-hls-gold">
+              <span class="mr-1">⚜</span>选择角色
             </h3>
             <span class="font-body text-xs text-hls-text-muted">
               准备后将锁定角色，直到本局开始。
@@ -238,7 +238,7 @@ function dismissHostClosed(): void {
             >
               <div class="flex items-center gap-2">
                 <span class="text-2xl">🛡️</span>
-                <div class="font-pixel text-hls-text-nav text-xl uppercase">
+                <div class="font-body font-bold text-hls-text-nav text-xl uppercase">
                   护航
                 </div>
               </div>
@@ -258,7 +258,7 @@ function dismissHostClosed(): void {
             >
               <div class="flex items-center gap-2">
                 <span class="text-2xl">🧙</span>
-                <div class="font-pixel text-hls-gold text-xl uppercase">
+                <div class="font-body font-bold text-hls-gold text-xl uppercase">
                   板板
                 </div>
               </div>
@@ -275,14 +275,14 @@ function dismissHostClosed(): void {
 
         <div class="hls-panel mt-5 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div class="font-pixel text-sm flex items-center gap-2">
+            <div class="font-body text-sm flex items-center gap-2">
               <template v-if="me?.ready">
-                <span class="font-pixel text-hls-btn-green font-bold text-lg animate-pulse_soft">✓</span>
-                <span class="font-pixel text-hls-btn-green font-bold tracking-widest uppercase">已经准备</span>
+                <span class="text-hls-btn-green font-bold text-lg animate-pulse_soft">✓</span>
+                <span class="font-body text-hls-btn-green font-bold uppercase">已经准备</span>
               </template>
               <template v-else>
                 <span class="font-pixel text-hls-gold text-lg animate-pixel-pulse">✦</span>
-                <span class="font-pixel text-hls-gold font-bold tracking-widest uppercase">尚未准备</span>
+                <span class="font-body text-hls-gold font-bold uppercase">尚未准备</span>
               </template>
             </div>
             <div class="font-body text-xs text-hls-text-light/80 mt-1">{{ startHint }}</div>
