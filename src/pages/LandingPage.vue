@@ -82,7 +82,8 @@ const games = [
             :class="[
               game.active ? 'active' : 'disabled',
             ]"
-            @click="game.active && router.push(game.route)"
+            :disabled="!game.active"
+            @click="router.push(game.route)"
           >
             <div class="text-2xl shrink-0">{{ game.icon }}</div>
             <div class="flex-1 min-w-0">
