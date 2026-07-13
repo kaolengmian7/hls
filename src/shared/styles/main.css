@@ -262,6 +262,13 @@
   .sdv-toast--warn    { background: linear-gradient(180deg, #b07018 0%, #7a4808 100%); }
   .sdv-toast--info    { background: linear-gradient(180deg, #2a4838 0%, #1a3020 100%); }
 
+  /* ---------- Coin tag ---------- */
+  .coin-tag {
+    font-family: 'VT323', monospace;
+    color: #f0e080;
+    font-size: 1rem;
+  }
+
   /* ---------- Stat panel ---------- */
   .sdv-stat {
     background: #c8a870;

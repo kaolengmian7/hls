@@ -31,7 +31,7 @@ function bundledNames(eq: Equipment): string {
         当前鼠币 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
       </span>
     </div>
-    <div class="rpg-divider mb-5" />
+    <div class="sdv-divider mb-5" />
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div

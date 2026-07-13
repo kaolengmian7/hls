@@ -31,7 +31,7 @@ const events = computed(() => roomStore.feed);
         {{ events.length }} 缄
       </span>
     </div>
-    <div class="rpg-divider mb-3" />
+    <div class="sdv-divider mb-3" />
     <div class="flex-1 overflow-y-auto max-h-[60vh] lg:max-h-[calc(100vh-8rem)] pr-1 space-y-2">
       <transition-group name="feed">
         <div
@@ -47,11 +47,11 @@ const events = computed(() => roomStore.feed);
           </template>
 
           <template v-else-if="ev.kind === 'PLAYER_LEFT'">
-            <span class="font-pixel font-semibold text-oxblood-300">「{{ nameOf(asStr(ev.payload.playerId)) }}」</span>离开了神秘商店。
+            <span class="font-pixel font-semibold text-red-400">「{{ nameOf(asStr(ev.payload.playerId)) }}」</span>离开了神秘商店。
           </template>
 
           <template v-else-if="ev.kind === 'LOTTERY'">
-            <div><span class="font-pixel font-semibold text-sdv-gold">「板板」</span>在神秘商店摸出了<span class="font-pixel font-bold text-royal-400">‹{{ asStr(ev.payload.itemName) }}›</span></div>
+            <div><span class="font-pixel font-semibold text-sdv-gold">「板板」</span>在神秘商店摸出了<span class="font-pixel font-bold text-sdv-text-light">‹{{ asStr(ev.payload.itemName) }}›</span></div>
             <div v-if="Number(ev.payload.itemValue) > 0 || Number(ev.payload.guaranteeDelta) > 0" class="feed-detail">
               <span v-if="Number(ev.payload.itemValue) > 0" class="text-sdv-btn-green">价值 {{ Number(ev.payload.itemValue) }}W</span>
               <span v-if="Number(ev.payload.guaranteeDelta) > 0" class="text-sdv-gold/80">保底 +{{ Number(ev.payload.guaranteeDelta) }}W · {{ Number(ev.payload.guaranteeBefore) }}→{{ Number(ev.payload.guaranteeAfter) }}</span>
@@ -70,7 +70,7 @@ const events = computed(() => roomStore.feed);
           </template>
 
           <template v-else-if="ev.kind === 'SETTLEMENT'">
-            <div><span class="font-pixel font-bold tracking-wider" :class="ev.payload.outcome === 'EVACUATED' ? 'text-sdv-btn-green' : 'text-oxblood-300'">{{ ev.payload.outcome === 'EVACUATED' ? '✓ 成功撤离' : '✗ 炸单翻车' }}</span></div>
+            <div><span class="font-pixel font-bold tracking-wider" :class="ev.payload.outcome === 'EVACUATED' ? 'text-sdv-btn-green' : 'text-red-400'">{{ ev.payload.outcome === 'EVACUATED' ? '✓ 成功撤离' : '✗ 炸单翻车' }}</span></div>
             <div v-if="Number(ev.payload.guaranteeDelta) > 0" class="feed-detail">
               <span class="text-sdv-gold/80">库藏 {{ asStr(ev.payload.guaranteeBefore) }}W → {{ asStr(ev.payload.guaranteeAfter) }}W</span>
             </div>
