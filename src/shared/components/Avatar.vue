@@ -27,7 +27,7 @@ const sizeCls = computed(() => {
 
 <template>
   <div
-    class="avatar-portrait rounded-full flex items-center justify-center font-display font-bold text-white shadow-inner select-none"
+    class="avatar-portrait flex items-center justify-center font-pixel font-bold text-white shadow-inner select-none"
     :class="sizeCls"
     :style="{ backgroundColor: bg }"
   >
@@ -38,12 +38,10 @@ const sizeCls = computed(() => {
 <style scoped>
 .avatar-portrait {
   position: relative;
-  border: 2px solid rgba(212, 175, 55, 0.65);
+  border: 3px solid #5c3d24;
   box-shadow:
-    inset 0 0 8px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(0, 0, 0, 0.6),
-    0 0 0 3px rgba(20, 12, 8, 0.7),
-    0 4px 10px rgba(0, 0, 0, 0.5);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+    inset 0 0 0 1px #e8c898,
+    2px 2px 0 #0a0806;
+  image-rendering: pixelated;
 }
 </style>
