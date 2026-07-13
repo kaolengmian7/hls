@@ -34,36 +34,45 @@ async function handleLogin() {
 
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center px-4">
-    <h1 class="rpg-title text-2xl mb-8 tracking-widest">花栗鼠俱乐部</h1>
+    <div class="w-full max-w-xs">
+      <div class="sdv-panel animate-pixel-slide">
+        <div class="sdv-panel-title text-center">花栗鼠俱乐部</div>
+        <div class="p-6 space-y-4">
+          <p v-if="error" class="font-body text-sm text-red-400 text-center">{{ error }}</p>
 
-    <div class="w-full max-w-xs space-y-4">
-      <p v-if="error" class="text-red-400 text-sm text-center">{{ error }}</p>
+          <div>
+            <label class="font-pixel text-sm text-sdv-text-dark tracking-wider block mb-1">账号</label>
+            <input
+              v-model="username"
+              type="text"
+              autocomplete="username"
+              placeholder="hlsXXXX"
+              class="sdv-input w-full"
+              @keydown.enter="!loading && handleLogin()"
+            />
+          </div>
 
-      <input
-        v-model="username"
-        type="text"
-        autocomplete="username"
-        placeholder="账号（hlsXXXX）"
-        class="w-full bg-white/5 border border-white/20 rounded px-3 py-2 text-sm font-serif text-parchment-200 placeholder:text-parchment-400/40 focus:outline-none focus:border-gold-400/60"
-        @keydown.enter="!loading && handleLogin()"
-      />
+          <div>
+            <label class="font-pixel text-sm text-sdv-text-dark tracking-wider block mb-1">密码</label>
+            <input
+              v-model="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••"
+              class="sdv-input w-full"
+              @keydown.enter="!loading && handleLogin()"
+            />
+          </div>
 
-      <input
-        v-model="password"
-        type="password"
-        autocomplete="current-password"
-        placeholder="密码"
-        class="w-full bg-white/5 border border-white/20 rounded px-3 py-2 text-sm font-serif text-parchment-200 placeholder:text-parchment-400/40 focus:outline-none focus:border-gold-400/60"
-        @keydown.enter="!loading && handleLogin()"
-      />
-
-      <button
-        class="w-full font-serif text-sm text-gold-300 border border-gold-400/40 px-4 py-2 rounded hover:border-gold-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        :disabled="loading || !username || !password"
-        @click="handleLogin"
-      >
-        {{ loading ? '登录中…' : '登录' }}
-      </button>
+          <button
+            class="sdv-btn w-full py-2.5 mt-2"
+            :disabled="loading || !username || !password"
+            @click="handleLogin"
+          >
+            {{ loading ? '登录中…' : '▶ 登录' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
