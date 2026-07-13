@@ -8,13 +8,16 @@ const router = useRouter();
   <div class="min-h-screen flex flex-col">
     <AppHeader />
     <div class="flex-1 flex flex-col items-center justify-center">
-      <div class="text-center select-none">
-        <div class="rpg-subtitle text-[10px] mb-4 animate-flicker">✦ 花栗鼠俱乐部 ✦</div>
-        <div class="text-4xl mb-4">🃏</div>
-        <h1 class="rpg-title text-3xl font-bold mb-3">摸红扑克牌</h1>
-        <div class="mx-auto max-w-xs rpg-divider mb-6" />
-        <p class="text-parchment-300/70 font-body text-sm mb-8">即将推出，敬请期待</p>
-        <button class="btn-secondary px-6 py-2" @click="router.push('/')">← 返回首页</button>
+      <div class="sdv-panel max-w-sm w-full mx-4 animate-pixel-slide">
+        <div class="sdv-panel-title text-center">摸红扑克牌</div>
+        <div class="p-8 text-center">
+          <div class="text-5xl mb-4">🃏</div>
+          <p class="font-body text-sm text-sdv-text-muted mb-6">即将推出，敬请期待</p>
+          <span class="sdv-badge sdv-badge-gray mb-6 inline-block">即将推出</span>
+          <div class="mt-4">
+            <button class="sdv-btn-secondary px-6 py-2" @click="router.push('/')">← 返回首页</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
