@@ -58,13 +58,13 @@ defineExpose({ shake, reset, passed })
       <!-- fill bar -->
       <div
         class="absolute left-0 top-0 h-full pointer-events-none transition-colors duration-200"
-        :class="passed ? 'bg-green-500/30' : 'bg-gold-400/20'"
+        :class="passed ? 'bg-green-500/30' : 'bg-sdv-gold/20'"
         :style="{ width: fillWidth + 'px' }"
       />
       <!-- label -->
       <span
-        class="absolute inset-0 flex items-center justify-center text-xs font-serif tracking-widest pointer-events-none"
-        :class="passed ? 'text-green-400' : 'text-parchment-400/50'"
+        class="absolute inset-0 flex items-center justify-center text-xs font-pixel tracking-widest pointer-events-none"
+        :class="passed ? 'text-green-400' : 'text-sdv-text-muted/70'"
       >
         {{ passed ? '验证通过 ✓' : '拖动滑块完成验证' }}
       </span>
@@ -74,7 +74,7 @@ defineExpose({ shake, reset, passed })
         :style="{ width: KNOB_W + 'px', left: sliderX + 'px' }"
         @pointerdown.prevent="onPointerDown"
       >
-        <span class="text-gold-300 text-base select-none">›</span>
+        <span class="text-sdv-gold text-base select-none">›</span>
       </div>
     </div>
   </div>
