@@ -70,21 +70,21 @@ async function updatePassword() {
 
 <template>
   <div class="min-h-screen px-4 py-8 max-w-md mx-auto space-y-6">
-    <h1 class="font-pixel text-2xl tracking-widest text-sdv-gold">个人管理</h1>
+    <h1 class="font-pixel text-2xl tracking-widest text-hls-gold">个人管理</h1>
 
-    <div v-if="auth.user" class="font-body text-xs text-sdv-text-nav/60">
+    <div v-if="auth.user" class="font-body text-xs text-hls-text-nav/60">
       账号：{{ auth.user.username }}
     </div>
 
     <!-- 修改昵称 -->
-    <div class="sdv-panel">
-      <div class="sdv-panel-title">修改昵称</div>
+    <div class="hls-panel">
+      <div class="hls-panel-title">修改昵称</div>
       <div class="p-5 space-y-3">
         <p v-if="nicknameError" class="font-body text-xs text-red-400">{{ nicknameError }}</p>
         <p v-if="nicknameSuccess" class="font-body text-xs text-green-400">修改成功</p>
-        <input v-model="nickname" type="text" placeholder="昵称" class="sdv-input w-full" />
+        <input v-model="nickname" type="text" placeholder="昵称" class="hls-input w-full" />
         <button
-          class="sdv-btn py-2 px-5"
+          class="hls-btn py-2 px-5"
           :disabled="nicknameLoading || !nickname.trim()"
           @click="updateNickname"
         >
@@ -94,16 +94,16 @@ async function updatePassword() {
     </div>
 
     <!-- 修改密码 -->
-    <div class="sdv-panel">
-      <div class="sdv-panel-title">修改密码</div>
+    <div class="hls-panel">
+      <div class="hls-panel-title">修改密码</div>
       <div class="p-5 space-y-3">
         <p v-if="passwordError" class="font-body text-xs text-red-400">{{ passwordError }}</p>
         <p v-if="passwordSuccess" class="font-body text-xs text-green-400">密码修改成功</p>
-        <input v-model="oldPassword" type="password" placeholder="旧密码" class="sdv-input w-full" />
-        <input v-model="newPassword" type="password" placeholder="新密码（至少6位）" class="sdv-input w-full" />
-        <input v-model="confirmPassword" type="password" placeholder="确认新密码" class="sdv-input w-full" />
+        <input v-model="oldPassword" type="password" placeholder="旧密码" class="hls-input w-full" />
+        <input v-model="newPassword" type="password" placeholder="新密码（至少6位）" class="hls-input w-full" />
+        <input v-model="confirmPassword" type="password" placeholder="确认新密码" class="hls-input w-full" />
         <button
-          class="sdv-btn-secondary py-2 px-5"
+          class="hls-btn-secondary py-2 px-5"
           :disabled="passwordLoading || !oldPassword || !newPassword || !confirmPassword"
           @click="updatePassword"
         >
@@ -113,9 +113,9 @@ async function updatePassword() {
     </div>
 
     <!-- 店长专属 -->
-    <div v-if="auth.user?.role === 'owner'" class="sdv-panel">
+    <div v-if="auth.user?.role === 'owner'" class="hls-panel">
       <div class="p-5">
-        <button class="sdv-btn-secondary w-full py-2.5" @click="router.push('/admin')">
+        <button class="hls-btn-secondary w-full py-2.5" @click="router.push('/admin')">
           ▶ 进入后台管理
         </button>
       </div>

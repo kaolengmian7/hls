@@ -33,55 +33,55 @@ const records = computed(() => roomStore.lotteryRecords);
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
       @click.self="emit('close')"
     >
-      <div class="sdv-panel w-[92%] max-w-lg max-h-[80vh] flex flex-col animate-pixel-slide">
-        <div class="sdv-panel-title">抽奖记录</div>
+      <div class="hls-panel w-[92%] max-w-lg max-h-[80vh] flex flex-col animate-pixel-slide">
+        <div class="hls-panel-title">抽奖记录</div>
         <div class="flex-1 overflow-y-auto p-5">
           <table class="w-full text-sm">
             <thead>
               <tr class="text-left">
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-sdv-gold/85">时辰</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-sdv-gold/85">开启人</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-sdv-gold/85">耗金</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-sdv-gold/85">所得</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-sdv-gold/85">阶位</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-sdv-gold/85">价值</th>
-                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-sdv-gold/85">库藏变动</th>
+                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">时辰</th>
+                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">开启人</th>
+                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">耗金</th>
+                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">所得</th>
+                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">阶位</th>
+                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">价值</th>
+                <th class="py-2 font-pixel text-[11px] tracking-[0.18em] uppercase text-hls-gold/85">库藏变动</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="r in records"
                 :key="r.id"
-                class="sdv-menu-row border-t border-sdv-border/30 hover:bg-sdv-bg/60 transition-colors"
+                class="hls-menu-row border-t border-hls-border/30 hover:bg-hls-bg/60 transition-colors"
               >
-                <td class="py-2 font-pixel text-sdv-text-light/90">{{ format(r.at) }}</td>
-                <td class="py-2 font-pixel text-sdv-text-light">{{ nameOf(r.playerId) }}</td>
+                <td class="py-2 font-pixel text-hls-text-light/90">{{ format(r.at) }}</td>
+                <td class="py-2 font-pixel text-hls-text-light">{{ nameOf(r.playerId) }}</td>
                 <td class="py-2 coin-tag">💰 {{ r.cost }}</td>
                 <td
                   class="py-2 font-pixel font-bold"
-                  :class="RARITY_COLOR[r.item.rarity as Rarity] ?? 'text-sdv-text-light'"
+                  :class="RARITY_COLOR[r.item.rarity as Rarity] ?? 'text-hls-text-light'"
                 >
                   {{ r.item.name }}
                 </td>
-                <td class="py-2 font-body text-sdv-text-light/80">
+                <td class="py-2 font-body text-hls-text-light/80">
                   {{ RARITY_LABEL[r.item.rarity as Rarity] ?? r.item.rarity }}
                 </td>
-                <td class="py-2 text-sdv-btn-green font-pixel">{{ formatValueW(r.item.value) }}</td>
-                <td class="py-2 text-sdv-gold whitespace-nowrap font-pixel">
+                <td class="py-2 text-hls-btn-green font-pixel">{{ formatValueW(r.item.value) }}</td>
+                <td class="py-2 text-hls-gold whitespace-nowrap font-pixel">
                   {{ formatGuaranteeShift(r.guaranteeDelta, r.guaranteeBefore, r.guaranteeAfter) || '—' }}
                 </td>
               </tr>
               <tr v-if="records.length === 0">
                 <td colspan="7" class="py-10 text-center">
-                  <div class="text-2xl text-sdv-gold/60 animate-pixel-pulse">✶</div>
-                  <div class="font-body text-sdv-text-light/75 mt-2">还没有抽奖记录</div>
+                  <div class="text-2xl text-hls-gold/60 animate-pixel-pulse">✶</div>
+                  <div class="font-body text-hls-text-light/75 mt-2">还没有抽奖记录</div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="p-4 border-t border-sdv-border/30">
-          <button class="sdv-btn-secondary w-full py-2" @click="emit('close')">关闭</button>
+        <div class="p-4 border-t border-hls-border/30">
+          <button class="hls-btn-secondary w-full py-2" @click="emit('close')">关闭</button>
         </div>
       </div>
     </div>

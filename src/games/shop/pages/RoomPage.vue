@@ -150,12 +150,12 @@ function dismissHostClosed(): void {
     <!-- 加载状态 -->
     <div v-if="restoring || !roomStore.snapshot" class="flex-1 flex items-center justify-center">
       <ToastContainer />
-      <div class="sdv-panel p-10 text-center max-w-sm">
-        <div class="sdv-panel-title text-center">重返神秘商店</div>
+      <div class="hls-panel p-10 text-center max-w-sm">
+        <div class="hls-panel-title text-center">重返神秘商店</div>
         <div class="p-6">
-          <div class="font-pixel text-3xl text-sdv-gold mb-3 animate-pixel-pulse">✶</div>
-          <div class="font-body text-sm text-sdv-text-dark">正在根据商店口令返回花栗鼠的神秘商店…</div>
-          <div class="mt-4 font-pixel text-xs tracking-[0.3em] uppercase text-sdv-text-muted">
+          <div class="font-pixel text-3xl text-hls-gold mb-3 animate-pixel-pulse">✶</div>
+          <div class="font-body text-sm text-hls-text-dark">正在根据商店口令返回花栗鼠的神秘商店…</div>
+          <div class="mt-4 font-pixel text-xs tracking-[0.3em] uppercase text-hls-text-muted">
             口令 · {{ code }}
           </div>
         </div>
@@ -166,34 +166,34 @@ function dismissHostClosed(): void {
       <ToastContainer />
 
       <header
-        class="px-4 sm:px-8 py-4 flex items-center justify-between gap-3 flex-wrap border-b border-sdv-border/20 bg-sdv-panel-deep/60 backdrop-blur"
+        class="px-4 sm:px-8 py-4 flex items-center justify-between gap-3 flex-wrap border-b border-hls-border/20 bg-hls-panel-deep/60 backdrop-blur"
       >
         <div class="flex items-center gap-3 flex-wrap">
           <div class="leading-tight">
-            <div class="font-pixel text-sdv-gold/70 text-[10px] tracking-[0.32em] uppercase">
+            <div class="font-pixel text-hls-gold/70 text-[10px] tracking-[0.32em] uppercase">
               <span class="font-pixel mr-1">⚜</span>商店口令
             </div>
-            <div class="font-pixel text-2xl text-sdv-gold tracking-[.4em]">{{ code }}</div>
+            <div class="font-pixel text-2xl text-hls-gold tracking-[.4em]">{{ code }}</div>
           </div>
-          <button class="sdv-btn-ghost" @click="copyCode">复制口令</button>
-          <button class="sdv-btn-ghost" @click="copyLink">复制邀请链接</button>
+          <button class="hls-btn-ghost" @click="copyCode">复制口令</button>
+          <button class="hls-btn-ghost" @click="copyLink">复制邀请链接</button>
         </div>
         <div class="flex items-center gap-3">
           <div
-            class="sdv-stat leading-tight text-right"
+            class="hls-stat leading-tight text-right"
             :title="`商店保底`"
           >
-            <div class="font-pixel text-sdv-gold/70 text-[10px] uppercase tracking-[0.3em]">
+            <div class="font-pixel text-hls-gold/70 text-[10px] uppercase tracking-[0.3em]">
               商店保底
             </div>
-            <div class="font-pixel text-base text-sdv-gold font-bold">
-              {{ roomStore.guaranteedAmount }}<span class="text-sdv-gold/80 ml-0.5">W</span>
+            <div class="font-pixel text-base text-hls-gold font-bold">
+              {{ roomStore.guaranteedAmount }}<span class="text-hls-gold/80 ml-0.5">W</span>
             </div>
           </div>
-          <div class="sdv-badge">
+          <div class="hls-badge">
             <span class="font-pixel mr-1">🐿</span>{{ players.length }} / {{ MAX_PLAYERS }}
           </div>
-          <button class="sdv-btn-danger" @click="confirmLeave">
+          <button class="hls-btn-danger" @click="confirmLeave">
             离开商店
           </button>
         </div>
@@ -201,9 +201,9 @@ function dismissHostClosed(): void {
 
       <main class="flex-1 px-4 sm:px-8 py-8 max-w-4xl mx-auto w-full">
         <div class="text-center mb-6">
-          <h2 class="font-pixel text-2xl sm:text-3xl text-sdv-gold">角色分配</h2>
-          <div class="mx-auto max-w-md mt-2 sdv-divider" />
-          <p class="mt-2 font-body text-sdv-text-light/80 text-sm">
+          <h2 class="font-pixel text-2xl sm:text-3xl text-hls-gold">角色分配</h2>
+          <div class="mx-auto max-w-md mt-2 hls-divider" />
+          <p class="mt-2 font-body text-hls-text-light/80 text-sm">
             本局固定 3 个角色：1 个板板，2 个护航。
           </p>
         </div>
@@ -217,18 +217,18 @@ function dismissHostClosed(): void {
           />
         </div>
 
-        <div class="sdv-panel mt-7 p-6">
+        <div class="hls-panel mt-7 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="font-pixel text-xl text-sdv-gold">
+            <h3 class="font-pixel text-xl text-hls-gold">
               <span class="font-pixel mr-1">⚜</span>选择角色
             </h3>
-            <span class="font-body text-xs text-sdv-text-muted">
+            <span class="font-body text-xs text-hls-text-muted">
               准备后将锁定角色，直到本局开始。
             </span>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <button
-              class="sdv-menu-row"
+              class="hls-menu-row"
               :class="{
                 'active': me?.role === 'ESCORT',
                 'opacity-60 cursor-not-allowed': me?.ready,
@@ -238,17 +238,17 @@ function dismissHostClosed(): void {
             >
               <div class="flex items-center gap-2">
                 <span class="text-2xl">🛡️</span>
-                <div class="font-pixel text-sdv-text-nav text-xl uppercase">
+                <div class="font-pixel text-hls-text-nav text-xl uppercase">
                   护航
                 </div>
               </div>
-              <div class="sdv-divider mt-2 mb-2 opacity-70" />
-              <p class="font-body text-xs text-sdv-text-light/80 leading-relaxed">
+              <div class="hls-divider mt-2 mb-2 opacity-70" />
+              <p class="font-body text-xs text-hls-text-light/80 leading-relaxed">
                 名额 2 · 起始 10 金 · 花费鼠币起装备保护板板
               </p>
             </button>
             <button
-              class="sdv-menu-row"
+              class="hls-menu-row"
               :class="{
                 'active': me?.role === 'BOSS',
                 'opacity-60 cursor-not-allowed': me?.ready,
@@ -258,45 +258,45 @@ function dismissHostClosed(): void {
             >
               <div class="flex items-center gap-2">
                 <span class="text-2xl">🧙</span>
-                <div class="font-pixel text-sdv-gold text-xl uppercase">
+                <div class="font-pixel text-hls-gold text-xl uppercase">
                   板板
                 </div>
               </div>
-              <div class="sdv-divider mt-2 mb-2 opacity-70" />
-              <p class="font-body text-xs text-sdv-text-light/80 leading-relaxed">
+              <div class="hls-divider mt-2 mb-2 opacity-70" />
+              <p class="font-body text-xs text-hls-text-light/80 leading-relaxed">
                 名额 1 · 起始 0 金 · 带队撤离 · 从神秘商店中开启丰厚奖励
               </p>
             </button>
           </div>
-          <p class="font-body text-[12px] text-sdv-text-muted mt-4 text-center">
+          <p class="font-body text-[12px] text-hls-text-muted mt-4 text-center">
             若切换角色，需要重新点击准备。
           </p>
         </div>
 
-        <div class="sdv-panel mt-5 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="hls-panel mt-5 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div class="font-pixel text-sm flex items-center gap-2">
               <template v-if="me?.ready">
-                <span class="font-pixel text-sdv-btn-green font-bold text-lg animate-pulse_soft">✓</span>
-                <span class="font-pixel text-sdv-btn-green font-bold tracking-widest uppercase">已经准备</span>
+                <span class="font-pixel text-hls-btn-green font-bold text-lg animate-pulse_soft">✓</span>
+                <span class="font-pixel text-hls-btn-green font-bold tracking-widest uppercase">已经准备</span>
               </template>
               <template v-else>
-                <span class="font-pixel text-sdv-gold text-lg animate-pixel-pulse">✦</span>
-                <span class="font-pixel text-sdv-gold font-bold tracking-widest uppercase">尚未准备</span>
+                <span class="font-pixel text-hls-gold text-lg animate-pixel-pulse">✦</span>
+                <span class="font-pixel text-hls-gold font-bold tracking-widest uppercase">尚未准备</span>
               </template>
             </div>
-            <div class="font-body text-xs text-sdv-text-light/80 mt-1">{{ startHint }}</div>
+            <div class="font-body text-xs text-hls-text-light/80 mt-1">{{ startHint }}</div>
           </div>
           <div class="flex flex-wrap gap-3 items-center">
             <button
-              :class="me?.ready ? 'sdv-btn-danger' : 'sdv-btn'"
+              :class="me?.ready ? 'hls-btn-danger' : 'hls-btn'"
               @click="toggleReady"
             >
               {{ me?.ready ? '取消准备' : '点击准备' }}
             </button>
             <button
               v-if="isHost"
-              class="sdv-btn"
+              class="hls-btn"
               :disabled="!startReady.ok"
               :title="startHint"
               @click="startGame"

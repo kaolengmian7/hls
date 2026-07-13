@@ -45,25 +45,25 @@ const games = [
 
     <!-- 顶部导航 -->
     <AppHeader>
-      <div class="flex gap-6 font-pixel text-xs tracking-widest text-sdv-text-nav/60">
-        <a href="#games" class="hover:text-sdv-gold transition-colors">玩法</a>
+      <div class="flex gap-6 font-pixel text-xs tracking-widest text-hls-text-nav/60">
+        <a href="#games" class="hover:text-hls-gold transition-colors">玩法</a>
         <span>微信服务号</span>
       </div>
     </AppHeader>
 
     <!-- Hero -->
-    <header class="flex-none px-6 pt-14 pb-10 text-center select-none border-b border-sdv-border/30">
-      <div class="font-pixel text-sm mb-4 text-sdv-gold/80 tracking-widest animate-pixel-pulse">
+    <header class="flex-none px-6 pt-14 pb-10 text-center select-none border-b border-hls-border/30">
+      <div class="font-pixel text-sm mb-4 text-hls-gold/80 tracking-widest animate-pixel-pulse">
         ✦ 花栗鼠俱乐部 · 三角洲行动 ✦
       </div>
-      <h1 class="font-pixel text-4xl sm:text-6xl font-bold leading-tight tracking-[0.2em] text-sdv-gold">
+      <h1 class="font-pixel text-4xl sm:text-6xl font-bold leading-tight tracking-[0.2em] text-hls-gold">
         花栗鼠俱乐部
       </h1>
-      <div class="mt-5 mx-auto max-w-xs sdv-divider" />
-      <p class="mt-5 font-body text-sm sm:text-base text-sdv-text-light tracking-wide leading-relaxed">
+      <div class="mt-5 mx-auto max-w-xs hls-divider" />
+      <p class="mt-5 font-body text-sm sm:text-base text-hls-text-light tracking-wide leading-relaxed">
         开一家最有温度的三角洲陪玩店
       </p>
-      <p class="mt-2 font-body text-xs text-sdv-text-nav/60 tracking-widest">
+      <p class="mt-2 font-body text-xs text-hls-text-nav/60 tracking-widest">
         原创 1V1 定制教学单 · 神秘商店趣味单
       </p>
     </header>
@@ -71,14 +71,14 @@ const games = [
     <!-- 玩法卡片 -->
     <main id="games" class="flex-1 px-4 py-10">
       <div class="mx-auto max-w-lg">
-        <div class="font-pixel text-xs tracking-[0.4em] uppercase text-sdv-text-nav/50 mb-6 text-center">
+        <div class="font-pixel text-xs tracking-[0.4em] uppercase text-hls-text-nav/50 mb-6 text-center">
           ❖ 我们的玩法 ❖
         </div>
         <div class="flex flex-col gap-3">
           <button
             v-for="game in games"
             :key="game.key"
-            class="sdv-menu-row text-left"
+            class="hls-menu-row text-left"
             :class="[
               game.active ? 'active' : 'disabled',
             ]"
@@ -87,16 +87,16 @@ const games = [
           >
             <div class="text-2xl shrink-0">{{ game.icon }}</div>
             <div class="flex-1 min-w-0">
-              <div class="font-pixel text-base tracking-wider text-sdv-text-dark">
+              <div class="font-pixel text-base tracking-wider text-hls-text-dark">
                 {{ game.title }}
               </div>
-              <div class="font-body text-xs leading-relaxed text-sdv-text-muted whitespace-pre-line mt-0.5">
+              <div class="font-body text-xs leading-relaxed text-hls-text-muted whitespace-pre-line mt-0.5">
                 {{ game.desc }}
               </div>
             </div>
             <div class="shrink-0">
-              <span v-if="game.active" class="sdv-badge">▶ 进入</span>
-              <span v-else class="sdv-badge sdv-badge-gray">即将推出</span>
+              <span v-if="game.active" class="hls-badge">▶ 进入</span>
+              <span v-else class="hls-badge hls-badge-gray">即将推出</span>
             </div>
           </button>
         </div>
@@ -104,7 +104,7 @@ const games = [
     </main>
 
     <!-- Footer -->
-    <footer class="text-center font-pixel text-sm tracking-[0.4em] uppercase text-sdv-text-nav/40 py-5 border-t border-sdv-border/20">
+    <footer class="text-center font-pixel text-sm tracking-[0.4em] uppercase text-hls-text-nav/40 py-5 border-t border-hls-border/20">
       ✥ 微信服务号 · 花栗鼠俱乐部 ✥
     </footer>
 

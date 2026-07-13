@@ -35,37 +35,37 @@ async function handleLogin() {
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center px-4">
     <div class="w-full max-w-xs">
-      <div class="sdv-panel animate-pixel-slide">
-        <div class="sdv-panel-title text-center">花栗鼠俱乐部</div>
+      <div class="hls-panel animate-pixel-slide">
+        <div class="hls-panel-title text-center">花栗鼠俱乐部</div>
         <div class="p-6 space-y-4">
           <p v-if="error" class="font-body text-sm text-red-400 text-center">{{ error }}</p>
 
           <div>
-            <label class="font-pixel text-sm text-sdv-text-dark tracking-wider block mb-1">账号</label>
+            <label class="font-pixel text-sm text-hls-text-dark tracking-wider block mb-1">账号</label>
             <input
               v-model="username"
               type="text"
               autocomplete="username"
               placeholder="hlsXXXX"
-              class="sdv-input w-full"
+              class="hls-input w-full"
               @keydown.enter="!loading && handleLogin()"
             />
           </div>
 
           <div>
-            <label class="font-pixel text-sm text-sdv-text-dark tracking-wider block mb-1">密码</label>
+            <label class="font-pixel text-sm text-hls-text-dark tracking-wider block mb-1">密码</label>
             <input
               v-model="password"
               type="password"
               autocomplete="current-password"
               placeholder="••••••"
-              class="sdv-input w-full"
+              class="hls-input w-full"
               @keydown.enter="!loading && handleLogin()"
             />
           </div>
 
           <button
-            class="sdv-btn w-full py-2.5 mt-2"
+            class="hls-btn w-full py-2.5 mt-2"
             :disabled="loading || !username || !password"
             @click="handleLogin"
           >

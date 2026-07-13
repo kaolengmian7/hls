@@ -113,39 +113,39 @@ async function handleConfirm() {
 <template>
   <div class="min-h-screen px-4 py-8 max-w-3xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
-      <h1 class="font-pixel text-2xl tracking-widest text-sdv-gold">后台管理</h1>
-      <button class="sdv-btn py-2 px-5" @click="openCreate">▶ 创建用户</button>
+      <h1 class="font-pixel text-2xl tracking-widest text-hls-gold">后台管理</h1>
+      <button class="hls-btn py-2 px-5" @click="openCreate">▶ 创建用户</button>
     </div>
 
     <p v-if="listError" class="font-body text-sm text-red-400">{{ listError }}</p>
-    <p v-if="loading" class="font-body text-sm text-sdv-text-nav/60 animate-pixel-pulse">加载中…</p>
+    <p v-if="loading" class="font-body text-sm text-hls-text-nav/60 animate-pixel-pulse">加载中…</p>
 
-    <div v-if="!loading && !listError" class="sdv-panel overflow-hidden">
-      <div class="sdv-panel-title">用户列表</div>
+    <div v-if="!loading && !listError" class="hls-panel overflow-hidden">
+      <div class="hls-panel-title">用户列表</div>
       <table class="w-full text-sm">
         <thead>
-          <tr class="border-b-2 border-sdv-border/50">
-            <th class="text-left px-4 py-3 font-pixel text-sdv-text-dark tracking-wider font-normal">ID</th>
-            <th class="text-left px-4 py-3 font-pixel text-sdv-text-dark tracking-wider font-normal">账号</th>
-            <th class="text-left px-4 py-3 font-pixel text-sdv-text-dark tracking-wider font-normal">昵称</th>
-            <th class="text-left px-4 py-3 font-pixel text-sdv-text-dark tracking-wider font-normal">角色</th>
-            <th class="text-left px-4 py-3 font-pixel text-sdv-text-dark tracking-wider font-normal">操作</th>
+          <tr class="border-b-2 border-hls-border/50">
+            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">ID</th>
+            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">账号</th>
+            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">昵称</th>
+            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">角色</th>
+            <th class="text-left px-4 py-3 font-pixel text-hls-text-dark tracking-wider font-normal">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="u in users"
             :key="u.id"
-            class="border-b border-sdv-border/25 last:border-0"
+            class="border-b border-hls-border/25 last:border-0"
           >
-            <td class="px-4 py-3 font-body text-sdv-text-muted">{{ u.id }}</td>
-            <td class="px-4 py-3 font-body text-sdv-text-dark">{{ u.username }}</td>
-            <td class="px-4 py-3 font-body text-sdv-text-dark">{{ u.nickname }}</td>
-            <td class="px-4 py-3"><span class="sdv-badge sdv-badge-gold">{{ roleLabels[u.role] }}</span></td>
+            <td class="px-4 py-3 font-body text-hls-text-muted">{{ u.id }}</td>
+            <td class="px-4 py-3 font-body text-hls-text-dark">{{ u.username }}</td>
+            <td class="px-4 py-3 font-body text-hls-text-dark">{{ u.nickname }}</td>
+            <td class="px-4 py-3"><span class="hls-badge hls-badge-gold">{{ roleLabels[u.role] }}</span></td>
             <td class="px-4 py-3">
               <div class="flex gap-2">
-                <button class="sdv-btn-secondary text-xs py-1 px-3" @click="askResetPassword(u)">重置密码</button>
-                <button class="sdv-btn-secondary text-xs py-1 px-3" @click="askResetNickname(u)">重置昵称</button>
+                <button class="hls-btn-secondary text-xs py-1 px-3" @click="askResetPassword(u)">重置密码</button>
+                <button class="hls-btn-secondary text-xs py-1 px-3" @click="askResetNickname(u)">重置昵称</button>
               </div>
             </td>
           </tr>
@@ -160,31 +160,31 @@ async function handleConfirm() {
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
         @click.self="showCreate = false"
       >
-        <div class="sdv-panel w-[92%] max-w-sm animate-pixel-slide">
-          <div class="sdv-panel-title text-center">创建用户</div>
+        <div class="hls-panel w-[92%] max-w-sm animate-pixel-slide">
+          <div class="hls-panel-title text-center">创建用户</div>
           <div class="p-6 space-y-4">
 
             <div v-if="createResult" class="space-y-3">
-              <p class="font-body text-sm text-sdv-text-dark text-center">创建成功！</p>
-              <div class="sdv-stat space-y-2">
-                <p class="font-body text-sm text-sdv-text-muted">账号：<span class="font-pixel text-sdv-text-dark">{{ createResult.username }}</span></p>
-                <p class="font-body text-sm text-sdv-text-muted">初始密码：<span class="font-pixel text-sdv-gold-dark">{{ createResult.password }}</span></p>
+              <p class="font-body text-sm text-hls-text-dark text-center">创建成功！</p>
+              <div class="hls-stat space-y-2">
+                <p class="font-body text-sm text-hls-text-muted">账号：<span class="font-pixel text-hls-text-dark">{{ createResult.username }}</span></p>
+                <p class="font-body text-sm text-hls-text-muted">初始密码：<span class="font-pixel text-hls-gold-dark">{{ createResult.password }}</span></p>
               </div>
-              <button class="sdv-btn w-full py-2" @click="showCreate = false">关闭</button>
+              <button class="hls-btn w-full py-2" @click="showCreate = false">关闭</button>
             </div>
 
             <template v-else>
               <p v-if="createError" class="font-body text-xs text-red-400 text-center">{{ createError }}</p>
-              <input v-model="createNickname" type="text" placeholder="昵称（可选）" class="sdv-input w-full" />
-              <select v-model="createRole" class="sdv-input w-full">
+              <input v-model="createNickname" type="text" placeholder="昵称（可选）" class="hls-input w-full" />
+              <select v-model="createRole" class="hls-input w-full">
                 <option value="customer">客户</option>
                 <option value="service">客服</option>
                 <option value="enforcer">打手</option>
                 <option value="owner">店长</option>
               </select>
               <div class="flex gap-3 pt-1">
-                <button class="flex-1 sdv-btn-secondary py-2" @click="showCreate = false">取消</button>
-                <button class="flex-1 sdv-btn py-2 disabled:opacity-40" :disabled="createLoading" @click="submitCreate">
+                <button class="flex-1 hls-btn-secondary py-2" @click="showCreate = false">取消</button>
+                <button class="flex-1 hls-btn py-2 disabled:opacity-40" :disabled="createLoading" @click="submitCreate">
                   {{ createLoading ? '创建中…' : '▶ 创建' }}
                 </button>
               </div>

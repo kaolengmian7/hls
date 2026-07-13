@@ -22,41 +22,41 @@ function bundledNames(eq: Equipment): string {
 </script>
 
 <template>
-  <div class="sdv-panel-deep p-6">
+  <div class="hls-panel-deep p-6">
     <div class="flex items-center justify-between mb-3 gap-2">
-      <h3 class="font-pixel text-sdv-gold text-xl">
+      <h3 class="font-pixel text-hls-gold text-xl">
         ⚔ 护航补给架
       </h3>
-      <span class="font-pixel text-xs tracking-[0.2em] uppercase text-sdv-gold">
+      <span class="font-pixel text-xs tracking-[0.2em] uppercase text-hls-gold">
         当前鼠币 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
       </span>
     </div>
-    <div class="sdv-divider mb-5" />
+    <div class="hls-divider mb-5" />
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div
         v-for="eq in EQUIPMENT_LIST"
         :key="eq.id"
-        class="sdv-menu-row flex flex-col gap-2 transition-all"
+        class="hls-menu-row flex flex-col gap-2 transition-all"
       >
         <div class="flex items-center gap-3">
           <div class="text-3xl filter drop-shadow">{{ eq.icon }}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-pixel font-bold text-sdv-text-light truncate text-base">{{ eq.name }}</div>
-            <div class="font-body text-xs text-sdv-text-light/85">{{ eq.description }}</div>
+            <div class="font-pixel font-bold text-hls-text-light truncate text-base">{{ eq.name }}</div>
+            <div class="font-body text-xs text-hls-text-light/85">{{ eq.description }}</div>
           </div>
         </div>
 
-        <div v-if="eq.bundledLabels?.length" class="text-[11px] font-body text-sdv-text-muted">
-          套装包含：<span class="text-sdv-gold">{{ bundledNames(eq) }}</span>
+        <div v-if="eq.bundledLabels?.length" class="text-[11px] font-body text-hls-text-muted">
+          套装包含：<span class="text-hls-gold">{{ bundledNames(eq) }}</span>
         </div>
 
-        <div class="flex items-center justify-between mt-1 pt-2 border-t border-sdv-border/30">
+        <div class="flex items-center justify-between mt-1 pt-2 border-t border-hls-border/30">
           <span class="coin-tag text-base">
             <span>💰</span> {{ eq.price }}
           </span>
           <button
-            class="sdv-btn py-1.5 px-3 text-[11px]"
+            class="hls-btn py-1.5 px-3 text-[11px]"
             :disabled="!canAfford(eq)"
             @click="startBuy(eq)"
           >

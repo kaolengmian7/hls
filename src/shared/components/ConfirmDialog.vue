@@ -24,17 +24,17 @@ const emit = defineEmits<{
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
       @click.self="!persistent && emit('cancel')"
     >
-      <div class="sdv-panel w-[92%] max-w-sm animate-pixel-slide">
-        <div class="sdv-panel-title text-center">{{ title }}</div>
+      <div class="hls-panel w-[92%] max-w-sm animate-pixel-slide">
+        <div class="hls-panel-title text-center">{{ title }}</div>
         <div class="p-6 text-center">
-          <p class="font-body text-sm text-sdv-text-dark leading-relaxed">
+          <p class="font-body text-sm text-hls-text-dark leading-relaxed">
             {{ message }}
           </p>
           <div class="mt-6 flex gap-3 justify-center">
-            <button v-if="!noCancel" class="sdv-btn-secondary px-5 py-2" @click="emit('cancel')">
+            <button v-if="!noCancel" class="hls-btn-secondary px-5 py-2" @click="emit('cancel')">
               {{ cancelText ?? '稍候' }}
             </button>
-            <button :class="danger ? 'sdv-btn-danger' : 'sdv-btn'" class="px-5 py-2" @click="emit('confirm')">
+            <button :class="danger ? 'hls-btn-danger' : 'hls-btn'" class="px-5 py-2" @click="emit('confirm')">
               {{ confirmText ?? '确认' }}
             </button>
           </div>

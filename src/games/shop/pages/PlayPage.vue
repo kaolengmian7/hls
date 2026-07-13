@@ -119,11 +119,11 @@ function dismissClosed(): void {
   <div class="flex-1 flex flex-col">
     <div v-if="restoring || !roomStore.snapshot" class="flex-1 flex items-center justify-center">
       <ToastContainer />
-      <div class="sdv-panel p-10 text-center max-w-sm">
-        <div class="sdv-panel-title text-center">重返神秘商店</div>
+      <div class="hls-panel p-10 text-center max-w-sm">
+        <div class="hls-panel-title text-center">重返神秘商店</div>
         <div class="p-6">
-          <div class="font-pixel text-3xl text-sdv-gold mb-3 animate-pixel-pulse">✶</div>
-          <div class="font-body text-sm text-sdv-text-dark">正在根据商店口令返回花栗鼠的神秘商店…</div>
+          <div class="font-pixel text-3xl text-hls-gold mb-3 animate-pixel-pulse">✶</div>
+          <div class="font-body text-sm text-hls-text-dark">正在根据商店口令返回花栗鼠的神秘商店…</div>
         </div>
       </div>
     </div>
@@ -131,20 +131,20 @@ function dismissClosed(): void {
     <div v-else class="flex-1 flex flex-col">
       <ToastContainer />
 
-      <header class="px-4 sm:px-8 py-3 sticky top-0 z-10 backdrop-blur sdv-panel-deep border-b border-sdv-border/25">
+      <header class="px-4 sm:px-8 py-3 sticky top-0 z-10 backdrop-blur hls-panel-deep border-b border-hls-border/25">
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <div class="flex items-center gap-3 min-w-0">
             <div class="text-2xl animate-pixel-pulse">⚜</div>
             <div class="min-w-0">
-              <div class="font-pixel text-sdv-gold text-base sm:text-lg leading-tight">花栗鼠的神秘商店</div>
-              <div class="font-pixel text-[10px] tracking-[0.3em] uppercase text-sdv-gold/70 mt-0.5">
+              <div class="font-pixel text-hls-gold text-base sm:text-lg leading-tight">花栗鼠的神秘商店</div>
+              <div class="font-pixel text-[10px] tracking-[0.3em] uppercase text-hls-gold/70 mt-0.5">
                 口令 · {{ code }}
               </div>
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <button class="sdv-btn-ghost text-red-400 hover:!text-red-400 text-[11px]" @click="confirmLeave">
+            <button class="hls-btn-ghost text-red-400 hover:!text-red-400 text-[11px]" @click="confirmLeave">
               离开
             </button>
           </div>
@@ -153,30 +153,30 @@ function dismissClosed(): void {
 
       <main class="flex-1 px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-[220px_1fr_260px] gap-6 max-w-7xl mx-auto w-full">
         <aside class="order-2 lg:order-1">
-          <div class="sdv-panel-deep p-4 lg:sticky lg:top-24 flex flex-col gap-4">
+          <div class="hls-panel-deep p-4 lg:sticky lg:top-24 flex flex-col gap-4">
 
             <!-- 本局数据 -->
             <div>
-              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-sdv-gold/60 mb-2">
+              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-hls-gold/60 mb-2">
                 ⚜ 本局数据
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <div
-                  class="sdv-stat text-center"
+                  class="hls-stat text-center"
                   title="商店保底"
                 >
-                  <div class="font-pixel text-[10px] uppercase tracking-[0.2em] text-sdv-gold/80">保底</div>
-                  <div class="text-base font-bold font-pixel text-sdv-gold mt-0.5">
-                    {{ roomStore.guaranteedAmount }}<span class="text-sdv-gold/80 ml-0.5 text-[11px]">W</span>
+                  <div class="font-pixel text-[10px] uppercase tracking-[0.2em] text-hls-gold/80">保底</div>
+                  <div class="text-base font-bold font-pixel text-hls-gold mt-0.5">
+                    {{ roomStore.guaranteedAmount }}<span class="text-hls-gold/80 ml-0.5 text-[11px]">W</span>
                   </div>
                 </div>
                 <div
-                  class="sdv-stat text-center"
+                  class="hls-stat text-center"
                   title="历次撤离成功累计扣减额"
                 >
-                  <div class="font-pixel text-[10px] uppercase tracking-[0.2em] text-sdv-btn-green/70">得吃</div>
-                  <div class="text-base font-bold font-pixel text-sdv-btn-green mt-0.5">
-                    {{ roomStore.evacuatedTotal }}<span class="text-sdv-btn-green/80 ml-0.5 text-[11px]">W</span>
+                  <div class="font-pixel text-[10px] uppercase tracking-[0.2em] text-hls-btn-green/70">得吃</div>
+                  <div class="text-base font-bold font-pixel text-hls-btn-green mt-0.5">
+                    {{ roomStore.evacuatedTotal }}<span class="text-hls-btn-green/80 ml-0.5 text-[11px]">W</span>
                   </div>
                 </div>
               </div>
@@ -184,73 +184,73 @@ function dismissClosed(): void {
 
             <!-- 操作 -->
             <div>
-              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-sdv-gold/60 mb-2">
+              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-hls-gold/60 mb-2">
                 🗂 操作
               </div>
               <div class="flex flex-wrap gap-2">
                 <button
                   v-if="canSettle"
-                  class="sdv-btn py-1.5 px-3 text-[11px]"
+                  class="hls-btn py-1.5 px-3 text-[11px]"
                   @click="showSettlement = true"
                 >
                   ⚖ 本轮结算
                 </button>
                 <button
                   v-if="canSettle"
-                  class="sdv-btn-danger py-1.5 px-3 text-[11px]"
+                  class="hls-btn-danger py-1.5 px-3 text-[11px]"
                   @click="handleCloseGame"
                 >
                   结单
                 </button>
-                <button class="sdv-btn-ghost py-1.5 px-3 text-[11px]" @click="showSettlementHistory = true">结算记录</button>
-                <button class="sdv-btn-ghost py-1.5 px-3 text-[11px]" @click="showLottery = true">抽奖记录</button>
+                <button class="hls-btn-ghost py-1.5 px-3 text-[11px]" @click="showSettlementHistory = true">结算记录</button>
+                <button class="hls-btn-ghost py-1.5 px-3 text-[11px]" @click="showLottery = true">抽奖记录</button>
               </div>
             </div>
 
-            <div class="sdv-divider" />
+            <div class="hls-divider" />
 
             <!-- 店内成员 -->
             <div>
-              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-sdv-gold/60 mb-2">
+              <div class="font-pixel text-[10px] tracking-[0.2em] uppercase text-hls-gold/60 mb-2">
                 👥 店内成员
               </div>
               <div class="grid grid-cols-3 gap-2 lg:grid-cols-1">
                 <div
                   v-for="p in roster"
                   :key="p.id"
-                  class="sdv-panel-deep rounded-md p-2 border transition-colors flex flex-col lg:flex-row items-center gap-1.5 lg:gap-3 lg:p-2.5"
+                  class="hls-panel-deep rounded-md p-2 border transition-colors flex flex-col lg:flex-row items-center gap-1.5 lg:gap-3 lg:p-2.5"
                   :class="
                     p.id === roomStore.selfPlayerId
-                      ? 'border-sdv-gold/70 bg-sdv-gold/10'
-                      : 'border-sdv-border/25'
+                      ? 'border-hls-gold/70 bg-hls-gold/10'
+                      : 'border-hls-border/25'
                   "
                 >
                   <div class="relative shrink-0">
                     <Avatar :seed="p.id" :name="p.nickname" size="md" />
                     <span
                       v-if="!p.connected"
-                      class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-700 border border-sdv-bg"
+                      class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-700 border border-hls-bg"
                       title="失联中"
                     />
                   </div>
                   <div class="flex-1 min-w-0 w-full">
-                    <div class="font-pixel font-semibold text-sdv-text-light flex flex-wrap items-center gap-1 justify-center lg:justify-start">
-                      <span v-if="p.isHost" class="text-sdv-gold shrink-0" title="房主">👑</span>
+                    <div class="font-pixel font-semibold text-hls-text-light flex flex-wrap items-center gap-1 justify-center lg:justify-start">
+                      <span v-if="p.isHost" class="text-hls-gold shrink-0" title="房主">👑</span>
                       <span class="flex-1 min-w-0 truncate text-xs lg:text-sm lg:break-all lg:whitespace-normal">{{ p.nickname }}</span>
                       <span
                         v-if="p.id === roomStore.selfPlayerId"
-                        class="sdv-badge !text-sdv-gold !border-sdv-gold/60 text-[10px] shrink-0"
+                        class="hls-badge !text-hls-gold !border-hls-gold/60 text-[10px] shrink-0"
                       >
                         我
                       </span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-1 justify-center lg:justify-start">
                       <span
-                        class="sdv-badge text-[10px]"
+                        class="hls-badge text-[10px]"
                         :class="
                           p.role === 'BOSS'
-                            ? '!border-sdv-gold/60 !text-sdv-gold'
-                            : '!border-sdv-text-nav/60 !text-sdv-text-nav'
+                            ? '!border-hls-gold/60 !text-hls-gold'
+                            : '!border-hls-text-nav/60 !text-hls-text-nav'
                         "
                       >
                         {{ p.role ? ROLE_LABEL[p.role] : '未择阶' }}
@@ -277,10 +277,10 @@ function dismissClosed(): void {
           </template>
 
           <template v-else>
-            <div class="sdv-panel p-10 text-center">
-              <div class="sdv-panel-title">正在确认角色</div>
+            <div class="hls-panel p-10 text-center">
+              <div class="hls-panel-title">正在确认角色</div>
               <div class="p-6">
-                <div class="font-pixel text-sdv-text-light mt-2">
+                <div class="font-pixel text-hls-text-light mt-2">
                   正在确认您的店内角色…
                 </div>
               </div>

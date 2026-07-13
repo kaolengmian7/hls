@@ -10,8 +10,8 @@ const roomStore = useRoomStore();
       <div
         v-for="t in roomStore.toasts"
         :key="t.id"
-        class="sdv-toast pointer-events-auto"
-        :class="`sdv-toast--${t.type}`"
+        class="hls-toast pointer-events-auto"
+        :class="`hls-toast--${t.type}`"
       >
         <template v-if="t.type === 'success'">✓ </template>
         <template v-else-if="t.type === 'error'">✗ </template>

@@ -42,45 +42,45 @@ const records = computed(() => roomStore.settlementRecords);
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
       @click.self="emit('close')"
     >
-      <div class="sdv-panel w-[92%] max-w-lg max-h-[80vh] flex flex-col animate-pixel-slide">
-        <div class="sdv-panel-title">结算记录</div>
+      <div class="hls-panel w-[92%] max-w-lg max-h-[80vh] flex flex-col animate-pixel-slide">
+        <div class="hls-panel-title">结算记录</div>
         <div class="flex-1 overflow-y-auto p-5">
           <div v-if="records.length === 0" class="text-center py-10">
-            <div class="text-2xl text-sdv-gold/60 animate-pixel-pulse">✶</div>
-            <div class="font-body text-sdv-text-light/75 mt-2">暂时还没有结算记录</div>
+            <div class="text-2xl text-hls-gold/60 animate-pixel-pulse">✶</div>
+            <div class="font-body text-hls-text-light/75 mt-2">暂时还没有结算记录</div>
           </div>
           <ul v-else class="space-y-4">
             <li
               v-for="r in records"
               :key="r.id"
-              class="sdv-menu-row rounded-md p-4"
+              class="hls-menu-row rounded-md p-4"
             >
               <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
                 <div class="flex items-center gap-2">
-                  <span class="font-pixel text-[11px] tracking-widest text-sdv-gold/70">
+                  <span class="font-pixel text-[11px] tracking-widest text-hls-gold/70">
                     ✦ {{ format(r.at) }}
                   </span>
                   <span
-                    class="sdv-badge"
+                    class="hls-badge"
                     :class="
                       r.outcome === 'EVACUATED'
-                        ? '!border-sdv-btn-green/70 !text-sdv-btn-green'
+                        ? '!border-hls-btn-green/70 !text-hls-btn-green'
                         : '!border-red-400/70 !text-red-400'
                     "
                   >
                     {{ r.outcome === 'EVACUATED' ? '撤离成功' : '炸单翻车' }}
                   </span>
                 </div>
-                <div class="font-pixel text-xs text-sdv-gold">
+                <div class="font-pixel text-xs text-hls-gold">
                   库藏 {{ r.guaranteeBefore }}W →
                   <span
                     :class="
-                      r.outcome === 'EVACUATED' ? 'text-sdv-btn-green' : 'text-red-400'
+                      r.outcome === 'EVACUATED' ? 'text-hls-btn-green' : 'text-red-400'
                     "
                   >
                     {{ r.guaranteeAfter }}W
                   </span>
-                  <span v-if="r.guaranteeDelta > 0" class="ml-1 text-sdv-text-muted">
+                  <span v-if="r.guaranteeDelta > 0" class="ml-1 text-hls-text-muted">
                     ({{ r.outcome === 'EVACUATED' ? '−' : '+' }}{{ r.guaranteeDelta }}W)
                   </span>
                 </div>
@@ -88,39 +88,39 @@ const records = computed(() => roomStore.settlementRecords);
               <table class="w-full text-xs">
                 <thead>
                   <tr class="text-left">
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">成员</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">击杀</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">小红</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">6 格</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80">9+ 格</th>
-                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-sdv-gold/80 text-right">所得</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">成员</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">击杀</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">小红</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">6 格</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80">9+ 格</th>
+                    <th class="py-1 font-pixel tracking-[0.18em] uppercase text-hls-gold/80 text-right">所得</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="pp in r.perPlayer"
                     :key="pp.playerId"
-                    class="border-t border-sdv-border/15"
+                    class="border-t border-hls-border/15"
                   >
-                    <td class="py-1.5 font-pixel text-sdv-text-light">{{ nameOf(pp.playerId) }}</td>
-                    <td class="py-1.5 text-sdv-text-light/90">{{ pp.kills }}</td>
+                    <td class="py-1.5 font-pixel text-hls-text-light">{{ nameOf(pp.playerId) }}</td>
+                    <td class="py-1.5 text-hls-text-light/90">{{ pp.kills }}</td>
                     <template v-if="isEscort(pp)">
-                      <td colspan="3" class="py-1.5 text-sdv-text-light/90">
-                        <span class="sdv-badge !border-sdv-text-nav/50 !text-sdv-text-nav text-[10px] mr-1">护航</span>
+                      <td colspan="3" class="py-1.5 text-hls-text-light/90">
+                        <span class="hls-badge !border-hls-text-nav/50 !text-hls-text-nav text-[10px] mr-1">护航</span>
                         救助板板：
-                        <span :class="pp.rescue ? 'text-sdv-btn-green' : 'text-sdv-text-muted'">
+                        <span :class="pp.rescue ? 'text-hls-btn-green' : 'text-hls-text-muted'">
                           {{ pp.rescue ? '是 (+1)' : '否' }}
                         </span>
                       </td>
                     </template>
                     <template v-else>
-                      <td class="py-1.5 text-sdv-text-light/90">{{ pp.smallReds }}</td>
-                      <td class="py-1.5 text-sdv-text-light/90">{{ pp.sixGrids }}</td>
-                      <td class="py-1.5 text-sdv-text-light/90">{{ pp.nineGrids }}</td>
+                      <td class="py-1.5 text-hls-text-light/90">{{ pp.smallReds }}</td>
+                      <td class="py-1.5 text-hls-text-light/90">{{ pp.sixGrids }}</td>
+                      <td class="py-1.5 text-hls-text-light/90">{{ pp.nineGrids }}</td>
                     </template>
                     <td
                       class="py-1.5 text-right font-pixel font-bold"
-                      :class="pp.coinDelta > 0 ? 'text-sdv-btn-green' : 'text-sdv-text-muted'"
+                      :class="pp.coinDelta > 0 ? 'text-hls-btn-green' : 'text-hls-text-muted'"
                     >
                       +{{ pp.coinDelta }}
                     </td>
@@ -130,8 +130,8 @@ const records = computed(() => roomStore.settlementRecords);
             </li>
           </ul>
         </div>
-        <div class="p-4 flex justify-end border-t border-sdv-border/30">
-          <button class="sdv-btn-secondary py-1.5 px-4" @click="emit('close')">关闭</button>
+        <div class="p-4 flex justify-end border-t border-hls-border/30">
+          <button class="hls-btn-secondary py-1.5 px-4" @click="emit('close')">关闭</button>
         </div>
       </div>
     </div>

@@ -134,39 +134,39 @@ async function handleJoin(): Promise<void> {
     <ToastContainer />
 
     <header class="px-6 pt-12 pb-4 text-center select-none">
-      <div class="font-pixel text-sm mb-3 text-sdv-gold/80 tracking-widest animate-pixel-pulse">
+      <div class="font-pixel text-sm mb-3 text-hls-gold/80 tracking-widest animate-pixel-pulse">
         ✦ 花栗鼠俱乐部 · 原创玩法 ✦
       </div>
-      <h1 class="font-pixel text-4xl sm:text-6xl font-bold leading-tight tracking-[0.2em] text-sdv-gold">
+      <h1 class="font-pixel text-4xl sm:text-6xl font-bold leading-tight tracking-[0.2em] text-hls-gold">
         花栗鼠的神秘商店
       </h1>
-      <div class="mt-4 mx-auto max-w-xs sdv-divider" />
+      <div class="mt-4 mx-auto max-w-xs hls-divider" />
     </header>
 
     <main class="flex-1 flex items-center justify-center px-4 py-6">
-      <div class="sdv-panel w-full max-w-md animate-pixel-slide">
-        <div class="sdv-panel-title text-center">开店 / 入店</div>
+      <div class="hls-panel w-full max-w-md animate-pixel-slide">
+        <div class="hls-panel-title text-center">开店 / 入店</div>
         <div class="p-7 sm:p-9 space-y-5">
 
           <div>
-            <label class="font-pixel text-sm text-sdv-text-dark tracking-wider block mb-1">
+            <label class="font-pixel text-sm text-hls-text-dark tracking-wider block mb-1">
               商店保底
             </label>
             <div class="relative">
               <input
                 :value="guaranteeInput"
-                class="sdv-input w-full pr-10 text-right"
+                class="hls-input w-full pr-10 text-right"
                 :class="{ 'ring-2 ring-red-400': !guaranteeValid }"
                 inputmode="numeric"
                 maxlength="6"
                 :placeholder="String(DEFAULT_GUARANTEED_AMOUNT)"
                 @input="onGuaranteeInput"
               />
-              <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center font-pixel text-sdv-text-dark">W</span>
+              <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center font-pixel text-hls-text-dark">W</span>
             </div>
-            <p class="font-body text-xs mt-1.5" :class="guaranteeValid ? 'text-sdv-text-muted' : 'text-red-400'">
+            <p class="font-body text-xs mt-1.5" :class="guaranteeValid ? 'text-hls-text-muted' : 'text-red-400'">
               <template v-if="guaranteeValid">
-                当前保底：<span class="font-pixel text-sdv-gold-dark">{{ guaranteeNumber }}W</span>
+                当前保底：<span class="font-pixel text-hls-gold-dark">{{ guaranteeNumber }}W</span>
                 · 可填 {{ MIN_GUARANTEED_AMOUNT }} ~ {{ MAX_GUARANTEED_AMOUNT }}
               </template>
               <template v-else>
@@ -175,20 +175,20 @@ async function handleJoin(): Promise<void> {
             </p>
           </div>
 
-          <button class="sdv-btn w-full py-3" :disabled="creating || !guaranteeValid" @click="handleCreate">
+          <button class="hls-btn w-full py-3" :disabled="creating || !guaranteeValid" @click="handleCreate">
             <span v-if="creating">商店布置中…</span>
             <span v-else>⚜ 开一家神秘商店</span>
           </button>
 
-          <div class="sdv-divider-label"><span>OR</span></div>
+          <div class="hls-divider-label"><span>OR</span></div>
 
           <div>
-            <label class="font-pixel text-sm text-sdv-text-dark tracking-wider block mb-1">
+            <label class="font-pixel text-sm text-hls-text-dark tracking-wider block mb-1">
               商店口令（六位）
             </label>
             <input
               :value="codeInput"
-              class="sdv-input w-full tracking-[.55em] text-center text-2xl"
+              class="hls-input w-full tracking-[.55em] text-center text-2xl"
               placeholder="✦ ✦ ✦ ✦ ✦ ✦"
               inputmode="numeric"
               maxlength="6"
@@ -197,7 +197,7 @@ async function handleJoin(): Promise<void> {
             />
           </div>
 
-          <button class="sdv-btn-secondary w-full py-3" :disabled="joining" @click="handleJoin">
+          <button class="hls-btn-secondary w-full py-3" :disabled="joining" @click="handleJoin">
             <span v-if="joining">正在入店…</span>
             <span v-else>✶ 进入已有商店</span>
           </button>
@@ -206,7 +206,7 @@ async function handleJoin(): Promise<void> {
       </div>
     </main>
 
-    <footer class="text-center font-pixel text-sm tracking-[0.4em] uppercase text-sdv-text-nav/40 py-5">
+    <footer class="text-center font-pixel text-sm tracking-[0.4em] uppercase text-hls-text-nav/40 py-5">
       ✥ 微信服务号 · 花栗鼠俱乐部 ✥
     </footer>
   </div>
