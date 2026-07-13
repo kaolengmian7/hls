@@ -45,25 +45,25 @@ const games = [
 
     <!-- 顶部导航 -->
     <AppHeader>
-      <div class="flex gap-6 font-serif text-xs tracking-widest text-parchment-400/60">
-        <a href="#games" class="hover:text-gold-300 transition-colors">玩法</a>
+      <div class="flex gap-6 font-pixel text-xs tracking-widest text-sdv-text-nav/60">
+        <a href="#games" class="hover:text-sdv-gold transition-colors">玩法</a>
         <span>微信服务号</span>
       </div>
     </AppHeader>
 
     <!-- Hero -->
-    <header class="flex-none px-6 pt-14 pb-10 text-center select-none border-b border-white/5">
-      <div class="rpg-subtitle text-[10px] sm:text-xs mb-4 animate-flicker tracking-widest">
+    <header class="flex-none px-6 pt-14 pb-10 text-center select-none border-b border-sdv-border/30">
+      <div class="font-pixel text-sm mb-4 text-sdv-gold/80 tracking-widest animate-pixel-pulse">
         ✦ 花栗鼠俱乐部 · 三角洲行动 ✦
       </div>
-      <h1 class="rpg-title text-4xl sm:text-6xl font-bold leading-tight tracking-[0.2em]">
+      <h1 class="font-pixel text-4xl sm:text-6xl font-bold leading-tight tracking-[0.2em] text-sdv-gold">
         花栗鼠俱乐部
       </h1>
-      <div class="mt-5 mx-auto max-w-xs rpg-divider" />
-      <p class="mt-5 font-serif text-sm sm:text-base text-gold-300 tracking-wide leading-relaxed">
+      <div class="mt-5 mx-auto max-w-xs sdv-divider" />
+      <p class="mt-5 font-body text-sm sm:text-base text-sdv-text-light tracking-wide leading-relaxed">
         开一家最有温度的三角洲陪玩店
       </p>
-      <p class="mt-2 font-body text-xs text-parchment-400/60 tracking-widest">
+      <p class="mt-2 font-body text-xs text-sdv-text-nav/60 tracking-widest">
         原创 1V1 定制教学单 · 神秘商店趣味单
       </p>
     </header>
@@ -71,40 +71,31 @@ const games = [
     <!-- 玩法卡片 -->
     <main id="games" class="flex-1 px-4 py-10">
       <div class="mx-auto max-w-lg">
-        <div class="font-serif text-[10px] tracking-[0.4em] uppercase text-parchment-400/50 mb-6 text-center">
-          <span class="rune-mark mr-2">❖</span>我们的玩法<span class="rune-mark ml-2">❖</span>
+        <div class="font-pixel text-xs tracking-[0.4em] uppercase text-sdv-text-nav/50 mb-6 text-center">
+          ❖ 我们的玩法 ❖
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-3">
           <button
             v-for="game in games"
             :key="game.key"
-            class="card rpg-corners text-left p-5 transition-all duration-200"
-            :class="game.active
-              ? 'border-gold-400/60 hover:border-gold-300 hover:shadow-gold cursor-pointer'
-              : 'border-white/8 opacity-60 cursor-pointer hover:opacity-75'"
-            @click="router.push(game.route)"
+            class="sdv-menu-row text-left"
+            :class="[
+              game.active ? 'active' : 'disabled',
+            ]"
+            @click="game.active && router.push(game.route)"
           >
-            <div class="text-2xl mb-3">{{ game.icon }}</div>
-            <div
-              class="font-serif text-sm font-bold mb-2 leading-snug"
-              :class="game.active ? 'text-parchment-100' : 'text-parchment-400/70'"
-            >
-              {{ game.title }}
+            <div class="text-2xl shrink-0">{{ game.icon }}</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-pixel text-base tracking-wider text-sdv-text-dark">
+                {{ game.title }}
+              </div>
+              <div class="font-body text-xs leading-relaxed text-sdv-text-muted whitespace-pre-line mt-0.5">
+                {{ game.desc }}
+              </div>
             </div>
-            <div class="font-body text-[10px] leading-relaxed whitespace-pre-line"
-              :class="game.active ? 'text-parchment-300/60' : 'text-parchment-400/40'"
-            >
-              {{ game.desc }}
-            </div>
-            <div class="mt-3">
-              <span
-                v-if="game.active"
-                class="inline-block font-serif text-[10px] text-gold-300 tracking-wider"
-              >立即开始 →</span>
-              <span
-                v-else
-                class="inline-block font-serif text-[10px] text-parchment-400/35 tracking-wider"
-              >即将推出</span>
+            <div class="shrink-0">
+              <span v-if="game.active" class="sdv-badge">▶ 进入</span>
+              <span v-else class="sdv-badge sdv-badge-gray">即将推出</span>
             </div>
           </button>
         </div>
@@ -112,8 +103,8 @@ const games = [
     </main>
 
     <!-- Footer -->
-    <footer class="text-center font-serif text-[11px] tracking-[0.4em] uppercase text-parchment-400/40 py-5 border-t border-white/5">
-      <span class="rune-mark mr-2">✥</span>微信服务号 · 花栗鼠俱乐部<span class="rune-mark ml-2">✥</span>
+    <footer class="text-center font-pixel text-sm tracking-[0.4em] uppercase text-sdv-text-nav/40 py-5 border-t border-sdv-border/20">
+      ✥ 微信服务号 · 花栗鼠俱乐部 ✥
     </footer>
 
   </div>
