@@ -424,9 +424,9 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   transition: all 0.2s ease;
   background:
     linear-gradient(180deg, rgba(212, 175, 55, 0.05), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #1a0f0a, #120804);
+    linear-gradient(180deg, #fffef9, #faf6ed);
   border: 1px solid rgba(212, 175, 55, 0.25);
-  box-shadow: inset 0 1px 0 rgba(244, 230, 194, 0.06);
+  box-shadow: inset 0 1px 0 rgba(80, 40, 10, 0.06);
 }
 .judgment-card:hover {
   border-color: rgba(232, 200, 124, 0.6);
@@ -435,7 +435,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   border-color: rgba(90, 122, 50, 0.85);
   background:
     linear-gradient(180deg, rgba(90, 122, 50, 0.18), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #14200a, #0a1505);
+    linear-gradient(180deg, #f0f8e8, #e8f0d8);
   box-shadow:
     inset 0 1px 0 rgba(136, 160, 79, 0.18),
     0 0 0 1px rgba(90, 122, 50, 0.55),
@@ -445,7 +445,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   border-color: rgba(160, 35, 35, 0.85);
   background:
     linear-gradient(180deg, rgba(160, 35, 35, 0.18), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #2a0c0c, #1a0606);
+    linear-gradient(180deg, #fdf0f0, #f8e8e8);
   box-shadow:
     inset 0 1px 0 rgba(193, 58, 58, 0.2),
     0 0 0 1px rgba(160, 35, 35, 0.55),
@@ -458,33 +458,33 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   padding: 5px 12px;
   font-family: 'VT323', monospace;
   font-size: 0.85rem;
-  color: #cbb78a;
+  color: #7a5020;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #1a0f0a, #120804);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #fffef9, #faf6ed);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
   transition: all 0.18s ease;
 }
 .rescue-toggle:hover {
   border-color: rgba(232, 200, 124, 0.7);
 }
 .rescue-toggle.is-yes {
-  color: #bfe0a0;
+  color: #4a7020;
   border-color: rgba(90, 122, 50, 0.85);
   background:
     linear-gradient(180deg, rgba(90, 122, 50, 0.22), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #14200a, #0a1505);
+    linear-gradient(180deg, #f0f8e8, #e8f0d8);
   box-shadow:
     inset 0 1px 0 rgba(136, 160, 79, 0.18),
     0 0 0 1px rgba(90, 122, 50, 0.5);
 }
 .rescue-toggle.is-no {
-  color: #e6c0c0;
+  color: #8a2020;
   border-color: rgba(160, 35, 35, 0.7);
   background:
     linear-gradient(180deg, rgba(160, 35, 35, 0.18), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #2a0c0c, #1a0606);
+    linear-gradient(180deg, #fdf0f0, #f8e8e8);
   box-shadow:
     inset 0 1px 0 rgba(193, 58, 58, 0.18),
     0 0 0 1px rgba(160, 35, 35, 0.45);
@@ -494,16 +494,16 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   width: 100%;
   border-radius: 4px;
   background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #1a0f0a, #120804);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0)),
+    linear-gradient(180deg, #fffef9, #faf6ed);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  color: #f4e6c2;
+  color: #3a2010;
   text-align: center;
   font-family: 'VT323', monospace;
   font-size: 0.875rem;
   padding: 6px 8px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 .stat-input:focus {
   outline: none;

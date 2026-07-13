@@ -226,8 +226,8 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
         :style="{
           border: '1px solid rgba(212, 175, 55, 0.45)',
           background:
-            'radial-gradient(120% 80% at 50% 0%, rgba(249, 115, 22, 0.18), transparent 60%), linear-gradient(180deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.65)), #1a0f0a',
-          boxShadow: 'inset 0 0 24px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.45)',
+            'radial-gradient(120% 80% at 50% 0%, rgba(249, 115, 22, 0.18), transparent 60%), linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.28)), #e8d0a8',
+          boxShadow: 'inset 0 0 24px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.12)',
         }"
       >
         <!-- 空闲态：开奖前的提示 -->
@@ -260,7 +260,7 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
               />
               <div
                 v-else
-                style="width:160px;height:160px;border-radius:16px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:80px;"
+                style="width:160px;height:160px;border-radius:16px;background:rgba(0,0,0,0.04);display:flex;align-items:center;justify-content:center;font-size:80px;"
               >
                 🎁
               </div>
@@ -270,11 +270,11 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
           <!-- 上下渐隐遮罩，强化"窗口"观感 -->
           <div
             class="pointer-events-none absolute inset-x-0 top-0"
-            style="height:28px;background:linear-gradient(180deg,#1a0f0a,rgba(26,15,10,0));"
+            style="height:28px;background:linear-gradient(180deg,#e8d0a8,rgba(232,208,168,0));"
           />
           <div
             class="pointer-events-none absolute inset-x-0 bottom-0"
-            style="height:28px;background:linear-gradient(0deg,#1a0f0a,rgba(26,15,10,0));"
+            style="height:28px;background:linear-gradient(0deg,#e8d0a8,rgba(232,208,168,0));"
           />
 
           <!-- 中间结果指示线 -->
