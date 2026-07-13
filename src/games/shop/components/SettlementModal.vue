@@ -318,7 +318,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                             class="sdv-badge text-[10px]"
                             :class="
                               p.role === 'BOSS'
-                                ? '!border-ember-400/60 !text-sdv-gold'
+                                ? '!border-sdv-gold/60 !text-sdv-gold'
                                 : '!border-sdv-text-nav/60 !text-sdv-text-nav'
                             "
                           >
@@ -456,7 +456,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   min-width: 44px;
   border-radius: 4px;
   padding: 5px 12px;
-  font-family: 'Cinzel', 'Cardo', 'Noto Serif SC', serif;
+  font-family: 'VT323', monospace;
   font-size: 0.85rem;
   color: #cbb78a;
   background:
@@ -499,7 +499,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   border: 1px solid rgba(212, 175, 55, 0.3);
   color: #f4e6c2;
   text-align: center;
-  font-family: 'Cinzel', 'Cardo', 'Noto Serif SC', serif;
+  font-family: 'VT323', monospace;
   font-size: 0.875rem;
   padding: 6px 8px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;

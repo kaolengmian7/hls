@@ -204,17 +204,17 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
 <template>
   <div class="sdv-panel p-6 relative overflow-hidden">
     <div
-      class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-ember-500/15 blur-3xl"
+      class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-sdv-gold/10 blur-3xl"
     />
     <div
-      class="pointer-events-none absolute -bottom-32 -left-20 w-72 h-72 rounded-full bg-royal-500/10 blur-3xl"
+      class="pointer-events-none absolute -bottom-32 -left-20 w-72 h-72 rounded-full bg-sdv-panel-deep/20 blur-3xl"
     />
     <div class="relative">
       <div class="flex items-center justify-between mb-4 gap-2">
         <h3 class="font-pixel text-xl text-sdv-gold">
           ⚜ 板板专属 · 神秘商店
         </h3>
-        <span class="sdv-badge !border-ember-400/60 !text-sdv-gold animate-pixel-pulse">
+        <span class="sdv-badge !border-sdv-gold/60 !text-sdv-gold animate-pixel-pulse">
           ★ 神秘商店
         </span>
       </div>

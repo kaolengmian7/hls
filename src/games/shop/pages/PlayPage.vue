@@ -249,7 +249,7 @@ function dismissClosed(): void {
                         class="sdv-badge text-[10px]"
                         :class="
                           p.role === 'BOSS'
-                            ? '!border-ember-400/60 !text-sdv-gold'
+                            ? '!border-sdv-gold/60 !text-sdv-gold'
                             : '!border-sdv-text-nav/60 !text-sdv-text-nav'
                         "
                       >
