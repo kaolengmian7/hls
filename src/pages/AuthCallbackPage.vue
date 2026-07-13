@@ -21,6 +21,6 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen flex items-center justify-center">
-    <p class="text-parchment-400/60 text-sm tracking-wider">正在跳转…</p>
+    <p class="font-pixel text-lg tracking-widest text-sdv-text-nav animate-pixel-pulse">正在跳转…</p>
   </div>
 </template>
