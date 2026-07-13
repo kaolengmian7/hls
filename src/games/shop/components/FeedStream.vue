@@ -95,9 +95,9 @@ const events = computed(() => roomStore.feed);
 .feed-item {
   background:
     linear-gradient(180deg, rgba(212, 175, 55, 0.05), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, rgba(20, 12, 8, 0.7), rgba(10, 6, 4, 0.7));
+    linear-gradient(180deg, rgba(232, 208, 168, 0.7), rgba(232, 208, 168, 0.7));
   border: 1px solid rgba(212, 175, 55, 0.18);
-  color: #f4e6c2;
+  color: #2a1408;
 }
 .feed-detail {
   display: flex;
