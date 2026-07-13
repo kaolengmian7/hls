@@ -22,12 +22,12 @@ function bundledNames(eq: Equipment): string {
 </script>
 
 <template>
-  <div class="card rpg-corners p-6">
+  <div class="sdv-panel-deep p-6">
     <div class="flex items-center justify-between mb-3 gap-2">
-      <h3 class="rpg-title text-xl">
-        <span class="rune-mark mr-1">⚔</span>护航补给架
+      <h3 class="font-pixel text-sdv-gold text-xl">
+        ⚔ 护航补给架
       </h3>
-      <span class="font-serif text-xs tracking-[0.2em] uppercase text-gold-300">
+      <span class="font-pixel text-xs tracking-[0.2em] uppercase text-sdv-gold">
         当前鼠币 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
       </span>
     </div>
@@ -37,26 +37,26 @@ function bundledNames(eq: Equipment): string {
       <div
         v-for="eq in EQUIPMENT_LIST"
         :key="eq.id"
-        class="armory-card rounded-md p-4 flex flex-col gap-2 transition-all"
+        class="sdv-menu-row flex flex-col gap-2 transition-all"
       >
         <div class="flex items-center gap-3">
           <div class="text-3xl filter drop-shadow">{{ eq.icon }}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-serif font-bold text-parchment-50 truncate text-base">{{ eq.name }}</div>
-            <div class="font-body text-xs text-parchment-300/85">{{ eq.description }}</div>
+            <div class="font-pixel font-bold text-sdv-text-light truncate text-base">{{ eq.name }}</div>
+            <div class="font-body text-xs text-sdv-text-light/85">{{ eq.description }}</div>
           </div>
         </div>
 
-        <div v-if="eq.bundledLabels?.length" class="text-[11px] font-body text-parchment-400/80">
-          套装包含：<span class="text-gold-200">{{ bundledNames(eq) }}</span>
+        <div v-if="eq.bundledLabels?.length" class="text-[11px] font-body text-sdv-text-muted">
+          套装包含：<span class="text-sdv-gold">{{ bundledNames(eq) }}</span>
         </div>
 
-        <div class="flex items-center justify-between mt-1 pt-2 border-t border-gold-500/15">
+        <div class="flex items-center justify-between mt-1 pt-2 border-t border-sdv-border/30">
           <span class="coin-tag text-base">
             <span>💰</span> {{ eq.price }}
           </span>
           <button
-            class="btn-escort py-1.5 px-3 text-[11px]"
+            class="sdv-btn py-1.5 px-3 text-[11px]"
             :disabled="!canAfford(eq)"
             @click="startBuy(eq)"
           >
@@ -68,20 +68,3 @@ function bundledNames(eq: Equipment): string {
   </div>
 </template>
 
-<style scoped>
-.armory-card {
-  background:
-    linear-gradient(180deg, rgba(212, 175, 55, 0.06), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #1a0f0a, #120804);
-  border: 1px solid rgba(212, 175, 55, 0.25);
-  box-shadow: inset 0 1px 0 rgba(244, 230, 194, 0.06);
-}
-.armory-card:hover {
-  border-color: rgba(232, 200, 124, 0.7);
-  transform: translateY(-1px);
-  box-shadow:
-    inset 0 1px 0 rgba(244, 230, 194, 0.1),
-    0 8px 22px -8px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(212, 175, 55, 0.25);
-}
-</style>

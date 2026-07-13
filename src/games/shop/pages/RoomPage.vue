@@ -147,14 +147,17 @@ function dismissHostClosed(): void {
   <div class="flex-1 flex flex-col">
     <AppHeader />
 
+    <!-- 加载状态 -->
     <div v-if="restoring || !roomStore.snapshot" class="flex-1 flex items-center justify-center">
       <ToastContainer />
-      <div class="card rpg-corners p-10 text-center max-w-sm">
-        <div class="rune-mark text-3xl animate-flicker">✶</div>
-        <div class="rpg-title text-xl mt-2">重返神秘商店</div>
-        <div class="font-body text-parchment-300/80 mt-2">正在根据商店口令返回花栗鼠的神秘商店…</div>
-        <div class="mt-4 font-serif text-xs tracking-[0.32em] uppercase text-gold-300/70">
-          口令 · {{ code }}
+      <div class="sdv-panel p-10 text-center max-w-sm">
+        <div class="sdv-panel-title text-center">重返神秘商店</div>
+        <div class="p-6">
+          <div class="font-pixel text-3xl text-sdv-gold mb-3 animate-pixel-pulse">✶</div>
+          <div class="font-body text-sm text-sdv-text-dark">正在根据商店口令返回花栗鼠的神秘商店…</div>
+          <div class="mt-4 font-pixel text-xs tracking-[0.3em] uppercase text-sdv-text-muted">
+            口令 · {{ code }}
+          </div>
         </div>
       </div>
     </div>
@@ -163,34 +166,34 @@ function dismissHostClosed(): void {
       <ToastContainer />
 
       <header
-        class="px-4 sm:px-8 py-4 flex items-center justify-between gap-3 flex-wrap border-b border-gold-500/20 bg-ink-700/60 backdrop-blur"
+        class="px-4 sm:px-8 py-4 flex items-center justify-between gap-3 flex-wrap border-b border-sdv-border/20 bg-sdv-panel-deep/60 backdrop-blur"
       >
         <div class="flex items-center gap-3 flex-wrap">
           <div class="leading-tight">
-            <div class="font-serif text-[10px] tracking-[0.32em] uppercase text-gold-300/70">
-              <span class="rune-mark mr-1">⚜</span>商店口令
+            <div class="font-pixel text-sdv-gold/70 text-[10px] tracking-[0.32em] uppercase">
+              <span class="font-pixel mr-1">⚜</span>商店口令
             </div>
-            <div class="rpg-title text-2xl tracking-[.4em] font-display">{{ code }}</div>
+            <div class="font-pixel text-2xl text-sdv-gold tracking-[.4em]">{{ code }}</div>
           </div>
-          <button class="btn-ghost" @click="copyCode">复制口令</button>
-          <button class="btn-ghost" @click="copyLink">复制邀请链接</button>
+          <button class="sdv-btn-ghost" @click="copyCode">复制口令</button>
+          <button class="sdv-btn-ghost" @click="copyLink">复制邀请链接</button>
         </div>
         <div class="flex items-center gap-3">
           <div
-            class="rounded-md px-3 py-1.5 leading-tight text-right border border-gold-500/40 bg-ink-700/60"
+            class="sdv-stat leading-tight text-right"
             :title="`商店保底`"
           >
-            <div class="font-serif text-[10px] uppercase tracking-[0.3em] text-gold-300/80">
+            <div class="font-pixel text-sdv-gold/70 text-[10px] uppercase tracking-[0.3em]">
               商店保底
             </div>
-            <div class="text-base font-bold font-serif text-gold-200">
-              {{ roomStore.guaranteedAmount }}<span class="text-gold-300/80 ml-0.5">W</span>
+            <div class="font-pixel text-base text-sdv-gold font-bold">
+              {{ roomStore.guaranteedAmount }}<span class="text-sdv-gold/80 ml-0.5">W</span>
             </div>
           </div>
-          <div class="badge">
-            <span class="rune-mark mr-1">🐿</span>{{ players.length }} / {{ MAX_PLAYERS }}
+          <div class="sdv-badge">
+            <span class="font-pixel mr-1">🐿</span>{{ players.length }} / {{ MAX_PLAYERS }}
           </div>
-          <button class="btn-ghost text-oxblood-300 hover:!text-oxblood-300" @click="confirmLeave">
+          <button class="sdv-btn-danger" @click="confirmLeave">
             离开商店
           </button>
         </div>
@@ -198,9 +201,9 @@ function dismissHostClosed(): void {
 
       <main class="flex-1 px-4 sm:px-8 py-8 max-w-4xl mx-auto w-full">
         <div class="text-center mb-6">
-          <h2 class="rpg-title text-2xl sm:text-3xl">角色分配</h2>
-          <div class="mx-auto max-w-md mt-2 rpg-divider" />
-          <p class="mt-2 font-body text-parchment-300/80 text-sm">
+          <h2 class="font-pixel text-2xl sm:text-3xl text-sdv-gold">角色分配</h2>
+          <div class="mx-auto max-w-md mt-2 sdv-divider" />
+          <p class="mt-2 font-body text-sdv-text-light/80 text-sm">
             本局固定 3 个角色：1 个板板，2 个护航。
           </p>
         </div>
@@ -214,20 +217,20 @@ function dismissHostClosed(): void {
           />
         </div>
 
-        <div class="card rpg-corners mt-7 p-6">
+        <div class="sdv-panel mt-7 p-6">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="rpg-title text-lg sm:text-xl">
-              <span class="rune-mark mr-1">⚜</span>选择角色
+            <h3 class="font-pixel text-xl text-sdv-gold">
+              <span class="font-pixel mr-1">⚜</span>选择角色
             </h3>
-            <span class="font-body text-xs text-parchment-300/70">
+            <span class="font-body text-xs text-sdv-text-muted">
               准备后将锁定角色，直到本局开始。
             </span>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <button
-              class="role-card"
+              class="sdv-menu-row"
               :class="{
-                'is-active-escort': me?.role === 'ESCORT',
+                'active': me?.role === 'ESCORT',
                 'opacity-60 cursor-not-allowed': me?.ready,
               }"
               :disabled="me?.ready"
@@ -235,19 +238,19 @@ function dismissHostClosed(): void {
             >
               <div class="flex items-center gap-2">
                 <span class="text-2xl">🛡️</span>
-                <div class="font-display tracking-[0.2em] text-sapphire-300 text-xl uppercase">
+                <div class="font-pixel text-sdv-text-nav text-xl uppercase">
                   护航
                 </div>
               </div>
-              <div class="rpg-divider mt-2 mb-2 opacity-70" />
-              <p class="font-body text-xs text-parchment-300/85 leading-relaxed">
+              <div class="sdv-divider mt-2 mb-2 opacity-70" />
+              <p class="font-body text-xs text-sdv-text-light/80 leading-relaxed">
                 名额 2 · 起始 10 金 · 花费鼠币起装备保护板板
               </p>
             </button>
             <button
-              class="role-card"
+              class="sdv-menu-row"
               :class="{
-                'is-active-boss': me?.role === 'BOSS',
+                'active': me?.role === 'BOSS',
                 'opacity-60 cursor-not-allowed': me?.ready,
               }"
               :disabled="me?.ready"
@@ -255,46 +258,45 @@ function dismissHostClosed(): void {
             >
               <div class="flex items-center gap-2">
                 <span class="text-2xl">🧙</span>
-                <div class="font-display tracking-[0.2em] text-ember-400 text-xl uppercase">
+                <div class="font-pixel text-sdv-gold text-xl uppercase">
                   板板
                 </div>
               </div>
-              <div class="rpg-divider mt-2 mb-2 opacity-70" />
-              <p class="font-body text-xs text-parchment-300/85 leading-relaxed">
+              <div class="sdv-divider mt-2 mb-2 opacity-70" />
+              <p class="font-body text-xs text-sdv-text-light/80 leading-relaxed">
                 名额 1 · 起始 0 金 · 带队撤离 · 从神秘商店中开启丰厚奖励
               </p>
             </button>
           </div>
-          <p class="font-body text-[12px] text-parchment-400/80 mt-4 text-center">
+          <p class="font-body text-[12px] text-sdv-text-muted mt-4 text-center">
             若切换角色，需要重新点击准备。
           </p>
         </div>
 
-        <div class="card rpg-corners mt-5 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="sdv-panel mt-5 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div class="font-serif text-sm flex items-center gap-2">
+            <div class="font-pixel text-sm flex items-center gap-2">
               <template v-if="me?.ready">
-                <span class="rune-mark text-forest-300 text-lg animate-pulse_soft">✓</span>
-                <span class="text-forest-300 font-bold tracking-widest uppercase">已经准备</span>
+                <span class="font-pixel text-sdv-btn-green font-bold text-lg animate-pulse_soft">✓</span>
+                <span class="font-pixel text-sdv-btn-green font-bold tracking-widest uppercase">已经准备</span>
               </template>
               <template v-else>
-                <span class="rune-mark text-gold-300 text-lg animate-flicker">✦</span>
-                <span class="text-gold-300 font-bold tracking-widest uppercase">尚未准备</span>
+                <span class="font-pixel text-sdv-gold text-lg animate-pixel-pulse">✦</span>
+                <span class="font-pixel text-sdv-gold font-bold tracking-widest uppercase">尚未准备</span>
               </template>
             </div>
-            <div class="font-body text-xs text-parchment-300/80 mt-1">{{ startHint }}</div>
+            <div class="font-body text-xs text-sdv-text-light/80 mt-1">{{ startHint }}</div>
           </div>
           <div class="flex flex-wrap gap-3 items-center">
             <button
-              class="btn"
-              :class="me?.ready ? 'btn-danger' : 'btn-primary'"
+              :class="me?.ready ? 'sdv-btn-danger' : 'sdv-btn'"
               @click="toggleReady"
             >
               {{ me?.ready ? '取消准备' : '点击准备' }}
             </button>
             <button
               v-if="isHost"
-              class="btn-boss"
+              class="sdv-btn"
               :disabled="!startReady.ok"
               :title="startHint"
               @click="startGame"

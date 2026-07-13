@@ -22,12 +22,12 @@ const events = computed(() => roomStore.feed);
 </script>
 
 <template>
-  <div class="card rpg-corners p-5 flex flex-col lg:sticky lg:top-24">
+  <div class="sdv-panel-deep p-5 flex flex-col lg:sticky lg:top-24">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="rpg-title text-lg">
-        <span class="rune-mark mr-1">⚜</span>神秘商店 · 小报童
+      <h3 class="font-pixel text-sdv-gold text-lg">
+        ⚜ 神秘商店 · 小报童
       </h3>
-      <span class="font-serif text-[11px] tracking-[0.2em] uppercase text-gold-300/70">
+      <span class="font-pixel text-[11px] tracking-[0.2em] uppercase text-sdv-gold/70">
         {{ events.length }} 缄
       </span>
     </div>
@@ -39,51 +39,51 @@ const events = computed(() => roomStore.feed);
           :key="ev.id"
           class="feed-item rounded-md px-3 py-2 text-sm font-body"
         >
-          <div class="font-serif text-[10px] tracking-widest text-gold-300/70 mb-0.5">
+          <div class="font-pixel text-[10px] tracking-widest text-sdv-gold/70 mb-0.5">
             ✦ {{ format(ev.at) }}
           </div>
           <template v-if="ev.kind === 'PLAYER_JOINED'">
-            <span class="font-serif font-semibold text-forest-300">「{{ asStr(ev.payload.nickname) || nameOf(asStr(ev.payload.playerId)) }}」</span>进入了神秘商店。
+            <span class="font-pixel font-semibold text-sdv-btn-green">「{{ asStr(ev.payload.nickname) || nameOf(asStr(ev.payload.playerId)) }}」</span>进入了神秘商店。
           </template>
 
           <template v-else-if="ev.kind === 'PLAYER_LEFT'">
-            <span class="font-serif font-semibold text-oxblood-300">「{{ nameOf(asStr(ev.payload.playerId)) }}」</span>离开了神秘商店。
+            <span class="font-pixel font-semibold text-oxblood-300">「{{ nameOf(asStr(ev.payload.playerId)) }}」</span>离开了神秘商店。
           </template>
 
           <template v-else-if="ev.kind === 'LOTTERY'">
-            <div><span class="font-serif font-semibold text-ember-300">「板板」</span>在神秘商店摸出了<span class="font-serif font-bold text-royal-400">‹{{ asStr(ev.payload.itemName) }}›</span></div>
+            <div><span class="font-pixel font-semibold text-sdv-gold">「板板」</span>在神秘商店摸出了<span class="font-pixel font-bold text-royal-400">‹{{ asStr(ev.payload.itemName) }}›</span></div>
             <div v-if="Number(ev.payload.itemValue) > 0 || Number(ev.payload.guaranteeDelta) > 0" class="feed-detail">
-              <span v-if="Number(ev.payload.itemValue) > 0" class="text-forest-300">价值 {{ Number(ev.payload.itemValue) }}W</span>
-              <span v-if="Number(ev.payload.guaranteeDelta) > 0" class="text-gold-200/80">保底 +{{ Number(ev.payload.guaranteeDelta) }}W · {{ Number(ev.payload.guaranteeBefore) }}→{{ Number(ev.payload.guaranteeAfter) }}</span>
+              <span v-if="Number(ev.payload.itemValue) > 0" class="text-sdv-btn-green">价值 {{ Number(ev.payload.itemValue) }}W</span>
+              <span v-if="Number(ev.payload.guaranteeDelta) > 0" class="text-sdv-gold/80">保底 +{{ Number(ev.payload.guaranteeDelta) }}W · {{ Number(ev.payload.guaranteeBefore) }}→{{ Number(ev.payload.guaranteeAfter) }}</span>
             </div>
           </template>
 
           <template v-else-if="ev.kind === 'PURCHASE'">
-            <div><span class="font-serif font-semibold text-sapphire-300">「{{ nameOf(asStr(ev.payload.playerId)) }}」</span>拿走了 <span class="font-serif font-bold text-parchment-50">‹{{ getEquipment(asStr(ev.payload.equipmentId))?.name ?? asStr(ev.payload.equipmentId) }}›</span></div>
+            <div><span class="font-pixel font-semibold text-sdv-text-nav">「{{ nameOf(asStr(ev.payload.playerId)) }}」</span>拿走了 <span class="font-pixel font-bold text-sdv-text-light">‹{{ getEquipment(asStr(ev.payload.equipmentId))?.name ?? asStr(ev.payload.equipmentId) }}›</span></div>
             <div v-if="ev.payload.pick" class="feed-detail">
-              <span class="text-forest-300">{{ asStr(ev.payload.pickName) || getWeapon(asStr(ev.payload.pick))?.name || asStr(ev.payload.pick) }}</span>
+              <span class="text-sdv-btn-green">{{ asStr(ev.payload.pickName) || getWeapon(asStr(ev.payload.pick))?.name || asStr(ev.payload.pick) }}</span>
             </div>
           </template>
 
           <template v-else-if="ev.kind === 'GAME_STARTED'">
-            <span class="rpg-title text-base font-bold tracking-widest">⚜ 神秘商店正式开张！</span>
+            <span class="font-pixel text-sdv-gold text-base font-bold tracking-widest">⚜ 神秘商店正式开张！</span>
           </template>
 
           <template v-else-if="ev.kind === 'SETTLEMENT'">
-            <div><span class="font-serif font-bold tracking-wider" :class="ev.payload.outcome === 'EVACUATED' ? 'text-forest-300' : 'text-oxblood-300'">{{ ev.payload.outcome === 'EVACUATED' ? '✓ 成功撤离' : '✗ 炸单翻车' }}</span></div>
+            <div><span class="font-pixel font-bold tracking-wider" :class="ev.payload.outcome === 'EVACUATED' ? 'text-sdv-btn-green' : 'text-oxblood-300'">{{ ev.payload.outcome === 'EVACUATED' ? '✓ 成功撤离' : '✗ 炸单翻车' }}</span></div>
             <div v-if="Number(ev.payload.guaranteeDelta) > 0" class="feed-detail">
-              <span class="text-gold-200/80">库藏 {{ asStr(ev.payload.guaranteeBefore) }}W → {{ asStr(ev.payload.guaranteeAfter) }}W</span>
+              <span class="text-sdv-gold/80">库藏 {{ asStr(ev.payload.guaranteeBefore) }}W → {{ asStr(ev.payload.guaranteeAfter) }}W</span>
             </div>
           </template>
 
           <template v-else>
-            <span class="text-parchment-400/80 font-serif">{{ ev.kind }}</span>
+            <span class="font-body text-sdv-text-muted font-pixel">{{ ev.kind }}</span>
           </template>
         </div>
       </transition-group>
       <div v-if="events.length === 0" class="text-center py-8">
-        <div class="rune-mark text-2xl text-gold-300/60 animate-flicker">✶</div>
-        <div class="font-body text-parchment-300/70 text-sm mt-2">
+        <div class="text-2xl text-sdv-gold/60 animate-pixel-pulse">✶</div>
+        <div class="font-body text-sdv-text-light/70 text-sm mt-2">
           还没有新的小报童消息。
         </div>
       </div>
