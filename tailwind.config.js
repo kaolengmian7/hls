@@ -4,136 +4,67 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // 装饰字体：仅用于大标题（房间号、Logo 等少量场景）
-        display: ['"Cinzel Decorative"', 'Cinzel', '"Noto Serif SC"', 'serif'],
-        // 全站统一正文/标题字族：拉丁走 Cinzel，中文走思源宋体
-        serif: ['Cinzel', '"Noto Serif SC"', 'serif'],
-        body: ['Cinzel', '"Noto Serif SC"', 'serif'],
+        pixel: ['"VT323"', 'monospace'],
+        body: ['"Noto Sans SC"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
+        // Keep as aliases so font-serif / font-display still work
+        serif: ['"VT323"', 'monospace'],
+        display: ['"VT323"', 'monospace'],
       },
       colors: {
-        // 羊皮纸：从亮米白到深沉发黄
-        parchment: {
-          50: '#fbf3df',
-          100: '#f4e6c2',
-          200: '#e9d3a0',
-          300: '#d8b87a',
-          400: '#bf975a',
-          500: '#9a7644',
-          600: '#6f5430',
-        },
-        // 锻金：从烛火光到暗铜绿
-        gold: {
-          200: '#f3e2a4',
-          300: '#e8c87c',
-          400: '#d4af37',
-          500: '#b8860b',
-          600: '#8c6708',
-          700: '#5e4505',
-        },
-        // 墨色 / 暗夜石：背景与重内容
-        ink: {
-          400: '#3a2b1f',
-          500: '#251913',
-          600: '#1a0f0a',
-          700: '#100806',
-          800: '#080403',
-        },
-        // 牛血酒红：危险与王权
-        oxblood: {
-          300: '#c13a3a',
-          400: '#a02323',
-          500: '#7f1d1d',
-          600: '#5e1212',
-          700: '#3d0a0a',
-        },
-        // 古林深绿：撤离 / 准备 / 成功
-        forest: {
-          300: '#88a04f',
-          400: '#5a7a32',
-          500: '#3f5a1f',
-          600: '#2a3e14',
-          700: '#1a2a0a',
-        },
-        // 王室紫：稀有 / 神秘
-        royal: {
-          400: '#7c3aed',
-          500: '#6d28d9',
-          600: '#4c1d95',
-          700: '#2e1065',
-        },
-        // 余烬橙：老板 / 抽奖
-        ember: {
-          300: '#fdba74',
-          400: '#fb923c',
-          500: '#f97316',
-          600: '#c2410c',
-          700: '#7c2d12',
-        },
-        // 古蓝：护航 / 法师
-        sapphire: {
-          300: '#93c5fd',
-          400: '#3b82f6',
-          500: '#1d4ed8',
-          600: '#1e3a8a',
-          700: '#172554',
-        },
-        boss: {
-          50: '#fff7ed',
-          500: '#f97316',
-          600: '#ea580c',
-          700: '#c2410c',
-        },
-        escort: {
-          50: '#eff6ff',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
+        sdv: {
+          bg: '#1a2e20',
+          'panel-deep': '#3a5030',
+          'panel-warm': '#c8a870',
+          'panel-title': '#a07040',
+          input: '#f0dfa0',
+          border: '#5c3d24',
+          'border-light': '#e8c898',
+          'border-mid': '#a07840',
+          gold: '#f0e080',
+          'gold-dark': '#c89020',
+          'btn-green': '#7ab848',
+          'btn-green-dark': '#4a8828',
+          'btn-green-border': '#2a5010',
+          'btn-brown': '#8a6030',
+          'btn-brown-dark': '#5c3d1a',
+          'btn-brown-border': '#3a2010',
+          'btn-red': '#c04030',
+          'btn-red-dark': '#7a2018',
+          'btn-red-border': '#4a1808',
+          shadow: '#0a0806',
+          'text-dark': '#3a200e',
+          'text-light': '#f0e8c0',
+          'text-nav': '#c8d8a0',
+          'text-muted': '#7a5a38',
+          active: '#e8d060',
+          'active-border': '#c89020',
+          grid: 'rgba(90,140,60,0.08)',
         },
       },
       boxShadow: {
-        relic: '0 6px 24px -8px rgba(0,0,0,.65), inset 0 1px 0 rgba(244,230,194,.06)',
-        torch:
-          '0 0 0 1px rgba(212,175,55,.35), 0 12px 40px -12px rgba(212,175,55,.25), inset 0 1px 0 rgba(244,230,194,.08)',
-        emboss: 'inset 0 1px 0 rgba(255,235,180,.12), inset 0 -2px 0 rgba(0,0,0,.45)',
+        'sdv-panel': 'inset 0 0 0 2px #e8c898, inset 0 0 0 4px #a07840, 4px 4px 0 #0a0806',
+        'sdv-panel-deep': 'inset 0 0 0 2px #2a3820, 4px 4px 0 #0a0806',
+        'sdv-btn': 'inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 0 rgba(0,0,0,0.3), 3px 3px 0 #0a0806',
+        'sdv-input': 'inset 2px 2px 0 #a07840, inset -1px -1px 0 #e8c898',
+        'sdv-input-focus': 'inset 2px 2px 0 #a07840, inset -1px -1px 0 #e8c898, 0 0 0 2px #f0c840',
       },
       animation: {
-        'fade-in': 'fade-in .35s ease-out',
-        'slide-up': 'slide-up .4s ease-out',
-        pulse_soft: 'pulse_soft 1.6s ease-in-out infinite',
-        flicker: 'flicker 2.8s ease-in-out infinite',
-        shimmer: 'shimmer 3.2s linear infinite',
-        'rune-spin': 'rune-spin 24s linear infinite',
+        'pixel-fade': 'pixel-fade 0.3s ease-out',
+        'pixel-slide': 'pixel-slide 0.25s ease-out',
+        'pixel-pulse': 'pixel-pulse 1.4s ease-in-out infinite',
       },
       keyframes: {
-        'fade-in': {
+        'pixel-fade': {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
-        'slide-up': {
-          '0%': { transform: 'translateY(10px)', opacity: '0' },
+        'pixel-slide': {
+          '0%': { transform: 'translateY(8px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
-        pulse_soft: {
+        'pixel-pulse': {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '.55' },
-        },
-        flicker: {
-          '0%, 18%, 22%, 25%, 53%, 57%, 100%': {
-            opacity: '1',
-            filter: 'drop-shadow(0 0 6px rgba(255,180,80,.55))',
-          },
-          '20%, 24%, 55%': {
-            opacity: '.8',
-            filter: 'drop-shadow(0 0 2px rgba(255,180,80,.25))',
-          },
-        },
-        shimmer: {
-          '0%': { 'background-position': '-200% 0' },
-          '100%': { 'background-position': '200% 0' },
-        },
-        'rune-spin': {
-          from: { transform: 'rotate(0deg)' },
-          to: { transform: 'rotate(360deg)' },
+          '50%': { opacity: '0.55' },
         },
       },
     },
