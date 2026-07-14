@@ -48,8 +48,19 @@ type TencentSMSConfig struct {
 	TemplateID  string `json:",optional"`
 }
 
+// LotteryItemConfig 是奖品池单件的 YAML 配置映射，与 game.LotteryItem 字段一一对应。
+type LotteryItemConfig struct {
+	ID       string  `json:",optional"`
+	Name     string  `json:",optional"`
+	Rarity   string  `json:",optional"` // HIGH | MEDIUM | LOW
+	Value    int     `json:",optional"` // 万元估值，正整数
+	Weight   float64 `json:",optional"` // 抽奖权重（客户端不可见）
+	ImageURL string  `json:",optional"`
+}
+
 // ShopConfig 神秘商店专项配置。
 type ShopConfig struct {
-	VIPUsers     []int64 `json:",optional"`
-	VIPHighBoost float64 `json:",default=5"`
+	VIPUsers     []int64             `json:",optional"`
+	VIPHighBoost float64             `json:",default=5"`
+	LotteryPool  []LotteryItemConfig `json:",optional"`
 }
