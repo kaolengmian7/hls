@@ -214,20 +214,18 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
         <h3 class="font-body font-bold text-xl text-hls-gold">
           ⚜ 板板专属 · 神秘商店
         </h3>
-        <span class="hls-badge !border-hls-gold/60 !text-hls-gold animate-pixel-pulse">
-          ★ 神秘商店
+        <span class="hls-badge !border-hls-gold/60 !text-white">
+          💰 {{ myCoin }} 鼠币
         </span>
       </div>
       <div class="hls-divider mb-5" />
 
       <!-- 老虎机卷轴 -->
       <div
-        class="rounded-md relative overflow-hidden"
+        class="lottery-window rounded-md relative overflow-hidden"
         :style="{
-          border: '1px solid rgba(212, 175, 55, 0.45)',
-          background:
-            'radial-gradient(120% 80% at 50% 0%, rgba(249, 115, 22, 0.18), transparent 60%), linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.28)), #e8d0a8',
-          boxShadow: 'inset 0 0 24px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.12)',
+          border: '1px solid rgba(126, 84, 39, 0.34)',
+          boxShadow: 'inset 0 0 32px rgba(88, 52, 24, 0.18), inset 0 0 0 1px rgba(255, 248, 220, 0.16), 0 10px 20px rgba(76, 48, 23, 0.12)',
         }"
       >
         <!-- 空闲态：开奖前的提示 -->
@@ -237,9 +235,6 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
           :style="{ height: VIEWPORT_H + 'px' }"
         >
           <div class="text-3xl text-hls-gold/70 animate-pixel-pulse">✶</div>
-          <div class="font-body text-hls-text-muted text-sm mt-2">
-            点击开启神秘货柜，看看板板这次摸到什么好货。
-          </div>
         </div>
 
         <!-- 卷轴态 -->
@@ -260,7 +255,8 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
               />
               <div
                 v-else
-                style="width:160px;height:160px;border-radius:16px;background:rgba(0,0,0,0.04);display:flex;align-items:center;justify-content:center;font-size:80px;"
+                class="lottery-window-fallback"
+                style="width:160px;height:160px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:80px;"
               >
                 🎁
               </div>
@@ -269,12 +265,12 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
 
           <!-- 上下渐隐遮罩，强化"窗口"观感 -->
           <div
-            class="pointer-events-none absolute inset-x-0 top-0"
-            style="height:28px;background:linear-gradient(180deg,#e8d0a8,rgba(232,208,168,0));"
+            class="lottery-window-mask-top pointer-events-none absolute inset-x-0 top-0"
+            style="height:28px;"
           />
           <div
-            class="pointer-events-none absolute inset-x-0 bottom-0"
-            style="height:28px;background:linear-gradient(0deg,#e8d0a8,rgba(232,208,168,0));"
+            class="lottery-window-mask-bottom pointer-events-none absolute inset-x-0 bottom-0"
+            style="height:28px;"
           />
 
           <!-- 中间结果指示线 -->
@@ -288,21 +284,11 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
                 ? '1.5px solid rgba(212,175,55,0.95)'
                 : '1px solid rgba(212,175,55,0.35)',
               boxShadow: revealed
-                ? 'inset 0 0 56px rgba(249,115,22,0.4), 0 0 36px rgba(212,175,55,0.55)'
+                ? 'inset 0 0 56px rgba(220,38,38,0.36), 0 0 36px rgba(239,68,68,0.5)'
                 : 'inset 0 0 18px rgba(0,0,0,0.15)',
-              background: revealed ? 'rgba(249,115,22,0.06)' : 'transparent',
+              background: revealed ? 'rgba(239,68,68,0.08)' : 'transparent',
             }"
           >
-            <span
-              class="absolute left-1 top-1/2 -translate-y-1/2 text-hls-gold/80 text-xs"
-              :class="spinning ? 'animate-pixel-pulse' : ''"
-              >▶</span
-            >
-            <span
-              class="absolute right-1 top-1/2 -translate-y-1/2 text-hls-gold/80 text-xs"
-              :class="spinning ? 'animate-pixel-pulse' : ''"
-              >◀</span
-            >
             <!-- 四角装饰：revealed 时淡入 -->
             <span
               class="absolute text-hls-gold text-sm transition-opacity duration-500"
@@ -372,16 +358,39 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
 </template>
 
 <style scoped>
+.lottery-window {
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(169, 221, 255, 0.3), transparent 52%),
+    radial-gradient(140% 90% at 50% 100%, rgba(162, 197, 112, 0.26), transparent 42%),
+    linear-gradient(180deg, #f8e7bf 0%, #f1d79d 52%, #e4c182 100%);
+}
+
+.lottery-window-fallback {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 252, 241, 0.92), transparent 28%),
+    linear-gradient(180deg, rgba(255, 244, 214, 0.96), rgba(235, 204, 144, 0.96));
+  border: 2px solid rgba(145, 95, 49, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.lottery-window-mask-top {
+  background: linear-gradient(180deg, rgba(202, 230, 247, 0.95), rgba(248, 231, 191, 0));
+}
+
+.lottery-window-mask-bottom {
+  background: linear-gradient(0deg, rgba(197, 177, 113, 0.9), rgba(248, 231, 191, 0));
+}
+
 .lottery-reveal-pulse {
   animation: lotteryRevealPulse 1.8s ease-in-out infinite;
 }
 
 @keyframes lotteryRevealPulse {
   0%, 100% {
-    box-shadow: inset 0 0 56px rgba(249, 115, 22, 0.4), 0 0 36px rgba(212, 175, 55, 0.55);
+    box-shadow: inset 0 0 56px rgba(220, 38, 38, 0.36), 0 0 36px rgba(239, 68, 68, 0.5);
   }
   50% {
-    box-shadow: inset 0 0 80px rgba(249, 115, 22, 0.6), 0 0 64px rgba(212, 175, 55, 0.9);
+    box-shadow: inset 0 0 80px rgba(220, 38, 38, 0.56), 0 0 64px rgba(239, 68, 68, 0.82);
   }
 }
 </style>

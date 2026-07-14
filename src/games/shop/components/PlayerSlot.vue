@@ -46,9 +46,6 @@ const frameClass = computed(() => {
           <span class="truncate max-w-[140px]">{{ player.nickname }}</span>
           <span v-if="isSelf" class="hls-badge hls-badge-gold !text-xs py-0 px-2">我</span>
         </div>
-        <div class="font-body text-xs text-hls-text-nav/60 mt-1">
-          ✦ {{ (player.id ?? '').slice(-6) }} ✦
-        </div>
       </div>
       <div class="flex gap-2 items-center mt-auto flex-wrap justify-center">
         <span class="hls-badge" :class="roleClass">

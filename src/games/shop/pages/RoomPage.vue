@@ -170,30 +170,30 @@ function dismissHostClosed(): void {
       >
         <div class="flex items-center gap-3 flex-wrap">
           <div class="leading-tight">
-            <div class="font-body text-hls-gold/70 text-[10px] uppercase">
+            <div class="font-body text-white text-xs uppercase">
               <span class="mr-1">⚜</span>商店口令
             </div>
-            <div class="font-body font-bold text-2xl text-hls-gold tracking-[.4em]">{{ code }}</div>
+            <div class="font-body font-bold text-2xl text-white tracking-[.4em]">{{ code }}</div>
           </div>
-          <button class="hls-btn-ghost" @click="copyCode">复制口令</button>
-          <button class="hls-btn-ghost" @click="copyLink">复制邀请链接</button>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button
+              class="hls-btn-secondary py-1.5 px-3 text-[11px]"
+              @click="copyCode"
+            >
+              <span>⎘</span>
+              <span>复制口令</span>
+            </button>
+            <button
+              class="hls-btn-secondary py-1.5 px-3 text-[11px]"
+              @click="copyLink"
+            >
+              <span>↗</span>
+              <span>复制邀请链接</span>
+            </button>
+          </div>
         </div>
         <div class="flex items-center gap-3">
-          <div
-            class="hls-stat leading-tight text-right"
-            :title="`商店保底`"
-          >
-            <div class="font-body text-hls-gold/70 text-[10px] uppercase">
-              商店保底
-            </div>
-            <div class="font-body text-base text-hls-gold font-bold">
-              {{ roomStore.guaranteedAmount }}<span class="text-hls-gold/80 ml-0.5">W</span>
-            </div>
-          </div>
-          <div class="hls-badge">
-            🐿 {{ players.length }} / {{ MAX_PLAYERS }}
-          </div>
-          <button class="hls-btn-danger" @click="confirmLeave">
+          <button class="hls-btn-danger py-2 px-4 text-sm" @click="confirmLeave">
             离开商店
           </button>
         </div>
@@ -203,9 +203,6 @@ function dismissHostClosed(): void {
         <div class="text-center mb-6">
           <h2 class="font-body font-bold text-2xl sm:text-3xl text-hls-gold">角色分配</h2>
           <div class="mx-auto max-w-md mt-2 hls-divider" />
-          <p class="mt-2 font-body text-hls-text-light/80 text-sm">
-            本局固定 3 个角色：1 个板板，2 个护航。
-          </p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -222,9 +219,6 @@ function dismissHostClosed(): void {
             <h3 class="font-body font-bold text-xl text-hls-gold">
               <span class="mr-1">⚜</span>选择角色
             </h3>
-            <span class="font-body text-xs text-hls-text-muted">
-              准备后将锁定角色，直到本局开始。
-            </span>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <button
@@ -242,10 +236,6 @@ function dismissHostClosed(): void {
                   护航
                 </div>
               </div>
-              <div class="hls-divider mt-2 mb-2 opacity-70" />
-              <p class="font-body text-xs text-hls-text-light/80 leading-relaxed">
-                名额 2 · 起始 10 金 · 花费鼠币起装备保护板板
-              </p>
             </button>
             <button
               class="hls-menu-row"
@@ -262,15 +252,8 @@ function dismissHostClosed(): void {
                   板板
                 </div>
               </div>
-              <div class="hls-divider mt-2 mb-2 opacity-70" />
-              <p class="font-body text-xs text-hls-text-light/80 leading-relaxed">
-                名额 1 · 起始 0 金 · 带队撤离 · 从神秘商店中开启丰厚奖励
-              </p>
             </button>
           </div>
-          <p class="font-body text-[12px] text-hls-text-muted mt-4 text-center">
-            若切换角色，需要重新点击准备。
-          </p>
         </div>
 
         <div class="hls-panel mt-5 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

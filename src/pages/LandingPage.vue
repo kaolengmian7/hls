@@ -52,28 +52,19 @@ const games = [
     </AppHeader>
 
     <!-- Hero -->
-    <header class="flex-none px-6 pt-14 pb-10 text-center select-none border-b border-hls-border/30">
+    <header class="flex-none px-6 pt-10 pb-6 text-center select-none">
       <div class="font-pixel text-sm mb-4 text-hls-gold/80 tracking-widest animate-pixel-pulse">
         ✦ 花栗鼠俱乐部 · 三角洲行动 ✦
       </div>
       <h1 class="font-pixel text-4xl sm:text-6xl font-bold leading-tight tracking-[0.2em] text-hls-gold">
         花栗鼠俱乐部
       </h1>
-      <div class="mt-5 mx-auto max-w-xs hls-divider" />
-      <p class="mt-5 font-body text-sm sm:text-base text-hls-text-light tracking-wide leading-relaxed">
-        开一家最有温度的三角洲陪玩店
-      </p>
-      <p class="mt-2 font-body text-xs text-hls-text-nav/60 tracking-widest">
-        原创 1V1 定制教学单 · 神秘商店趣味单
-      </p>
+      <div class="mt-4 mx-auto max-w-xs hls-divider" />
     </header>
 
     <!-- 玩法卡片 -->
-    <main id="games" class="flex-1 px-4 py-10">
+    <main id="games" class="flex-1 px-4 pt-6 pb-10">
       <div class="mx-auto max-w-lg">
-        <div class="font-pixel text-xs tracking-[0.4em] uppercase text-hls-text-nav/50 mb-6 text-center">
-          ❖ 我们的玩法 ❖
-        </div>
         <div class="flex flex-col gap-3">
           <button
             v-for="game in games"

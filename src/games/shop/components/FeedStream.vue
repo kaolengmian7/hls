@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoomStore } from '../stores/room';
 import { getEquipment, getWeapon } from '../game/equipment';
 
 const roomStore = useRoomStore();
+const PAGE_SIZE = 5;
 
 function nameOf(playerId: string): string {
   return roomStore.players.find((p) => p.id === playerId)?.nickname ?? playerId.slice(-4);
@@ -19,23 +20,43 @@ function asStr(v: unknown): string {
 }
 
 const events = computed(() => roomStore.feed);
+const currentPage = ref(1);
+const pageCount = computed(() => Math.max(1, Math.ceil(events.value.length / PAGE_SIZE)));
+const pagedEvents = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE;
+  return events.value.slice(start, start + PAGE_SIZE);
+});
+
+watch(
+  () => events.value.length,
+  () => {
+    if (currentPage.value > pageCount.value) {
+      currentPage.value = pageCount.value;
+    }
+  },
+);
+
+function prevPage(): void {
+  if (currentPage.value > 1) currentPage.value -= 1;
+}
+
+function nextPage(): void {
+  if (currentPage.value < pageCount.value) currentPage.value += 1;
+}
 </script>
 
 <template>
   <div class="hls-panel-deep p-5 flex flex-col lg:sticky lg:top-24">
-    <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center mb-3">
       <h3 class="font-body font-bold text-hls-gold text-lg">
         ⚜ 神秘商店 · 小报童
       </h3>
-      <span class="font-body text-[11px] uppercase text-hls-gold/70">
-        {{ events.length }} 缄
-      </span>
     </div>
     <div class="hls-divider mb-3" />
-    <div class="flex-1 overflow-y-auto max-h-[60vh] lg:max-h-[calc(100vh-8rem)] pr-1 space-y-2">
-      <transition-group name="feed">
+    <div class="flex-1 min-h-0">
+      <transition-group name="feed" class="flex flex-col gap-2">
         <div
-          v-for="ev in events"
+          v-for="ev in pagedEvents"
           :key="ev.id"
           class="feed-item rounded-md px-3 py-2 text-sm font-body"
         >
@@ -87,6 +108,17 @@ const events = computed(() => roomStore.feed);
           还没有新的小报童消息。
         </div>
       </div>
+    </div>
+    <div v-if="events.length > 0" class="mt-3 pt-3 border-t border-hls-border/20 flex items-center justify-between gap-2">
+      <button class="hls-btn-secondary px-3 py-1.5 text-[11px]" :disabled="currentPage === 1" @click="prevPage">
+        上一页
+      </button>
+      <div class="font-body text-[11px] text-hls-gold-dark font-bold">
+        第 {{ currentPage }} / {{ pageCount }} 页
+      </div>
+      <button class="hls-btn-secondary px-3 py-1.5 text-[11px]" :disabled="currentPage === pageCount" @click="nextPage">
+        下一页
+      </button>
     </div>
   </div>
 </template>

@@ -144,8 +144,8 @@ function dismissClosed(): void {
           </div>
 
           <div class="flex items-center gap-2">
-            <button class="hls-btn-ghost text-red-400 hover:!text-red-400 text-[11px]" @click="confirmLeave">
-              离开
+            <button class="hls-btn-danger py-2 px-4 text-sm" @click="confirmLeave">
+              离开商店
             </button>
           </div>
         </div>
@@ -157,7 +157,7 @@ function dismissClosed(): void {
 
             <!-- 本局数据 -->
             <div>
-              <div class="font-body text-[10px] uppercase text-hls-gold/60 mb-2">
+              <div class="font-body font-bold text-[11px] uppercase text-hls-gold mb-2">
                 ⚜ 本局数据
               </div>
               <div class="grid grid-cols-2 gap-2">
@@ -165,7 +165,7 @@ function dismissClosed(): void {
                   class="hls-stat text-center"
                   title="商店保底"
                 >
-                  <div class="font-body text-[10px] uppercase text-hls-gold/80">保底</div>
+                  <div class="font-body font-bold text-[11px] uppercase text-hls-gold-dark">保底</div>
                   <div class="text-base font-bold font-body text-hls-gold mt-0.5">
                     {{ roomStore.guaranteedAmount }}<span class="text-hls-gold/80 ml-0.5 text-[11px]">W</span>
                   </div>
@@ -174,7 +174,7 @@ function dismissClosed(): void {
                   class="hls-stat text-center"
                   title="历次撤离成功累计扣减额"
                 >
-                  <div class="font-body text-[10px] uppercase text-hls-btn-green/70">得吃</div>
+                  <div class="font-body font-bold text-[11px] uppercase text-hls-btn-green">得吃</div>
                   <div class="text-base font-bold font-body text-hls-btn-green mt-0.5">
                     {{ roomStore.evacuatedTotal }}<span class="text-hls-btn-green/80 ml-0.5 text-[11px]">W</span>
                   </div>
@@ -184,26 +184,26 @@ function dismissClosed(): void {
 
             <!-- 操作 -->
             <div>
-              <div class="font-body text-[10px] uppercase text-hls-gold/60 mb-2">
+              <div class="font-body font-bold text-[11px] uppercase text-hls-gold mb-2">
                 🗂 操作
               </div>
-              <div class="flex flex-wrap gap-2">
+              <div class="grid grid-cols-2 gap-2">
                 <button
                   v-if="canSettle"
-                  class="hls-btn py-1.5 px-3 text-[11px]"
+                  class="hls-btn w-full py-1.5 px-3 text-[11px]"
                   @click="showSettlement = true"
                 >
                   ⚖ 本轮结算
                 </button>
                 <button
                   v-if="canSettle"
-                  class="hls-btn-danger py-1.5 px-3 text-[11px]"
+                  class="hls-btn-danger w-full py-1.5 px-3 text-[11px]"
                   @click="handleCloseGame"
                 >
                   结单
                 </button>
-                <button class="hls-btn-ghost py-1.5 px-3 text-[11px]" @click="showSettlementHistory = true">结算记录</button>
-                <button class="hls-btn-ghost py-1.5 px-3 text-[11px]" @click="showLottery = true">抽奖记录</button>
+                <button class="hls-btn-ghost w-full py-1.5 px-3 text-[11px]" @click="showSettlementHistory = true">结算记录</button>
+                <button class="hls-btn-ghost w-full py-1.5 px-3 text-[11px]" @click="showLottery = true">抽奖记录</button>
               </div>
             </div>
 
@@ -211,7 +211,7 @@ function dismissClosed(): void {
 
             <!-- 店内成员 -->
             <div>
-              <div class="font-body text-[10px] uppercase text-hls-gold/60 mb-2">
+              <div class="font-body font-bold text-[11px] uppercase text-hls-gold mb-2">
                 👥 店内成员
               </div>
               <div class="grid grid-cols-3 gap-2 lg:grid-cols-1">
@@ -239,7 +239,7 @@ function dismissClosed(): void {
                       <span class="flex-1 min-w-0 truncate text-xs lg:text-sm lg:break-all lg:whitespace-normal">{{ p.nickname }}</span>
                       <span
                         v-if="p.id === roomStore.selfPlayerId"
-                        class="hls-badge !text-hls-gold !border-hls-gold/60 text-[10px] shrink-0"
+                        class="hls-badge hls-badge-gold text-[10px] shrink-0"
                       >
                         我
                       </span>
@@ -247,11 +247,7 @@ function dismissClosed(): void {
                     <div class="flex items-center gap-1.5 mt-1 justify-center lg:justify-start">
                       <span
                         class="hls-badge text-[10px]"
-                        :class="
-                          p.role === 'BOSS'
-                            ? '!border-hls-gold/60 !text-hls-gold'
-                            : '!border-hls-text-nav/60 !text-hls-text-nav'
-                        "
+                        :class="p.role === 'BOSS' ? 'hls-badge-amber' : 'hls-badge-teal'"
                       >
                         {{ p.role ? ROLE_LABEL[p.role] : '未择阶' }}
                       </span>
