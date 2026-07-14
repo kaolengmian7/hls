@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
+	"hls.dev/server/internal/game"
 	"hls.dev/server/internal/handler"
 )
 
@@ -44,5 +46,119 @@ func TestLotteryPoolHandler_MethodNotAllowed(t *testing.T) {
 
 	if w.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("status=%d, want 405", w.Code)
+	}
+}
+
+func TestMain(m *testing.M) {
+	if err := game.InitPool(defaultTestPool()); err != nil {
+		panic(err)
+	}
+	os.Exit(m.Run())
+}
+
+func defaultTestPool() []game.LotteryItem {
+	return []game.LotteryItem{
+		{ID: "TEAR_OF_THE_OCEAN", Name: "海洋之泪", Rarity: "HIGH", Value: 2800, Weight: 0.05,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/tear-of-the-ocean.webp"},
+		{ID: "HEART_OF_AFRICA", Name: "非洲之心", Rarity: "HIGH", Value: 1300, Weight: 0.1,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/heart-of-africa.webp"},
+		{ID: "PORTABLE_VENTILATOR", Name: "复苏呼吸机", Rarity: "HIGH", Value: 530, Weight: 0.3,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/portable-ventilator.webp"},
+		{ID: "MICRO_REACTOR", Name: "微型反应炉", Rarity: "HIGH", Value: 470, Weight: 0.4,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/micro-reactor.webp"},
+		{ID: "ARMORED_VEHICLE_BATTERY", Name: "装甲车电池", Rarity: "HIGH", Value: 380, Weight: 0.55,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/armored-vehicle-battery.webp"},
+		{ID: "ECMO", Name: "ECMO", Rarity: "HIGH", Value: 300, Weight: 0.7,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ecmo.webp"},
+		{ID: "RADAR_PORTABLE", Name: "便携军用雷达", Rarity: "HIGH", Value: 215, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/radar-portable.webp"},
+		{ID: "MANDEL_SUPERCOMPUTER", Name: "曼德尔超算单元", Rarity: "HIGH", Value: 200, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/mandel-supercomputer.webp"},
+		{ID: "DISK_ARRAY_HS", Name: "高速磁盘阵列", Rarity: "HIGH", Value: 170, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/disk-array-hs.webp"},
+		{ID: "GOLDEN_CROWN_OF_TEARS", Name: "万金泪冠", Rarity: "HIGH", Value: 230, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/golden-crown-of-tears.webp"},
+		{ID: "VERTICAL_HORIZONTAL", Name: "纵横", Rarity: "HIGH", Value: 240, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/vertical-horizontal.webp"},
+		{ID: "IMPRESSIONIST_PAINTING", Name: "印象派名画", Rarity: "HIGH", Value: 210, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/impressionist-painting.webp"},
+		{ID: "ROBOT_VAC_MOP", Name: "扫拖一体机器人", Rarity: "HIGH", Value: 200, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/robot-vac-mop.webp"},
+		{ID: "REINFORCED_CARBON_FIBER_PLATE", Name: "强化碳纤维板", Rarity: "HIGH", Value: 200, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/reinforced-carbon-fiber-plate.webp"},
+		{ID: "FLIGHT_RECORDER", Name: "飞行记录仪", Rarity: "HIGH", Value: 170, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/flight-recorder.webp"},
+		{ID: "FAMOUS_KILN_PORCELAIN", Name: "名窑瓷器", Rarity: "HIGH", Value: 150, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/famous-kiln-porcelain.webp"},
+		{ID: "BATTERY_PACK", Name: "动力电池组", Rarity: "HIGH", Value: 150, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/battery-pack.webp"},
+		{ID: "MIL_SHELL", Name: "军用炮弹", Rarity: "HIGH", Value: 150, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/mil-shell.webp"},
+		{ID: "DISK_ARRAY_HS_COMPACT", Name: "高速磁盘阵列", Rarity: "HIGH", Value: 150, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/disk-array-hs-compact.webp"},
+		{ID: "AED", Name: "自动体外除颤仪", Rarity: "HIGH", Value: 140, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/aed.webp"},
+		{ID: "POWERFUL_VACUUM", Name: "强力吸尘器", Rarity: "HIGH", Value: 140, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/powerful-vacuum.webp"},
+		{ID: "BLADE_SERVER", Name: "刀片服务器", Rarity: "HIGH", Value: 140, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/blade-server.webp"},
+		{ID: "IFV_MODEL_DELUXE", Name: "步战车模型", Rarity: "HIGH", Value: 220, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ifv-model-deluxe.webp"},
+		{ID: "IFV_MODEL", Name: "步战车模型", Rarity: "MEDIUM", Value: 130, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ifv-model.webp"},
+		{ID: "MIL_DRONE", Name: "军用无人机", Rarity: "MEDIUM", Value: 50, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/mil-drone.webp"},
+		{ID: "MIL_INFO_TERMINAL", Name: "军用信息终端", Rarity: "MEDIUM", Value: 38, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/mil-info-terminal.webp"},
+		{ID: "CHAMPAGNE", Name: "香槟", Rarity: "MEDIUM", Value: 34, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/champagne.webp"},
+		{ID: "GPU", Name: "显卡", Rarity: "MEDIUM", Value: 33, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/gpu.webp"},
+		{ID: "QUANTUM_STORAGE", Name: "量子存储", Rarity: "MEDIUM", Value: 30, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/quantum-storage.webp"},
+		{ID: "GOLD_BAR", Name: "万足金条", Rarity: "MEDIUM", Value: 30, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/gold-bar.webp"},
+		{ID: "FOSSIL", Name: "化石", Rarity: "MEDIUM", Value: 35, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/fossil.webp"},
+		{ID: "GOLDEN_GAZELLE", Name: "黄金瞪羚", Rarity: "MEDIUM", Value: 40, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/golden-gazelle.webp"},
+		{ID: "ARCHIVED_AUDIO_SOURCE", Name: "已封存音源", Rarity: "MEDIUM", Value: 50, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/archived-audio-source.webp"},
+		{ID: "GOLDEN_CROCODILE_BUST", Name: "黄金鳄鱼头雕像", Rarity: "MEDIUM", Value: 50, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/golden-crocodile-bust.webp"},
+		{ID: "TIANYUAN_DIFANG", Name: "天圆地方", Rarity: "MEDIUM", Value: 60, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/tianyuan-difang.webp"},
+		{ID: "CAMERA", Name: "摄影机", Rarity: "MEDIUM", Value: 65, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/camera.webp"},
+		{ID: "MUSKET", Name: "滑膛枪", Rarity: "MEDIUM", Value: 70, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/musket.webp"},
+		{ID: "MIL_RADIO", Name: "军用电台", Rarity: "MEDIUM", Value: 100, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/mil-radio.webp"},
+		{ID: "ELECTRONIC_ANKLET", Name: "电子脚镣", Rarity: "MEDIUM", Value: 100, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/electronic-anklet.webp"},
+		{ID: "MEDICAL_ROBOT", Name: "医疗机器人", Rarity: "MEDIUM", Value: 120, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/medical-robot.webp"},
+		{ID: "LAPTOP", Name: "笔记本电脑", Rarity: "MEDIUM", Value: 120, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/laptop.webp"},
+		{ID: "CLOUD_STORAGE_ARRAY", Name: "云储存阵列", Rarity: "MEDIUM", Value: 130, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/cloud-storage-array.webp"},
+		{ID: "VENTILATOR", Name: "呼吸机", Rarity: "MEDIUM", Value: 45, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ventilator.webp"},
+		{ID: "GPS_RECEIVER", Name: "定位接收器", Rarity: "LOW", Value: 18, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/gps-receiver.webp"},
+		{ID: "STAR_SENSOR", Name: "恒星敏感器", Rarity: "LOW", Value: 18, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/star-sensor.webp"},
+		{ID: "CAVIAR", Name: "鱼子酱", Rarity: "LOW", Value: 17, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/caviar.webp"},
+		{ID: "GILT_CARD", Name: "鎏金卡牌", Rarity: "LOW", Value: 20, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/gilt-card.webp"},
+		{ID: "ROLEX", Name: "劳力士", Rarity: "LOW", Value: 20, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/rolex.webp"},
+		{ID: "SAYYID_POCKET_WATCH", Name: "赛义德的怀表", Rarity: "LOW", Value: 20, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/sayyid-pocket-watch.webp"},
+		{ID: "ARCHIVED_EXPERIMENT_DATA", Name: "实验数据", Rarity: "LOW", Value: 20, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/archived-experiment-data.webp"},
+		{ID: "ULTRASONIC_CUTTER", Name: "超声波切割刀", Rarity: "LOW", Value: 20, Weight: 6.08,
+			ImageURL: "https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ultrasonic-cutter.webp"},
 	}
 }

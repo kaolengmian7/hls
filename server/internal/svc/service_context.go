@@ -9,6 +9,7 @@ import (
 
 	"hls.dev/server/internal/auth"
 	"hls.dev/server/internal/config"
+	"hls.dev/server/internal/game"
 	"hls.dev/server/internal/repo"
 	"hls.dev/server/internal/room"
 	"hls.dev/server/pkg/code"
@@ -34,6 +35,8 @@ type ServiceContext struct {
 
 // NewServiceContext 构建依赖。
 func NewServiceContext(cfg config.Config) *ServiceContext {
+	logx.Must(game.InitPool(toLotteryItems(cfg.Shop.LotteryPool)))
+
 	rootCtx, cancel := context.WithCancel(context.Background())
 	gen := code.NewGenerator()
 	conn := sqlx.NewMysql(cfg.DB.DSN)
@@ -67,4 +70,21 @@ func (s *ServiceContext) Stop() {
 	if s.RootCancel != nil {
 		s.RootCancel()
 	}
+}
+
+// toLotteryItems converts config-layer prize items to the game package type,
+// keeping game independent of the config package.
+func toLotteryItems(cfgItems []config.LotteryItemConfig) []game.LotteryItem {
+	items := make([]game.LotteryItem, len(cfgItems))
+	for i, it := range cfgItems {
+		items[i] = game.LotteryItem{
+			ID:       it.ID,
+			Name:     it.Name,
+			Rarity:   it.Rarity,
+			Value:    it.Value,
+			Weight:   it.Weight,
+			ImageURL: it.ImageURL,
+		}
+	}
+	return items
 }

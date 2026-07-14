@@ -163,12 +163,14 @@ func TestLotteryPoolDefinition(t *testing.T) {
 
 func TestDrawLotteryPropagatesImageURL(t *testing.T) {
 	// 给每件奖品设可预测的 URL，保证无论 roll 到哪件都能断言。
+	origURLs := make([]string, len(lotteryPool))
 	for i := range lotteryPool {
+		origURLs[i] = lotteryPool[i].ImageURL
 		lotteryPool[i].ImageURL = "https://cdn.example.com/prizes/" + lotteryPool[i].ID + ".webp"
 	}
 	t.Cleanup(func() {
 		for i := range lotteryPool {
-			lotteryPool[i].ImageURL = ""
+			lotteryPool[i].ImageURL = origURLs[i]
 		}
 	})
 
