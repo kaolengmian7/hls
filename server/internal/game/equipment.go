@@ -62,7 +62,7 @@ const (
 
 // weaponCatalog 是当前局可见的所有武器。
 //
-// 设计约定：AW(AWM) 只能通过 BUNDLE_AW 获得；基础枪械与单枪匹马通过各自装备项直接购买。
+// 设计约定：AW(AWM) 只能通过 BUNDLE_AW 获得。
 var weaponCatalog = []Weapon{
 	{ID: WeaponAWM, Name: "AWM", Icon: "🎯", Category: "SNIPER"},
 	{ID: WeaponM24, Name: "M24", Icon: "🎯", Category: "SNIPER"},
@@ -79,13 +79,9 @@ var weaponCatalog = []Weapon{
 
 // 装备 ID 常量。
 const (
-	EquipmentArmorL4     = "ARMOR_L4"
-	EquipmentArmorL5     = "ARMOR_L5"
-	EquipmentArmorL6     = "ARMOR_L6"
-	EquipmentBundleAW    = "BUNDLE_AW"
-	EquipmentBundleM7    = "BUNDLE_M7"
-	EquipmentWeaponOther = "WEAPON_SINGLE"
-	EquipmentWeaponLone  = "WEAPON_LONE"
+	EquipmentArmorL5  = "ARMOR_L5"
+	EquipmentArmorL6  = "ARMOR_L6"
+	EquipmentBundleAW = "BUNDLE_AW"
 )
 
 // equipmentCatalog 是默认装备目录。
@@ -93,34 +89,17 @@ const (
 // 所有条目均为直接购买（扣费即可），无需二级选枪。
 var equipmentCatalog = []Equipment{
 	{
-		ID: EquipmentArmorL4, Name: "4 级护甲", Icon: "🛡️", Price: 1, Category: CategoryArmor,
-		Description: "基础护甲，少量减伤。",
-	},
-	{
-		ID: EquipmentArmorL5, Name: "5 级护甲", Icon: "🛡️", Price: 2, Category: CategoryArmor,
+		ID: EquipmentArmorL5, Name: "5 级护甲", Icon: "🛡️", Price: 0, Category: CategoryArmor,
 		Description: "进阶护甲，中等减伤。",
 	},
 	{
-		ID: EquipmentArmorL6, Name: "6 级护甲", Icon: "🛡️", Price: 3, Category: CategoryArmor,
+		ID: EquipmentArmorL6, Name: "6 级护甲", Icon: "🛡️", Price: 0, Category: CategoryArmor,
 		Description: "顶级护甲，最大减伤。",
 	},
 	{
-		ID: EquipmentBundleAW, Name: "AW套装", Icon: "🎯", Price: 4, Category: CategoryBundle,
+		ID: EquipmentBundleAW, Name: "AW套装", Icon: "🎯", Price: 0, Category: CategoryBundle,
 		Description:   "AWM + 任意一把枪",
 		BundledLabels: []string{WeaponAWM},
-	},
-	{
-		ID: EquipmentBundleM7, Name: "T0枪械套装", Icon: "🔫", Price: 3, Category: CategoryBundle,
-		Description:   "T0枪械 + 任意一把狙击枪",
-		BundledLabels: []string{WeaponM7, WeaponM14, WeaponAsval, WeaponMK47},
-	},
-	{
-		ID: EquipmentWeaponOther, Name: "基础枪械套装", Icon: "🔫", Price: 2, Category: CategoryWeapon,
-		Description: "除 T0 枪械以外的任意单枪 + 任意一把狙击枪（AW 除外）。",
-	},
-	{
-		ID: EquipmentWeaponLone, Name: "单枪匹马", Icon: "🔫", Price: 1, Category: CategoryWeapon,
-		Description: "除 T0 枪械以外的任意单枪。",
 	},
 }
 

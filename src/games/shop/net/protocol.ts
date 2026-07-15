@@ -81,6 +81,7 @@ export type SettlementRecord = {
   id: string;
   at: number;
   outcome: SettlementOutcome;
+  /** EVACUATED 且 `guaranteeDelta > 0` 同时 `guaranteeBefore === guaranteeAfter` 时，表示老板兜底。 */
   guaranteeDelta: number;
   guaranteeBefore: number;
   guaranteeAfter: number;
@@ -161,12 +162,14 @@ export type IntentMap = {
   /**
    * 房主结算本局：
    *  - `outcome`        撤离成功 / 炸单。
-   *  - `guaranteeDelta` 非负整数（单位 W），EVACUATED 表示扣减额，BOMBED 表示增加额。
+   *  - `guaranteeDelta` 非负整数（单位 W），EVACUATED 表示本次得吃增加额，BOMBED 表示保底增加额。
+   *  - `bossCovered`    仅 EVACUATED 生效；true 表示老板兜底，得吃增加但保底不扣减。
    *  - `perPlayer`      必须涵盖房间内全部 3 位玩家（含老板），不重复不遗漏。
    */
   SETTLE_ROUND: {
     outcome: SettlementOutcome;
     guaranteeDelta: number;
+    bossCovered?: boolean;
     perPlayer: SettlePlayerInput[];
   };
   CLOSE_GAME: Record<string, never>;

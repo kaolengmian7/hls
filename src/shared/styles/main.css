@@ -157,11 +157,11 @@
     box-shadow: 1px 1px 0 rgba(60, 30, 8, 0.15);
     padding: 2px 10px;
   }
-  .hls-badge-gold  { background: #c89020; border-color: #7a5010; color: #fff8d0; }
+  .hls-badge-gold  { background: #c89020; border-color: #7a5010; color: #ffffff; }
   .hls-badge-gray  { background: #c8b090; border-color: #8a6838; color: #5c3820; }
   .hls-badge-red   { background: #a03020; border-color: #601808; color: #ffd8c8; }
-  .hls-badge-teal  { background: #2a7060; border-color: #185040; color: #b0f0e0; }
-  .hls-badge-amber { background: #c07018; border-color: #804808; color: #ffe8a0; }
+  .hls-badge-teal  { background: #2a7060; border-color: #185040; color: #ffffff; }
+  .hls-badge-amber { background: #c07018; border-color: #804808; color: #ffffff; }
 
   /* ---------- Nav header ---------- */
   .hls-nav {

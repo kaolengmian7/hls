@@ -39,11 +39,11 @@ type playerState struct {
 
 // Room 持有单个房间的权威状态及处理循环。
 type Room struct {
-	code     string
-	hub      *Hub
-	logger   logx.Logger
-	shopRepo *repo.ShopRepo   // nil = tests / no-persistence mode
-	userIDs  map[string]int64 // playerID → auth user ID
+	code         string
+	hub          *Hub
+	logger       logx.Logger
+	shopRepo     *repo.ShopRepo     // nil = tests / no-persistence mode
+	userIDs      map[string]int64   // playerID → auth user ID
 	vipUsers     map[int64]struct{} // read-only after newRoom; shared reference from Hub
 	vipHighBoost float64
 
@@ -931,7 +931,7 @@ func (r *Room) handleSettleRound(ctx context.Context, it Intent) {
 		roleByID[pid] = pl.Role
 	}
 	result, err := game.ComputeSettlement(
-		p.Outcome, p.GuaranteeDelta, r.guaranteedAmount,
+		p.Outcome, p.GuaranteeDelta, p.BossCovered, r.guaranteedAmount,
 		p.PerPlayer, append([]string(nil), r.playerOrder...), roleByID,
 	)
 	if err != nil {
@@ -1001,6 +1001,7 @@ func (r *Room) handleSettleRound(ctx context.Context, it Intent) {
 
 	r.appendFeed("SETTLEMENT", map[string]any{
 		"outcome":         string(result.Outcome),
+		"bossCovered":     result.BossCovered,
 		"guaranteeDelta":  result.GuaranteeDelta,
 		"guaranteeBefore": result.GuaranteeBefore,
 		"guaranteeAfter":  result.GuaranteeAfter,
@@ -1022,6 +1023,7 @@ func (r *Room) handleSettleRound(ctx context.Context, it Intent) {
 		logx.Field("code", r.code),
 		logx.Field("by", it.From.playerID),
 		logx.Field("outcome", string(result.Outcome)),
+		logx.Field("bossCovered", result.BossCovered),
 		logx.Field("guaranteeBefore", result.GuaranteeBefore),
 		logx.Field("guaranteeAfter", result.GuaranteeAfter))
 }
@@ -1139,4 +1141,3 @@ func shortEventID() (string, error) {
 	}
 	return base64.RawURLEncoding.EncodeToString(buf[:])[:10], nil
 }
-

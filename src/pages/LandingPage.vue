@@ -9,7 +9,6 @@ const games = [
     key: 'shop',
     icon: '🎲',
     title: '神秘商店',
-    desc: '趣味单 · 三人对局\n抽奖 · 装备 · 结算',
     route: '/shop',
     active: true,
   },
@@ -17,7 +16,6 @@ const games = [
     key: 'teach',
     icon: '🎓',
     title: '1V1 定制教学',
-    desc: '专属教练 · 针对性训练\n技术进阶',
     route: '/teach',
     active: false,
   },
@@ -25,7 +23,6 @@ const games = [
     key: 'audition',
     icon: '🎵',
     title: '试音',
-    desc: '与花栗鼠一起玩\n找到最合拍的搭档',
     route: '/audition',
     active: false,
   },
@@ -33,7 +30,6 @@ const games = [
     key: 'poker',
     icon: '🃏',
     title: '摸红扑克牌',
-    desc: '原创趣味玩法\n手气决定一切',
     route: '/poker',
     active: false,
   },
@@ -80,9 +76,6 @@ const games = [
             <div class="flex-1 min-w-0">
               <div class="font-body font-bold text-base text-hls-text-dark">
                 {{ game.title }}
-              </div>
-              <div class="font-body text-xs leading-relaxed text-hls-text-muted whitespace-pre-line mt-0.5">
-                {{ game.desc }}
               </div>
             </div>
             <div class="shrink-0">

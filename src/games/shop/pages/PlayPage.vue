@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useRoomStore } from '../stores/room';
 import { ROLE_LABEL } from '../game/rules';
@@ -26,6 +26,9 @@ const showClosedDialog = ref(false);
 const showGameClosedDialog = ref(false);
 const closedReason = ref('');
 const restoring = ref(false);
+const leftPanelRef = ref<HTMLElement | null>(null);
+const feedPanelHeight = ref<number | null>(null);
+let leftPanelObserver: ResizeObserver | null = null;
 
 /** 房主结算按钮：仅在 PLAYING 状态对房主显示。 */
 const canSettle = computed(
@@ -45,6 +48,12 @@ const roster = computed(() => {
   const others = players.filter((p) => p.id !== roomStore.selfPlayerId);
   return self ? [self, ...others] : players;
 });
+
+function syncFeedPanelHeight(): void {
+  feedPanelHeight.value = leftPanelRef.value
+    ? Math.ceil(leftPanelRef.value.getBoundingClientRect().height)
+    : null;
+}
 
 onMounted(async () => {
   playerStore.ensureIdentity();
@@ -68,6 +77,31 @@ onMounted(async () => {
   if (roomStore.snapshot?.status !== 'PLAYING') {
     router.replace({ name: 'shop-room', params: { code: targetCode } });
   }
+});
+
+watch(
+  leftPanelRef,
+  async (el) => {
+    leftPanelObserver?.disconnect();
+    leftPanelObserver = null;
+
+    if (!el) {
+      feedPanelHeight.value = null;
+      return;
+    }
+
+    await nextTick();
+    syncFeedPanelHeight();
+    leftPanelObserver = new ResizeObserver(() => {
+      syncFeedPanelHeight();
+    });
+    leftPanelObserver.observe(el);
+  },
+  { flush: 'post' },
+);
+
+onBeforeUnmount(() => {
+  leftPanelObserver?.disconnect();
 });
 
 watch(
@@ -123,7 +157,7 @@ function dismissClosed(): void {
         <div class="hls-panel-title text-center">重返神秘商店</div>
         <div class="p-6">
           <div class="font-pixel text-3xl text-hls-gold mb-3 animate-pixel-pulse">✶</div>
-          <div class="font-body text-sm text-hls-text-dark">正在根据商店口令返回花栗鼠的神秘商店…</div>
+          <div class="font-body text-base text-hls-text-dark">正在根据商店口令返回花栗鼠的神秘商店…</div>
         </div>
       </div>
     </div>
@@ -136,28 +170,28 @@ function dismissClosed(): void {
           <div class="flex items-center gap-3 min-w-0">
             <div class="text-2xl animate-pixel-pulse">⚜</div>
             <div class="min-w-0">
-              <div class="font-body font-bold text-hls-gold text-base sm:text-lg leading-tight">花栗鼠的神秘商店</div>
-              <div class="font-body text-[10px] uppercase text-hls-gold/70 mt-0.5">
+              <div class="font-body font-bold text-hls-gold text-lg sm:text-xl leading-tight">花栗鼠的神秘商店</div>
+              <div class="font-body text-xs uppercase text-hls-gold/70 mt-0.5">
                 口令 · {{ code }}
               </div>
             </div>
           </div>
 
           <div class="flex items-center gap-2">
-            <button class="hls-btn-danger py-2 px-4 text-sm" @click="confirmLeave">
+            <button class="hls-btn-danger py-2 px-4 text-base" @click="confirmLeave">
               离开商店
             </button>
           </div>
         </div>
       </header>
 
-      <main class="flex-1 px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-[220px_1fr_260px] gap-6 max-w-7xl mx-auto w-full">
+      <main class="flex-1 px-4 sm:px-8 py-6 grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-6 max-w-7xl mx-auto w-full">
         <aside class="order-2 lg:order-1">
-          <div class="hls-panel-deep p-4 lg:sticky lg:top-24 flex flex-col gap-4">
+          <div ref="leftPanelRef" class="hls-panel-deep p-4 lg:sticky lg:top-24 flex flex-col gap-4">
 
             <!-- 本局数据 -->
             <div>
-              <div class="font-body font-bold text-[11px] uppercase text-hls-gold mb-2">
+              <div class="font-body font-bold text-[13px] uppercase text-hls-gold mb-2">
                 ⚜ 本局数据
               </div>
               <div class="grid grid-cols-2 gap-2">
@@ -165,18 +199,18 @@ function dismissClosed(): void {
                   class="hls-stat text-center"
                   title="商店保底"
                 >
-                  <div class="font-body font-bold text-[11px] uppercase text-hls-gold-dark">保底</div>
-                  <div class="text-base font-bold font-body text-hls-gold mt-0.5">
-                    {{ roomStore.guaranteedAmount }}<span class="text-hls-gold/80 ml-0.5 text-[11px]">W</span>
+                  <div class="font-body font-bold text-[13px] uppercase text-hls-gold-dark">保底</div>
+                  <div class="text-lg font-bold font-body text-hls-gold mt-0.5">
+                    {{ roomStore.guaranteedAmount }}<span class="text-hls-gold/80 ml-0.5 text-[13px]">W</span>
                   </div>
                 </div>
                 <div
                   class="hls-stat text-center"
                   title="历次撤离成功累计扣减额"
                 >
-                  <div class="font-body font-bold text-[11px] uppercase text-hls-btn-green">得吃</div>
-                  <div class="text-base font-bold font-body text-hls-btn-green mt-0.5">
-                    {{ roomStore.evacuatedTotal }}<span class="text-hls-btn-green/80 ml-0.5 text-[11px]">W</span>
+                  <div class="font-body font-bold text-[13px] uppercase text-hls-btn-green">得吃</div>
+                  <div class="text-lg font-bold font-body text-hls-btn-green mt-0.5">
+                    {{ roomStore.evacuatedTotal }}<span class="text-hls-btn-green/80 ml-0.5 text-[13px]">W</span>
                   </div>
                 </div>
               </div>
@@ -184,26 +218,26 @@ function dismissClosed(): void {
 
             <!-- 操作 -->
             <div>
-              <div class="font-body font-bold text-[11px] uppercase text-hls-gold mb-2">
+              <div class="font-body font-bold text-[13px] uppercase text-hls-gold mb-2">
                 🗂 操作
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <button
                   v-if="canSettle"
-                  class="hls-btn w-full py-1.5 px-3 text-[11px]"
+                  class="hls-btn w-full py-1.5 px-3 text-[13px]"
                   @click="showSettlement = true"
                 >
-                  ⚖ 本轮结算
+                  本轮结算
                 </button>
                 <button
                   v-if="canSettle"
-                  class="hls-btn-danger w-full py-1.5 px-3 text-[11px]"
+                  class="hls-btn-danger w-full py-1.5 px-3 text-[13px]"
                   @click="handleCloseGame"
                 >
                   结单
                 </button>
-                <button class="hls-btn-ghost w-full py-1.5 px-3 text-[11px]" @click="showSettlementHistory = true">结算记录</button>
-                <button class="hls-btn-ghost w-full py-1.5 px-3 text-[11px]" @click="showLottery = true">抽奖记录</button>
+                <button class="hls-btn-ghost w-full py-1.5 px-3 text-[13px]" @click="showSettlementHistory = true">结算记录</button>
+                <button class="hls-btn-ghost w-full py-1.5 px-3 text-[13px]" @click="showLottery = true">抽奖记录</button>
               </div>
             </div>
 
@@ -211,7 +245,7 @@ function dismissClosed(): void {
 
             <!-- 店内成员 -->
             <div>
-              <div class="font-body font-bold text-[11px] uppercase text-hls-gold mb-2">
+              <div class="font-body font-bold text-[13px] uppercase text-hls-gold mb-2">
                 👥 店内成员
               </div>
               <div class="grid grid-cols-3 gap-2 lg:grid-cols-1">
@@ -236,23 +270,23 @@ function dismissClosed(): void {
                   <div class="flex-1 min-w-0 w-full">
                     <div class="font-body font-semibold text-hls-text-light flex flex-wrap items-center gap-1 justify-center lg:justify-start">
                       <span v-if="p.isHost" class="text-hls-gold shrink-0" title="房主">👑</span>
-                      <span class="flex-1 min-w-0 truncate text-xs lg:text-sm lg:break-all lg:whitespace-normal">{{ p.nickname }}</span>
+                      <span class="flex-1 min-w-0 truncate text-sm lg:text-base lg:break-all lg:whitespace-normal">{{ p.nickname }}</span>
                       <span
                         v-if="p.id === roomStore.selfPlayerId"
-                        class="hls-badge hls-badge-gold text-[10px] shrink-0"
+                        class="hls-badge hls-badge-gold text-xs shrink-0"
                       >
                         我
                       </span>
                     </div>
                     <div class="flex items-center gap-1.5 mt-1 justify-center lg:justify-start">
                       <span
-                        class="hls-badge text-[10px]"
+                        class="hls-badge text-xs"
                         :class="p.role === 'BOSS' ? 'hls-badge-amber' : 'hls-badge-teal'"
                       >
                         {{ p.role ? ROLE_LABEL[p.role] : '未择阶' }}
                       </span>
                     </div>
-                    <div class="coin-tag text-xs mt-1 lg:text-sm">
+                    <div class="coin-tag text-sm mt-1 lg:text-base">
                       <span>💰</span> {{ p.coin }}
                     </div>
                   </div>
@@ -276,7 +310,7 @@ function dismissClosed(): void {
             <div class="hls-panel p-10 text-center">
               <div class="hls-panel-title">正在确认角色</div>
               <div class="p-6">
-                <div class="font-body text-hls-text-light mt-2">
+                <div class="font-body text-base text-hls-text-light mt-2">
                   正在确认您的店内角色…
                 </div>
               </div>
@@ -285,7 +319,7 @@ function dismissClosed(): void {
         </section>
 
         <aside class="order-3">
-          <FeedStream />
+          <FeedStream :panel-height="feedPanelHeight" />
         </aside>
       </main>
 

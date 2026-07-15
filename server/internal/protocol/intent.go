@@ -2,17 +2,17 @@ package protocol
 
 // Intent 枚举：客户端 → 服务端。
 const (
-	IntentJoin        = "JOIN"
-	IntentLeave       = "LEAVE"
-	IntentDismissRoom = "DISMISS_ROOM"
-	IntentChangeRole  = "CHANGE_ROLE"
-	IntentReady       = "READY"
-	IntentStartGame   = "START_GAME"
+	IntentJoin         = "JOIN"
+	IntentLeave        = "LEAVE"
+	IntentDismissRoom  = "DISMISS_ROOM"
+	IntentChangeRole   = "CHANGE_ROLE"
+	IntentReady        = "READY"
+	IntentStartGame    = "START_GAME"
 	IntentBuyEquipment = "BUY_EQUIPMENT"
-	IntentDrawLottery = "DRAW_LOTTERY"
-	IntentSettleRound = "SETTLE_ROUND"
-	IntentCloseGame   = "CLOSE_GAME"
-	IntentPing        = "PING"
+	IntentDrawLottery  = "DRAW_LOTTERY"
+	IntentSettleRound  = "SETTLE_ROUND"
+	IntentCloseGame    = "CLOSE_GAME"
+	IntentPing         = "PING"
 )
 
 // JoinPayload 客户端 JOIN 首帧。
@@ -69,10 +69,12 @@ type SettlePlayerInput struct {
 
 // SettleRoundPayload 客户端发起本局结算（仅房主在 PLAYING 状态有效）。
 //
-// GuaranteeDelta 单位 W，非负整数；EVACUATED 表示扣减额，BOMBED 表示增加额。
+// GuaranteeDelta 单位 W，非负整数；EVACUATED 表示本次得吃增加额，BOMBED 表示保底增加额。
+// BossCovered 仅 EVACUATED 生效：true 表示老板兜底，得吃增加但保底不扣减。
 // PerPlayer 必须涵盖房间内全部 3 位玩家（含老板），不允许重复或遗漏。
 type SettleRoundPayload struct {
 	Outcome        SettlementOutcome   `json:"outcome"`
 	GuaranteeDelta int                 `json:"guaranteeDelta"`
+	BossCovered    bool                `json:"bossCovered,omitempty"`
 	PerPlayer      []SettlePlayerInput `json:"perPlayer"`
 }

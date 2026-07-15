@@ -32,9 +32,8 @@ const GUARANTEE_MAX = 999_999;
 
 const outcome = ref<SettlementOutcome>('EVACUATED');
 const guaranteeInput = ref<string>('');
+const bossCovered = ref(false);
 const stats = ref<Record<string, StatRow>>({});
-// 护航专属：是否救助板板（true 时 +1 币）。
-const rescues = ref<Record<string, boolean>>({});
 const submitting = ref(false);
 
 const players = computed(() => roomStore.players);
@@ -52,15 +51,13 @@ function resetForm(): void {
   outcome.value = 'EVACUATED';
   // 撤离成功无默认值，强制房主输入扣减额；炸单默认 60。
   guaranteeInput.value = '';
+  bossCovered.value = false;
   submitting.value = false;
   const next: Record<string, StatRow> = {};
-  const nextRescues: Record<string, boolean> = {};
   for (const p of players.value) {
     next[p.id] = freshRow();
-    nextRescues[p.id] = false;
   }
   stats.value = next;
-  rescues.value = nextRescues;
 }
 
 watch(
@@ -73,6 +70,7 @@ watch(
 
 watch(outcome, (next) => {
   guaranteeInput.value = next === 'BOMBED' ? '60' : '';
+  if (next === 'BOMBED') bossCovered.value = false;
 });
 
 /** 解析输入为非负整数；空串 / 非整数返回 NaN。 */
@@ -83,6 +81,10 @@ function parseNonNegInt(v: string): number {
   return Number(trimmed);
 }
 
+const isBossCovered = computed(
+  () => outcome.value === 'EVACUATED' && bossCovered.value,
+);
+
 const guaranteeDelta = computed<number | null>(() => {
   const n = parseNonNegInt(guaranteeInput.value);
   return Number.isNaN(n) ? null : n;
@@ -90,6 +92,7 @@ const guaranteeDelta = computed<number | null>(() => {
 
 const newGuarantee = computed<number | null>(() => {
   if (guaranteeDelta.value === null) return null;
+  if (isBossCovered.value) return currentGuarantee.value;
   return outcome.value === 'EVACUATED'
     ? currentGuarantee.value - guaranteeDelta.value
     : currentGuarantee.value + guaranteeDelta.value;
@@ -105,11 +108,10 @@ function statValue(playerId: string, key: StatKey): number {
 function previewCoinDelta(playerId: string): number | null {
   let delta = 0;
   if (isEscort(playerId)) {
-    // 护航：仅击杀 + 救助板板计币，不再通过小红 / 6 格 / 9 格获得币。
+    // 护航：仅击杀计币，不再通过小红 / 6 格 / 9 格获得币。
     const kills = statValue(playerId, 'kills');
     if (kills < 0 || kills > STAT_MAX) return null;
     delta = kills * coinWeight('kills');
-    if (rescues.value[playerId]) delta += 1;
   } else {
     // 板板（老板）：完整战绩计币。
     for (const k of STAT_KEYS) {
@@ -177,6 +179,7 @@ function submit(): void {
   roomStore.sendIntent('SETTLE_ROUND', {
     outcome: outcome.value,
     guaranteeDelta: guaranteeDelta.value!,
+    bossCovered: isBossCovered.value,
     perPlayer: players.value.map((p) => {
       const escort = isEscort(p.id);
       return {
@@ -186,7 +189,6 @@ function submit(): void {
         smallReds: escort ? 0 : statValue(p.id, 'smallReds'),
         sixGrids: escort ? 0 : statValue(p.id, 'sixGrids'),
         nineGrids: escort ? 0 : statValue(p.id, 'nineGrids'),
-        rescue: escort ? !!rescues.value[p.id] : false,
       };
     }),
   });
@@ -213,7 +215,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
 
         <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
           <section>
-            <div class="font-body font-medium text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2">
+            <div class="font-body font-medium text-[13px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2">
               ❖ 本轮结果
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -225,11 +227,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               >
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">🛡️</span>
-                  <div class="font-body font-bold text-lg uppercase text-hls-btn-green">
+                  <div class="font-body font-bold text-xl uppercase text-hls-btn-green">
                     撤离成功
                   </div>
                 </div>
-                <div class="font-body text-[11px] mt-1 text-hls-text-muted">
+                <div class="font-body text-[13px] mt-1 text-hls-text-muted">
                   保底 -X · 全员奖励 3 鼠币
                 </div>
               </button>
@@ -241,11 +243,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               >
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">💀</span>
-                  <div class="font-body font-bold text-lg uppercase text-red-400">
+                  <div class="font-body font-bold text-xl uppercase text-red-400">
                     炸单翻车
                   </div>
                 </div>
-                <div class="font-body text-[11px] mt-1 text-hls-text-muted">
+                <div class="font-body text-[13px] mt-1 text-hls-text-muted">
                   保底 +X · 默认 +60W
                 </div>
               </button>
@@ -253,51 +255,65 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
           </section>
 
           <section>
-            <label class="font-body font-medium text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2 block">
+            <label class="font-body font-medium text-[13px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2 block">
               ❖ {{ outcome === 'EVACUATED' ? '保底扣减（W）' : '保底增加（W）' }}
             </label>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
               <input
                 v-model="guaranteeInput"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                class="input flex-1"
+                class="hls-input guarantee-input flex-1"
                 :placeholder="outcome === 'EVACUATED' ? '例如 200' : '60'"
               />
-              <span class="font-body text-sm text-hls-gold whitespace-nowrap">
+              <label
+                v-if="outcome === 'EVACUATED'"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-hls-border/30 bg-hls-bg/45 font-body text-sm text-hls-text-light whitespace-nowrap"
+              >
+                <input
+                  v-model="bossCovered"
+                  type="checkbox"
+                  class="h-4 w-4 accent-[rgb(90,122,50)]"
+                />
+                老板兜底
+              </label>
+              <span class="font-body text-base text-hls-gold whitespace-nowrap">
                 当前保底 {{ currentGuarantee }}W
               </span>
             </div>
             <div
               v-if="newGuarantee !== null"
-              class="font-body text-xs mt-2"
+              class="font-body text-sm mt-2"
               :class="newGuarantee > GUARANTEE_MAX ? 'text-red-400' : 'text-hls-text-muted'"
             >
               结算后保底：
               <span class="font-body font-bold text-hls-text-light">{{ newGuarantee }}W</span>
-              <span class="ml-1 text-hls-text-muted">
+              <span v-if="isBossCovered" class="ml-1 text-hls-btn-green">
+                (老板兜底，得吃 +{{ guaranteeDelta }}W)
+              </span>
+              <span v-else class="ml-1 text-hls-text-muted">
                 ({{ outcome === 'EVACUATED' ? '−' : '+' }}{{ guaranteeDelta }}W)
               </span>
             </div>
           </section>
 
           <section>
-            <div class="font-body font-medium text-[11px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2">
+            <div class="font-body font-medium text-[13px] uppercase tracking-[0.32em] text-hls-gold/85 mb-2">
               ❖ 三人本轮记录
             </div>
             <div class="rounded-md overflow-hidden border border-hls-border/30">
-              <table class="w-full text-sm">
+              <table class="w-full text-base">
                 <thead>
                   <tr class="bg-hls-bg/80">
-                    <th class="text-left font-body font-medium text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-3 py-2">成员</th>
+                    <th class="text-left font-body font-medium text-[13px] uppercase tracking-[0.18em] text-hls-gold/85 px-3 py-2">成员</th>
                     <th
                       v-for="h in STAT_HEADERS"
                       :key="h.key"
-                      class="text-center font-body font-medium text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-2 py-2 w-20"
+                      class="text-center font-body font-medium text-[13px] uppercase tracking-[0.18em] text-hls-gold/85 px-2 py-2 w-20"
                     >
                       {{ h.label }}
                     </th>
-                    <th class="text-right font-body font-medium text-[11px] uppercase tracking-[0.18em] text-hls-gold/85 px-3 py-2 w-20">所得</th>
+                    <th class="text-right font-body font-medium text-[13px] uppercase tracking-[0.18em] text-hls-gold/85 px-3 py-2 w-20">所得</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -315,11 +331,11 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                             {{ p.nickname }}
                           </div>
                           <span
-                            class="hls-badge text-[10px]"
+                            class="hls-badge text-xs"
                             :class="
                               p.role === 'BOSS'
-                                ? '!border-hls-gold/60 !text-hls-gold'
-                                : '!border-hls-text-nav/60 !text-hls-text-nav'
+                                ? '!border-hls-gold/60 !text-white'
+                                : '!border-hls-text-nav/60 !text-white'
                             "
                           >
                             {{ p.role ? ROLE_LABEL[p.role] : '' }}
@@ -336,27 +352,9 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                           class="stat-input"
                         />
                       </td>
-                      <td colspan="3" class="px-2 py-2">
-                        <div class="flex items-center justify-center gap-2">
-                          <span class="font-body text-[11px] text-hls-text-muted whitespace-nowrap">救助板板</span>
-                          <button
-                            type="button"
-                            class="rescue-toggle"
-                            :class="rescues[p.id] ? 'is-yes' : ''"
-                            @click="rescues[p.id] = true"
-                          >
-                            是
-                          </button>
-                          <button
-                            type="button"
-                            class="rescue-toggle"
-                            :class="!rescues[p.id] ? 'is-no' : ''"
-                            @click="rescues[p.id] = false"
-                          >
-                            否
-                          </button>
-                        </div>
-                      </td>
+                      <td class="px-2 py-2 text-center font-body text-hls-text-muted/80">-</td>
+                      <td class="px-2 py-2 text-center font-body text-hls-text-muted/80">-</td>
+                      <td class="px-2 py-2 text-center font-body text-hls-text-muted/80">-</td>
                     </template>
                     <template v-else>
                       <td v-for="h in STAT_HEADERS" :key="h.key" class="px-2 py-2">
@@ -370,7 +368,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
                     </template>
                     <td class="px-3 py-2 text-right font-body font-bold">
                       <template v-if="previewCoinDelta(p.id) === null">
-                        <span class="text-red-400 text-xs">逆数</span>
+                        <span class="text-red-400 text-sm">逆数</span>
                       </template>
                       <template v-else>
                         <span class="text-hls-btn-green">+{{ previewCoinDelta(p.id) }}</span>
@@ -382,7 +380,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
             </div>
           </section>
 
-          <section class="rounded-md border border-hls-border/25 bg-hls-bg/55 px-4 py-3 text-xs leading-relaxed">
+          <section class="rounded-md border border-hls-border/25 bg-hls-bg/55 px-4 py-3 text-sm leading-relaxed">
             <div class="font-body font-medium uppercase text-hls-gold/90 mb-1">
               ❖ 结算规则
             </div>
@@ -390,7 +388,10 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
               <span class="font-body font-medium">板板</span>：击杀 1 人奖励 1 鼠币，摸到小红奖励 1 鼠币，6 格奖励 2 鼠币，9 格及以上奖励 3 鼠币，非洲之心 / 海洋之泪奖励 10 鼠币
             </div>
             <div class="font-body text-hls-text-nav/90 mt-0.5">
-              <span class="font-body font-medium">护航</span>：击杀 1 人奖励 1 鼠币，救助板板奖励 1 鼠币
+              <span class="font-body font-medium">护航</span>：击杀 1 人奖励 1 鼠币
+            </div>
+            <div class="font-body text-hls-text-light/80 mt-0.5">
+              老板兜底：得吃照常增加，但库藏不扣减
             </div>
             <div class="font-body text-hls-btn-green/90 mt-0.5">
               撤离成功 · 全员奖励 3 鼠币
@@ -399,7 +400,7 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
         </div>
 
         <div class="p-4 flex gap-3 justify-end border-t border-hls-border/30">
-          <div class="font-body text-xs text-red-400 min-h-[1em] flex items-center mr-auto">
+          <div class="font-body text-sm text-red-400 min-h-[1em] flex items-center mr-auto">
             {{ validation.ok ? '' : validation.reason }}
           </div>
           <button class="hls-btn-secondary py-2 px-4" @click="emit('close')">取消</button>
@@ -452,44 +453,6 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
     0 0 18px -4px rgba(160, 35, 35, 0.5);
 }
 
-.rescue-toggle {
-  min-width: 44px;
-  border-radius: 4px;
-  padding: 5px 12px;
-  font-family: 'VT323', monospace;
-  font-size: 0.85rem;
-  color: #7a5020;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #fffef9, #faf6ed);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
-  transition: all 0.18s ease;
-}
-.rescue-toggle:hover {
-  border-color: rgba(232, 200, 124, 0.7);
-}
-.rescue-toggle.is-yes {
-  color: #4a7020;
-  border-color: rgba(90, 122, 50, 0.85);
-  background:
-    linear-gradient(180deg, rgba(90, 122, 50, 0.22), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #f0f8e8, #e8f0d8);
-  box-shadow:
-    inset 0 1px 0 rgba(136, 160, 79, 0.18),
-    0 0 0 1px rgba(90, 122, 50, 0.5);
-}
-.rescue-toggle.is-no {
-  color: #8a2020;
-  border-color: rgba(160, 35, 35, 0.7);
-  background:
-    linear-gradient(180deg, rgba(160, 35, 35, 0.18), rgba(0, 0, 0, 0)),
-    linear-gradient(180deg, #fdf0f0, #f8e8e8);
-  box-shadow:
-    inset 0 1px 0 rgba(193, 58, 58, 0.18),
-    0 0 0 1px rgba(160, 35, 35, 0.45);
-}
-
 .stat-input {
   width: 100%;
   border-radius: 4px;
@@ -511,6 +474,29 @@ const STAT_HEADERS: { key: StatKey; label: string; suffix: string }[] = [
   box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(212, 175, 55, 0.4);
+}
+
+.guarantee-input {
+  color: #2a1408;
+  border-color: rgba(212, 175, 55, 0.78);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0)),
+    linear-gradient(180deg, #fffef9, #f8f0dc);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(160, 112, 64, 0.08);
+}
+
+.guarantee-input::placeholder {
+  color: rgba(92, 56, 32, 0.7);
+}
+
+.guarantee-input:focus {
+  border-color: rgba(200, 160, 32, 0.95);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(160, 112, 64, 0.08),
+    0 0 0 2px rgba(200, 160, 32, 0.22);
 }
 
 .fade-enter-active,

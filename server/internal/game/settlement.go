@@ -55,6 +55,7 @@ type SettlementResult struct {
 	GuaranteeDelta  int
 	GuaranteeBefore int
 	GuaranteeAfter  int
+	BossCovered     bool
 	PerPlayer       []protocol.SettlementPerPlayer
 }
 
@@ -73,6 +74,7 @@ type SettlementResult struct {
 func ComputeSettlement(
 	outcome protocol.SettlementOutcome,
 	guaranteeDelta int,
+	bossCovered bool,
 	currentGuarantee int,
 	perPlayer []protocol.SettlePlayerInput,
 	playerIDs []string,
@@ -88,8 +90,12 @@ func ComputeSettlement(
 	var newGuarantee int
 	switch outcome {
 	case protocol.SettlementOutcomeEvacuated:
-		// 撤离扣减保底允许结果为负数，不做下限校验。
-		newGuarantee = currentGuarantee - guaranteeDelta
+		if bossCovered {
+			newGuarantee = currentGuarantee
+		} else {
+			// 撤离扣减保底允许结果为负数，不做下限校验。
+			newGuarantee = currentGuarantee - guaranteeDelta
+		}
 	case protocol.SettlementOutcomeBombed:
 		newGuarantee = currentGuarantee + guaranteeDelta
 	}
@@ -136,6 +142,7 @@ func ComputeSettlement(
 		GuaranteeDelta:  guaranteeDelta,
 		GuaranteeBefore: currentGuarantee,
 		GuaranteeAfter:  newGuarantee,
+		BossCovered:     outcome == protocol.SettlementOutcomeEvacuated && bossCovered,
 		PerPlayer:       out,
 	}, nil
 }

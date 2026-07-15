@@ -15,19 +15,15 @@ function startBuy(eq: Equipment): void {
   if (!canAfford(eq)) return;
   roomStore.sendIntent('BUY_EQUIPMENT', { equipmentId: eq.id });
 }
-
-function bundledNames(eq: Equipment): string {
-  return eq.bundledLabels?.join('、') ?? '';
-}
 </script>
 
 <template>
   <div class="hls-panel-deep p-6">
     <div class="flex items-center justify-between mb-3 gap-2">
-      <h3 class="font-body font-bold text-hls-gold text-xl">
+      <h3 class="font-body font-bold text-hls-gold text-[22px]">
         ⚔ 护航补给架
       </h3>
-      <span class="font-body text-xs uppercase text-hls-gold">
+      <span class="font-body text-sm uppercase text-hls-gold">
         当前鼠币 <span class="coin-tag ml-1">💰 {{ myCoin }}</span>
       </span>
     </div>
@@ -42,21 +38,13 @@ function bundledNames(eq: Equipment): string {
         <div class="flex items-center gap-3">
           <div class="text-3xl filter drop-shadow">{{ eq.icon }}</div>
           <div class="flex-1 min-w-0">
-            <div class="font-body font-bold text-hls-text-light truncate text-base">{{ eq.name }}</div>
-            <div class="font-body text-xs text-hls-text-light/85">{{ eq.description }}</div>
+            <div class="font-body font-bold text-hls-text-light truncate text-lg">{{ eq.name }}</div>
           </div>
         </div>
 
-        <div v-if="eq.bundledLabels?.length" class="text-[11px] font-body text-hls-text-muted">
-          套装包含：<span class="text-hls-gold">{{ bundledNames(eq) }}</span>
-        </div>
-
-        <div class="flex items-center justify-between mt-1 pt-2 border-t border-hls-border/30">
-          <span class="coin-tag text-base">
-            <span>💰</span> {{ eq.price }}
-          </span>
+        <div class="flex items-center justify-end mt-1 pt-2 border-t border-hls-border/30">
           <button
-            class="hls-btn py-1.5 px-3 text-[11px]"
+            class="hls-btn py-1.5 px-3 text-[13px]"
             :disabled="!canAfford(eq)"
             @click="startBuy(eq)"
           >
@@ -67,4 +55,3 @@ function bundledNames(eq: Equipment): string {
     </div>
   </div>
 </template>
-

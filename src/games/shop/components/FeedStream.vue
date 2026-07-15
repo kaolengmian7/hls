@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed } from 'vue';
 import { useRoomStore } from '../stores/room';
 import { getEquipment, getWeapon } from '../game/equipment';
 
+const props = defineProps<{
+  panelHeight?: number | null;
+}>();
+
 const roomStore = useRoomStore();
-const PAGE_SIZE = 5;
 
 function nameOf(playerId: string): string {
   return roomStore.players.find((p) => p.id === playerId)?.nickname ?? playerId.slice(-4);
@@ -19,48 +22,34 @@ function asStr(v: unknown): string {
   return v == null ? '' : String(v);
 }
 
+function isBossCovered(payload: Record<string, unknown>): boolean {
+  return payload.outcome === 'EVACUATED'
+    && Number(payload.guaranteeDelta) > 0
+    && Number(payload.guaranteeBefore) === Number(payload.guaranteeAfter);
+}
+
 const events = computed(() => roomStore.feed);
-const currentPage = ref(1);
-const pageCount = computed(() => Math.max(1, Math.ceil(events.value.length / PAGE_SIZE)));
-const pagedEvents = computed(() => {
-  const start = (currentPage.value - 1) * PAGE_SIZE;
-  return events.value.slice(start, start + PAGE_SIZE);
-});
-
-watch(
-  () => events.value.length,
-  () => {
-    if (currentPage.value > pageCount.value) {
-      currentPage.value = pageCount.value;
-    }
-  },
-);
-
-function prevPage(): void {
-  if (currentPage.value > 1) currentPage.value -= 1;
-}
-
-function nextPage(): void {
-  if (currentPage.value < pageCount.value) currentPage.value += 1;
-}
 </script>
 
 <template>
-  <div class="hls-panel-deep p-5 flex flex-col lg:sticky lg:top-24">
+  <div
+    class="hls-panel-deep p-5 flex min-h-[24rem] flex-col lg:sticky lg:top-24"
+    :style="props.panelHeight ? { height: `${props.panelHeight}px` } : undefined"
+  >
     <div class="flex items-center mb-3">
-      <h3 class="font-body font-bold text-hls-gold text-lg">
+      <h3 class="font-body font-bold text-hls-gold text-xl">
         ⚜ 神秘商店 · 小报童
       </h3>
     </div>
     <div class="hls-divider mb-3" />
-    <div class="flex-1 min-h-0">
-      <transition-group name="feed" class="flex flex-col gap-2">
+    <div class="feed-scroll flex-1 min-h-0 overflow-y-auto pr-1">
+      <transition-group name="feed" tag="div" class="flex flex-col gap-3">
         <div
-          v-for="ev in pagedEvents"
+          v-for="ev in events"
           :key="ev.id"
-          class="feed-item rounded-md px-3 py-2 text-sm font-body"
+          class="feed-item rounded-md px-3 py-2 text-base font-body"
         >
-          <div class="font-body text-[10px] text-hls-gold/70 mb-0.5">
+          <div class="font-body text-xs text-hls-gold/70 mb-0.5">
             ✦ {{ format(ev.at) }}
           </div>
           <template v-if="ev.kind === 'PLAYER_JOINED'">
@@ -87,13 +76,14 @@ function nextPage(): void {
           </template>
 
           <template v-else-if="ev.kind === 'GAME_STARTED'">
-            <span class="font-body text-hls-gold text-base font-bold">⚜ 神秘商店正式开张！</span>
+            <span class="font-body text-hls-gold text-lg font-bold">⚜ 神秘商店正式开张！</span>
           </template>
 
           <template v-else-if="ev.kind === 'SETTLEMENT'">
             <div><span class="font-body font-bold" :class="ev.payload.outcome === 'EVACUATED' ? 'text-hls-btn-green' : 'text-red-400'">{{ ev.payload.outcome === 'EVACUATED' ? '✓ 成功撤离' : '✗ 炸单翻车' }}</span></div>
             <div v-if="Number(ev.payload.guaranteeDelta) > 0" class="feed-detail">
               <span class="text-hls-gold/80">库藏 {{ asStr(ev.payload.guaranteeBefore) }}W → {{ asStr(ev.payload.guaranteeAfter) }}W</span>
+              <span v-if="isBossCovered(ev.payload)" class="text-hls-btn-green">老板兜底 · 得吃 +{{ Number(ev.payload.guaranteeDelta) }}W</span>
             </div>
           </template>
 
@@ -104,26 +94,19 @@ function nextPage(): void {
       </transition-group>
       <div v-if="events.length === 0" class="text-center py-8">
         <div class="text-2xl text-hls-gold/60 animate-pixel-pulse">✶</div>
-        <div class="font-body text-hls-text-light/70 text-sm mt-2">
+        <div class="font-body text-hls-text-light/70 text-base mt-2">
           还没有新的小报童消息。
         </div>
       </div>
-    </div>
-    <div v-if="events.length > 0" class="mt-3 pt-3 border-t border-hls-border/20 flex items-center justify-between gap-2">
-      <button class="hls-btn-secondary px-3 py-1.5 text-[11px]" :disabled="currentPage === 1" @click="prevPage">
-        上一页
-      </button>
-      <div class="font-body text-[11px] text-hls-gold-dark font-bold">
-        第 {{ currentPage }} / {{ pageCount }} 页
-      </div>
-      <button class="hls-btn-secondary px-3 py-1.5 text-[11px]" :disabled="currentPage === pageCount" @click="nextPage">
-        下一页
-      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
+.feed-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.45) rgba(0, 0, 0, 0.14);
+}
 .feed-item {
   background:
     linear-gradient(180deg, rgba(212, 175, 55, 0.05), rgba(0, 0, 0, 0)),
@@ -136,7 +119,7 @@ function nextPage(): void {
   flex-wrap: wrap;
   gap: 0 0.6rem;
   margin-top: 3px;
-  font-size: 11px;
+  font-size: 13px;
   opacity: 0.9;
 }
 .feed-enter-active {
@@ -145,5 +128,16 @@ function nextPage(): void {
 .feed-enter-from {
   opacity: 0;
   transform: translateX(10px);
+}
+.feed-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.feed-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.14);
+  border-radius: 999px;
+}
+.feed-scroll::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.45);
+  border-radius: 999px;
 }
 </style>

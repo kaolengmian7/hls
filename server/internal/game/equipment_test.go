@@ -12,13 +12,9 @@ func TestEquipmentList(t *testing.T) {
 		t.Fatal("equipment list is empty")
 	}
 	wantPrice := map[string]int{
-		EquipmentArmorL4:     1,
-		EquipmentArmorL5:     2,
-		EquipmentArmorL6:     3,
-		EquipmentBundleAW:    4,
-		EquipmentBundleM7:    3,
-		EquipmentWeaponOther: 2,
-		EquipmentWeaponLone:  1,
+		EquipmentArmorL5:  0,
+		EquipmentArmorL6:  0,
+		EquipmentBundleAW: 0,
 	}
 	got := map[string]int{}
 	for _, eq := range list {
@@ -78,36 +74,6 @@ func TestValidatePurchase(t *testing.T) {
 		{
 			name: "AW 组合不再接受 pick",
 			eqID: EquipmentBundleAW, pick: WeaponM762,
-			wantCode: errors.CodeInvalidParam, wantMsg: "PICK_NOT_REQUIRED",
-		},
-		{
-			name: "M7 组合直接购买",
-			eqID: EquipmentBundleM7, pick: "",
-			wantOK: true,
-		},
-		{
-			name: "M7 组合不再接受 pick",
-			eqID: EquipmentBundleM7, pick: WeaponM24,
-			wantCode: errors.CodeInvalidParam, wantMsg: "PICK_NOT_REQUIRED",
-		},
-		{
-			name: "其他枪直接购买",
-			eqID: EquipmentWeaponOther, pick: "",
-			wantOK: true,
-		},
-		{
-			name: "其他枪不再接受 pick",
-			eqID: EquipmentWeaponOther, pick: WeaponKar98K,
-			wantCode: errors.CodeInvalidParam, wantMsg: "PICK_NOT_REQUIRED",
-		},
-		{
-			name: "单枪匹马直接购买",
-			eqID: EquipmentWeaponLone, pick: "",
-			wantOK: true,
-		},
-		{
-			name: "单枪匹马不接受 pick",
-			eqID: EquipmentWeaponLone, pick: WeaponM416,
 			wantCode: errors.CodeInvalidParam, wantMsg: "PICK_NOT_REQUIRED",
 		},
 		{

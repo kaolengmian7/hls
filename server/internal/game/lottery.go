@@ -15,7 +15,7 @@ import (
 // 当前仅支持单抽（times == 1）；如需扩展多连抽，请在此追加新的常量与
 // CostForTimes / DrawLottery 的分支，并同步前端 IntentMap.DRAW_LOTTERY。
 const (
-	SingleDrawCost = 2
+	SingleDrawCost = 1
 )
 
 // 暴露给上层的 reason 字符串（直接写入 ACTION_REJECTED.reason）。

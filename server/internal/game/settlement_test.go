@@ -32,6 +32,7 @@ func TestComputeSettlementEvacuated(t *testing.T) {
 	result, err := ComputeSettlement(
 		protocol.SettlementOutcomeEvacuated,
 		200,
+		false,
 		2500,
 		[]protocol.SettlePlayerInput{
 			mkInput("a", 1, 2, 1, 1),
@@ -78,6 +79,7 @@ func TestComputeSettlementBombed(t *testing.T) {
 	result, err := ComputeSettlement(
 		protocol.SettlementOutcomeBombed,
 		60,
+		false,
 		2500,
 		[]protocol.SettlePlayerInput{
 			mkInput("a", 2, 0, 0, 0),
@@ -121,6 +123,7 @@ func TestComputeSettlementRoleDifferentiated(t *testing.T) {
 	result, err := ComputeSettlement(
 		protocol.SettlementOutcomeEvacuated,
 		0,
+		false,
 		2500,
 		[]protocol.SettlePlayerInput{
 			mkInput("boss", 1, 2, 1, 1),
@@ -160,6 +163,7 @@ func TestComputeSettlementEvacuatedNegativeGuarantee(t *testing.T) {
 	result, err := ComputeSettlement(
 		protocol.SettlementOutcomeEvacuated,
 		100,
+		false,
 		50,
 		[]protocol.SettlePlayerInput{
 			mkInput("a", 0, 0, 0, 0),
@@ -182,6 +186,7 @@ func TestComputeSettlementZeroDelta(t *testing.T) {
 	result, err := ComputeSettlement(
 		protocol.SettlementOutcomeEvacuated,
 		0,
+		false,
 		2500,
 		[]protocol.SettlePlayerInput{
 			mkInput("a", 0, 0, 0, 0),
@@ -202,6 +207,33 @@ func TestComputeSettlementZeroDelta(t *testing.T) {
 			t.Errorf("EVACUATED zero stats should give %d, got %d",
 				SettlementEvacuationBonus, pp.CoinDelta)
 		}
+	}
+}
+
+func TestComputeSettlementEvacuatedBossCovered(t *testing.T) {
+	playerIDs := []string{"a", "b", "c"}
+	result, err := ComputeSettlement(
+		protocol.SettlementOutcomeEvacuated,
+		200,
+		true,
+		2500,
+		[]protocol.SettlePlayerInput{
+			mkInput("a", 1, 2, 1, 1),
+			mkInput("b", 0, 0, 0, 0),
+			mkInput("c", 0, 0, 0, 0),
+		},
+		playerIDs,
+		rolesAllBoss(playerIDs...),
+	)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if !result.BossCovered {
+		t.Fatalf("boss covered should be recorded")
+	}
+	if result.GuaranteeBefore != 2500 || result.GuaranteeAfter != 2500 || result.GuaranteeDelta != 200 {
+		t.Fatalf("guarantee got before=%d after=%d delta=%d",
+			result.GuaranteeBefore, result.GuaranteeAfter, result.GuaranteeDelta)
 	}
 }
 
@@ -325,7 +357,7 @@ func TestComputeSettlementInvalid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := ComputeSettlement(tt.outcome, tt.guaranteeDelta, tt.current, tt.perPlayer, tt.ids, rolesAllBoss(tt.ids...))
+			_, err := ComputeSettlement(tt.outcome, tt.guaranteeDelta, false, tt.current, tt.perPlayer, tt.ids, rolesAllBoss(tt.ids...))
 			if err == nil {
 				t.Fatalf("expected error, got nil")
 			}

@@ -202,7 +202,7 @@
 
 - **盲盒 / 抽奖机面板**：突出视觉效果（开箱动画 / 转盘 / 卡牌翻转皆可）。
 - 操作：
-  - 「单抽（消耗 2 币）」 → 发送 `DRAW_LOTTERY { times: 1 }`
+  - 「单抽（消耗 1 币）」 → 发送 `DRAW_LOTTERY { times: 1 }`
 - 抽奖**结果由服务端**完成随机（`crypto/rand`，保证唯一可信随机源），通过 `LOTTERY_DRAWN { records }` 广播给全员。
 - 每件抽中奖品都带有**官方估值 `value`（单位 `W`）**，服务端在裁决抽奖的同 tick **原子地**把 `value` 累加到房间 `guaranteedAmount` 上，并随后广播 `GUARANTEE_CHANGED { before, after }`（详见 §3.2.2 服务端裁决与 §4.4）。
 - 客户端收到广播后播放开箱动画 + 物品详情（含价值标签），并将事件追加到「实时播报」（包含本次保底增量）。
@@ -232,8 +232,8 @@
 
 ##### 服务端裁决（抽奖 → 保底联动）
 
-1. 校验老板身份、`status === 'PLAYING'`、`coin >= 2`，否则 `ACTION_REJECTED`。
-2. 扣 2 币（`coin -= 2`），从奖品池按权重随机一件 `prize`。
+1. 校验老板身份、`status === 'PLAYING'`、`coin >= 1`，否则 `ACTION_REJECTED`。
+2. 扣 1 币（`coin -= 1`），从奖品池按权重随机一件 `prize`。
 3. 计算 `newGuarantee = currentGuarantee + prize.value`，越界回滚（见上）。
 4. 原子提交：扣币 + 增保底 + 追加一条 `LotteryRecord`（含 `guaranteeDelta = prize.value`、`guaranteeBefore` / `guaranteeAfter`）+ 追加 `kind = 'LOTTERY'` 的 `FeedEvent`。
 5. 广播顺序（同 tick 内连续）：
@@ -440,7 +440,7 @@ type Envelope<T extends string = string, P = unknown> = {
 | `READY` | `{ ready: boolean }` | 准备/取消 |
 | `START_GAME` | `{}` | 仅房主有效 |
 | `BUY_EQUIPMENT` | `{ equipmentId: string }` | 护航购买装备；所有条目均直接扣费购买，无需 `pick` |
-| `DRAW_LOTTERY` | `{ times: 1 }` | 老板单次抽奖（消耗 2 币） |
+| `DRAW_LOTTERY` | `{ times: 1 }` | 老板单次抽奖（消耗 1 币） |
 | `SETTLE_ROUND` | `{ outcome: 'EVACUATED' \| 'BOMBED', guaranteeDelta: number, perPlayer: { playerId: string, kills: number, smallReds: number, sixGrids: number, nineGrids: number, rescue?: boolean }[] }` | 房主结算本局。`guaranteeDelta` 为非负整数（单位 W）；`outcome === 'EVACUATED'` 时表示扣减、`'BOMBED'` 时表示增加。`perPlayer` 必须涵盖房间内全部 3 位玩家。服务端按角色区分计币：板板看战绩，护航看击杀与 `rescue`（救助板板 +1 币，护航不再通过小红 / 6 格 / 9 格获得币）。仅 `status === 'PLAYING'` 且发起者为房主时有效。 |
 | `PING` | `{}` | 心跳 |
 

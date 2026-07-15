@@ -17,10 +17,8 @@ function nameOf(playerId: string): string {
   return roomStore.players.find((p) => p.id === playerId)?.nickname ?? playerId.slice(-4);
 }
 
-function isEscort(pp: { role?: string; playerId: string }): boolean {
-  // 优先用记录里冻结的角色；历史记录无该字段时回落到当前房间角色。
-  const role = pp.role ?? roomStore.players.find((p) => p.id === pp.playerId)?.role;
-  return role === 'ESCORT';
+function isBossCovered(guaranteeBefore: number, guaranteeAfter: number, guaranteeDelta: number, outcome: string): boolean {
+  return outcome === 'EVACUATED' && guaranteeDelta > 0 && guaranteeBefore === guaranteeAfter;
 }
 
 function pad(n: number): string {
@@ -64,8 +62,8 @@ const records = computed(() => roomStore.settlementRecords);
                     class="hls-badge"
                     :class="
                       r.outcome === 'EVACUATED'
-                        ? '!border-hls-btn-green/70 !text-hls-btn-green'
-                        : '!border-red-400/70 !text-red-400'
+                        ? '!border-hls-btn-green/70 !text-white'
+                        : 'hls-badge-red !text-white'
                     "
                   >
                     {{ r.outcome === 'EVACUATED' ? '撤离成功' : '炸单翻车' }}
@@ -80,7 +78,16 @@ const records = computed(() => roomStore.settlementRecords);
                   >
                     {{ r.guaranteeAfter }}W
                   </span>
-                  <span v-if="r.guaranteeDelta > 0" class="ml-1 text-hls-text-muted">
+                  <span
+                    v-if="isBossCovered(r.guaranteeBefore, r.guaranteeAfter, r.guaranteeDelta, r.outcome)"
+                    class="ml-1 text-hls-btn-green"
+                  >
+                    (老板兜底，得吃 +{{ r.guaranteeDelta }}W)
+                  </span>
+                  <span
+                    v-else-if="r.guaranteeDelta > 0"
+                    class="ml-1 text-hls-text-muted"
+                  >
                     ({{ r.outcome === 'EVACUATED' ? '−' : '+' }}{{ r.guaranteeDelta }}W)
                   </span>
                 </div>
@@ -104,20 +111,9 @@ const records = computed(() => roomStore.settlementRecords);
                   >
                     <td class="py-1.5 font-body text-hls-text-light">{{ nameOf(pp.playerId) }}</td>
                     <td class="py-1.5 text-hls-text-light/90">{{ pp.kills }}</td>
-                    <template v-if="isEscort(pp)">
-                      <td colspan="3" class="py-1.5 text-hls-text-light/90">
-                        <span class="hls-badge !border-hls-text-nav/50 !text-hls-text-nav text-[10px] mr-1">护航</span>
-                        救助板板：
-                        <span :class="pp.rescue ? 'text-hls-btn-green' : 'text-hls-text-muted'">
-                          {{ pp.rescue ? '是 (+1)' : '否' }}
-                        </span>
-                      </td>
-                    </template>
-                    <template v-else>
-                      <td class="py-1.5 text-hls-text-light/90">{{ pp.smallReds }}</td>
-                      <td class="py-1.5 text-hls-text-light/90">{{ pp.sixGrids }}</td>
-                      <td class="py-1.5 text-hls-text-light/90">{{ pp.nineGrids }}</td>
-                    </template>
+                    <td class="py-1.5 text-hls-text-light/90">{{ pp.smallReds }}</td>
+                    <td class="py-1.5 text-hls-text-light/90">{{ pp.sixGrids }}</td>
+                    <td class="py-1.5 text-hls-text-light/90">{{ pp.nineGrids }}</td>
                     <td
                       class="py-1.5 text-right font-body font-bold"
                       :class="pp.coinDelta > 0 ? 'text-hls-btn-green' : 'text-hls-text-muted'"

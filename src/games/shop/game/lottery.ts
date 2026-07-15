@@ -18,7 +18,7 @@ export type Rarity =
   | 'LEGENDARY'
   | string;
 
-export const SINGLE_DRAW_COST = 2;
+export const SINGLE_DRAW_COST = 1;
 
 export const RARITY_LABEL: Record<string, string> = {
   HIGH: '高价值',

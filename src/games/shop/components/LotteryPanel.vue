@@ -211,7 +211,7 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
     />
     <div class="relative">
       <div class="flex items-center justify-between mb-4 gap-2">
-        <h3 class="font-body font-bold text-xl text-hls-gold">
+        <h3 class="font-body font-bold text-[22px] text-hls-gold">
           ⚜ 板板专属 · 神秘商店
         </h3>
         <span class="hls-badge !border-hls-gold/60 !text-white">
@@ -291,22 +291,22 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
           >
             <!-- 四角装饰：revealed 时淡入 -->
             <span
-              class="absolute text-hls-gold text-sm transition-opacity duration-500"
+              class="absolute text-hls-gold text-base transition-opacity duration-500"
               :style="{ opacity: revealed ? 0.9 : 0, top: '8px', left: '8px' }"
               >✦</span
             >
             <span
-              class="absolute text-hls-gold text-sm transition-opacity duration-500"
+              class="absolute text-hls-gold text-base transition-opacity duration-500"
               :style="{ opacity: revealed ? 0.9 : 0, top: '8px', right: '8px' }"
               >✦</span
             >
             <span
-              class="absolute text-hls-gold text-sm transition-opacity duration-500"
+              class="absolute text-hls-gold text-base transition-opacity duration-500"
               :style="{ opacity: revealed ? 0.9 : 0, bottom: '8px', left: '8px' }"
               >✦</span
             >
             <span
-              class="absolute text-hls-gold text-sm transition-opacity duration-500"
+              class="absolute text-hls-gold text-base transition-opacity duration-500"
               :style="{ opacity: revealed ? 0.9 : 0, bottom: '8px', right: '8px' }"
               >✦</span
             >
@@ -316,17 +316,17 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
 
       <!-- 开奖详情：减速停稳后展示价值与保底变化 -->
       <div v-if="revealed" class="text-center mt-4 animate-slide-up">
-        <div class="font-body text-xs text-hls-gold/80 uppercase mb-1">
+        <div class="font-body text-sm text-hls-gold/80 uppercase mb-1">
           ✦ 本次开出的红 ✦
         </div>
-        <div class="text-xs font-body text-hls-text-light/80">
+        <div class="text-sm font-body text-hls-text-light/80">
           <span class="text-hls-btn-green font-semibold">
             价值 {{ formatValueW(result!.item.value) }}
           </span>
         </div>
         <div
           v-if="result!.guaranteeDelta > 0"
-          class="text-[11px] mt-1.5 font-body text-hls-gold"
+          class="text-[13px] mt-1.5 font-body text-hls-gold"
         >
           ⚜
           保底
@@ -346,13 +346,10 @@ const revealed = computed(() => phase.value === 'revealed' && result.value !== n
             <span class="animate-pixel-pulse">🎰</span> 货柜滚动中…
           </template>
           <template v-else>
-            🎁 开启神秘商店 · {{ SINGLE_DRAW_COST }} 鼠币
+            开启神秘商店 · {{ SINGLE_DRAW_COST }} 鼠币
           </template>
         </button>
       </div>
-      <p class="font-body text-[12px] text-hls-text-muted mt-3 leading-relaxed text-center">
-        按照市场价加入保底
-      </p>
     </div>
   </div>
 </template>

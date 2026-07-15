@@ -296,7 +296,8 @@ export const useRoomStore = defineStore('room', () => {
   const guaranteedAmount = computed(() => snapshot.value?.guaranteedAmount ?? 0);
 
   /**
-   * 累计"得吃"金额（单位 W）：历次"撤离成功"（EVACUATED）结算时房主输入的扣减额之和。
+   * 累计"得吃"金额（单位 W）：历次"撤离成功"（EVACUATED）结算时的得吃增加额之和。
+   * 含「老板兜底」场景：此时得吃增加，但房间保底不扣减。
    *
    * 取自服务端权威快照里的 settlementRecords，前端仅做求和聚合，
    * 不做其它二次计算，保证 3 名玩家看到的累计值完全一致。
