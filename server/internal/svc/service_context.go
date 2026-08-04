@@ -28,6 +28,7 @@ type ServiceContext struct {
 	JWTSigner     *auth.JWTSigner
 	WechatClient  *auth.WechatClient
 	ShopRepo      *repo.ShopRepo
+	OrderRepo     *repo.OrderRepo
 
 	SmsStore  *SmsStore
 	SmsSender auth.SmsSender
@@ -60,6 +61,7 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 		JWTSigner:     auth.NewJWTSigner(cfg.JWT.Secret, cfg.JWT.TTLDays),
 		WechatClient:  auth.NewWechatClient(cfg.WechatOpen.AppID, cfg.WechatOpen.AppSecret),
 		ShopRepo:      shopRepo,
+		OrderRepo:     repo.NewOrderRepo(conn),
 		SmsStore:      NewSmsStore(),
 		SmsSender:     smsSender,
 	}
