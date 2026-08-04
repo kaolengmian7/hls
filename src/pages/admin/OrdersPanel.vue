@@ -8,6 +8,7 @@ import {
   orderTypeLabels, orderStatusLabels, complaintLabels,
   type OrderView, type OrderType, type OrderStatus, type ComplaintStatus,
 } from '../../shared/orderLabels'
+import ConfirmDialog from '../../shared/components/ConfirmDialog.vue'
 
 const orders = ref<OrderView[]>([])
 const loading = ref(false)
@@ -35,6 +36,23 @@ const form = ref<CreateOrderPayload>({
 const createError = ref('')
 const creating = ref(false)
 
+// ---- confirm dialog ----
+const confirmOpen = ref(false)
+const confirmTitle = ref('')
+const confirmMessage = ref('')
+const confirmAction = ref<(() => Promise<void>) | null>(null)
+
+async function handleConfirm() {
+  if (confirmAction.value) {
+    try {
+      await confirmAction.value()
+    } catch {
+      listError.value = '操作失败，请重试'
+    }
+  }
+  confirmOpen.value = false
+}
+
 function openCreate() {
   form.value = { title: '', orderType: 'companion', price: 0, commissionRate: 20, bonusRate: 3, playerCount: 1, remark: '' }
   createError.value = ''
@@ -59,24 +77,41 @@ async function submitCreate() {
   }
 }
 
-function shareLink(code: string) {
-  const url = `${window.location.origin}/order/${code}`
-  navigator.clipboard?.writeText(url)
-  copiedCode.value = code
-  setTimeout(() => { if (copiedCode.value === code) copiedCode.value = '' }, 1500)
-}
 const copiedCode = ref('')
 
-async function onRemoveEnforcer(code: string, slot: 'a' | 'b') {
-  try {
-    await removeEnforcer(code, slot)
-    await load()
-  } catch { listError.value = '操作失败，请重试' }
+function shareLink(code: string) {
+  const url = `${window.location.origin}/order/${code}`
+  navigator.clipboard?.writeText(url).then(() => {
+    copiedCode.value = code
+    setTimeout(() => { if (copiedCode.value === code) copiedCode.value = '' }, 1500)
+  }).catch(() => {
+    listError.value = '复制失败，请重试'
+  })
 }
 
-async function onStatus(code: string, status: OrderStatus) {
-  try { await updateOrderStatus(code, status); await load() }
-  catch { listError.value = '操作失败，请重试' }
+function askRemoveEnforcer(code: string, slot: 'a' | 'b') {
+  confirmTitle.value = '移除打手'
+  confirmMessage.value = '确定移除该打手？移除后该位置将重新开放扣单。'
+  confirmAction.value = async () => {
+    await removeEnforcer(code, slot)
+    await load()
+  }
+  confirmOpen.value = true
+}
+
+function onStatus(code: string, status: OrderStatus) {
+  if (status === 'refunded') {
+    confirmTitle.value = '退单'
+    confirmMessage.value = '确定将订单改为退单？'
+    confirmAction.value = async () => {
+      await updateOrderStatus(code, status)
+      await load()
+    }
+    confirmOpen.value = true
+  } else {
+    try { updateOrderStatus(code, status).then(() => load()) }
+    catch { listError.value = '操作失败，请重试' }
+  }
 }
 
 async function onComplaint(code: string, complaintStatus: ComplaintStatus) {
@@ -122,10 +157,10 @@ const orderTypeOptions = Object.entries(orderTypeLabels) as [OrderType, string][
             <td class="px-3 py-2">{{ o.playerCount }}</td>
             <td class="px-3 py-2">
               <div>A：{{ o.enforcerA?.name || '—' }}
-                <button v-if="o.enforcerA" class="text-xs text-red-400 ml-1" @click="onRemoveEnforcer(o.code, 'a')">移除</button>
+                <button v-if="o.enforcerA" class="hls-btn-danger text-xs ml-1" @click="askRemoveEnforcer(o.code, 'a')">移除</button>
               </div>
               <div v-if="o.playerCount === 2">B：{{ o.enforcerB?.name || '—' }}
-                <button v-if="o.enforcerB" class="text-xs text-red-400 ml-1" @click="onRemoveEnforcer(o.code, 'b')">移除</button>
+                <button v-if="o.enforcerB" class="hls-btn-danger text-xs ml-1" @click="askRemoveEnforcer(o.code, 'b')">移除</button>
               </div>
             </td>
             <td class="px-3 py-2">
@@ -184,6 +219,16 @@ const orderTypeOptions = Object.entries(orderTypeLabels) as [OrderType, string][
         </div>
       </div>
     </transition>
+
+    <!-- Confirm Dialog -->
+    <ConfirmDialog
+      :open="confirmOpen"
+      :title="confirmTitle"
+      :message="confirmMessage"
+      danger
+      @confirm="handleConfirm"
+      @cancel="() => { confirmOpen = false; load() }"
+    />
   </div>
 </template>
 
