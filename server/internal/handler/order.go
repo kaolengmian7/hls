@@ -3,11 +3,13 @@ package handler
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 
 	"hls.dev/server/internal/repo"
@@ -190,7 +192,11 @@ func OrderDetailHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		code, _ := parseOrderPath(r.URL.Path)
 		o, err := ctx.OrderRepo.GetByCode(r.Context(), code)
 		if err != nil {
-			writeError(w, r, http.StatusNotFound, "order_not_found", nil)
+			if errors.Is(err, sqlx.ErrNotFound) {
+				writeError(w, r, http.StatusNotFound, "order_not_found", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
 			return
 		}
 		httpx.OkJsonCtx(r.Context(), w, toOrderView(o))
