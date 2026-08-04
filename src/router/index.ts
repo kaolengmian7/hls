@@ -33,6 +33,11 @@ export const router = createRouter({
       name: 'admin',
       component: () => import('@/pages/AdminPage.vue'),
     },
+    {
+      path: '/order/:code',
+      name: 'order-claim',
+      component: () => import('@/pages/OrderClaimPage.vue'),
+    },
     ...shopRoutes,
     ...teachRoutes,
     ...auditionRoutes,
@@ -54,6 +59,7 @@ router.beforeEach((to) => {
 
   if (to.path === '/admin') {
     if (!auth.token) return { name: 'login', query: { redirect: to.fullPath } }
-    if (auth.user && auth.user.role !== 'owner') return { name: 'home' }
+    const allowed = ['owner', 'service', 'enforcer']
+    if (auth.user && !allowed.includes(auth.user.role)) return { name: 'home' }
   }
 });
