@@ -186,9 +186,9 @@ func MyOrdersHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	})
 }
 
-// OrderDetailHandler handles GET /api/orders/:code (any logged-in role).
+// OrderDetailHandler handles GET /api/orders/:code (staff+enforcer only).
 func OrderDetailHandler(ctx *svc.ServiceContext) http.HandlerFunc {
-	return requireAnyRole(ctx, []string{"owner", "service", "enforcer", "customer"}, func(w http.ResponseWriter, r *http.Request) {
+	return requireAnyRole(ctx, []string{"owner", "service", "enforcer"}, func(w http.ResponseWriter, r *http.Request) {
 		code, _ := parseOrderPath(r.URL.Path)
 		o, err := ctx.OrderRepo.GetByCode(r.Context(), code)
 		if err != nil {

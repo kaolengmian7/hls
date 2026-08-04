@@ -57,6 +57,10 @@ router.beforeEach((to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
+  if (to.path.startsWith('/order/') && !auth.token) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
   if (to.path === '/admin') {
     if (!auth.token) return { name: 'login', query: { redirect: to.fullPath } }
     const allowed = ['owner', 'service', 'enforcer']

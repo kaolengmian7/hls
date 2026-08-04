@@ -42,7 +42,8 @@ const isFull = computed(() => {
   return o.playerCount === 1 ? !!o.enforcerA : !!o.enforcerA && !!o.enforcerB
 })
 const claimable = computed(() =>
-  !!order.value && order.value.status === 'dispatching' && !isFull.value && !alreadyClaimed.value,
+  !!order.value && order.value.status === 'dispatching' && !isFull.value && !alreadyClaimed.value &&
+  auth.user?.role === 'enforcer',
 )
 
 async function onClaim() {
