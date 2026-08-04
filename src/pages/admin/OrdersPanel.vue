@@ -48,6 +48,7 @@ async function handleConfirm() {
       await confirmAction.value()
     } catch {
       listError.value = '操作失败，请重试'
+      await load()
     }
   }
   confirmOpen.value = false
@@ -99,7 +100,7 @@ function askRemoveEnforcer(code: string, slot: 'a' | 'b') {
   confirmOpen.value = true
 }
 
-function onStatus(code: string, status: OrderStatus) {
+async function onStatus(code: string, status: OrderStatus) {
   if (status === 'refunded') {
     confirmTitle.value = '退单'
     confirmMessage.value = '确定将订单改为退单？'
@@ -109,14 +110,24 @@ function onStatus(code: string, status: OrderStatus) {
     }
     confirmOpen.value = true
   } else {
-    try { updateOrderStatus(code, status).then(() => load()) }
-    catch { listError.value = '操作失败，请重试' }
+    try {
+      await updateOrderStatus(code, status)
+      await load()
+    } catch {
+      listError.value = '操作失败，请重试'
+      await load()
+    }
   }
 }
 
 async function onComplaint(code: string, complaintStatus: ComplaintStatus) {
-  try { await updateComplaint(code, complaintStatus); await load() }
-  catch { listError.value = '操作失败，请重试' }
+  try {
+    await updateComplaint(code, complaintStatus)
+    await load()
+  } catch {
+    listError.value = '操作失败，请重试'
+    await load()
+  }
 }
 
 const orderTypeOptions = Object.entries(orderTypeLabels) as [OrderType, string][]
