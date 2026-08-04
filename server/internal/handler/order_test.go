@@ -53,3 +53,30 @@ func TestClaimHandler_NoAuth_ReturnsUnauthorized(t *testing.T) {
 		t.Fatalf("status = %d, want 401", w.Code)
 	}
 }
+
+func TestRemoveEnforcerHandler_NoAuth_ReturnsUnauthorized(t *testing.T) {
+	req := httptest.NewRequest(http.MethodDelete, "/api/orders/123/enforcer/a", nil)
+	w := httptest.NewRecorder()
+	handler.RemoveEnforcerHandler(nil)(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", w.Code)
+	}
+}
+
+func TestUpdateOrderStatusHandler_NoAuth_ReturnsUnauthorized(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPut, "/api/orders/123/status", nil)
+	w := httptest.NewRecorder()
+	handler.UpdateOrderStatusHandler(nil)(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", w.Code)
+	}
+}
+
+func TestUpdateOrderComplaintHandler_NoAuth_ReturnsUnauthorized(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPut, "/api/orders/123/complaint", nil)
+	w := httptest.NewRecorder()
+	handler.UpdateOrderComplaintHandler(nil)(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", w.Code)
+	}
+}

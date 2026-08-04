@@ -203,9 +203,148 @@ func OrderDetailHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	})
 }
 
-// ClaimOrderHandler is implemented in Task 7; placeholder keeps the package compiling.
+// ClaimOrderHandler handles POST /api/orders/:code/claim (enforcer).
+// Fills the first open slot (A then B); rejects if the order is not dispatching,
+// is already full, or the user already occupies a slot. When all required slots
+// are filled, transitions the order to "ongoing".
 func ClaimOrderHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	return requireAnyRole(ctx, []string{"enforcer"}, func(w http.ResponseWriter, r *http.Request) {
-		writeError(w, r, http.StatusNotImplemented, "not_implemented", nil)
+		userID, _ := extractUserID(r, ctx)
+		user, err := ctx.UserRepo.FindByID(r.Context(), userID)
+		if err != nil {
+			writeError(w, r, http.StatusUnauthorized, "user_not_found", nil)
+			return
+		}
+		code, _ := parseOrderPath(r.URL.Path)
+		o, err := ctx.OrderRepo.GetByCode(r.Context(), code)
+		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				writeError(w, r, http.StatusNotFound, "order_not_found", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		if o.Status != "dispatching" {
+			writeError(w, r, http.StatusConflict, "order_not_claimable", nil)
+			return
+		}
+		if (o.EnforcerAID.Valid && o.EnforcerAID.Int64 == userID) ||
+			(o.EnforcerBID.Valid && o.EnforcerBID.Int64 == userID) {
+			writeError(w, r, http.StatusConflict, "already_claimed", nil)
+			return
+		}
+		// choose first open slot within required player_count
+		slot := ""
+		if !o.EnforcerAID.Valid {
+			slot = "a"
+		} else if o.PlayerCount == 2 && !o.EnforcerBID.Valid {
+			slot = "b"
+		}
+		if slot == "" {
+			writeError(w, r, http.StatusConflict, "order_full", nil)
+			return
+		}
+		if err := ctx.OrderRepo.AssignEnforcer(r.Context(), code, slot, userID, user.Nickname); err != nil {
+			if err == repo.ErrSlotTaken {
+				writeError(w, r, http.StatusConflict, "slot_taken", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		// re-read to decide status transition
+		o, err = ctx.OrderRepo.GetByCode(r.Context(), code)
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		if isFullyStaffed(o) {
+			if err := ctx.OrderRepo.UpdateStatus(r.Context(), code, "ongoing"); err != nil {
+				writeError(w, r, http.StatusInternalServerError, "db_error", err)
+				return
+			}
+			o.Status = "ongoing"
+		}
+		httpx.OkJsonCtx(r.Context(), w, toOrderView(o))
+	})
+}
+
+func isFullyStaffed(o *repo.Order) bool {
+	if o.PlayerCount == 1 {
+		return o.EnforcerAID.Valid
+	}
+	return o.EnforcerAID.Valid && o.EnforcerBID.Valid
+}
+
+// RemoveEnforcerHandler handles DELETE /api/orders/:code/enforcer/:slot (owner/service).
+// Clears the slot; if the order is no longer fully staffed, reverts to "dispatching".
+func RemoveEnforcerHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"owner", "service"}, func(w http.ResponseWriter, r *http.Request) {
+		code, rest := parseOrderPath(r.URL.Path)
+		if len(rest) != 2 || rest[0] != "enforcer" || (rest[1] != "a" && rest[1] != "b") {
+			writeError(w, r, http.StatusBadRequest, "invalid_slot", nil)
+			return
+		}
+		if err := ctx.OrderRepo.RemoveEnforcer(r.Context(), code, rest[1]); err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		o, err := ctx.OrderRepo.GetByCode(r.Context(), code)
+		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				writeError(w, r, http.StatusNotFound, "order_not_found", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		if !isFullyStaffed(o) && (o.Status == "ongoing") {
+			_ = ctx.OrderRepo.UpdateStatus(r.Context(), code, "dispatching")
+			o.Status = "dispatching"
+		}
+		httpx.OkJsonCtx(r.Context(), w, toOrderView(o))
+	})
+}
+
+type statusRequest struct {
+	Status string `json:"status"`
+}
+
+// UpdateOrderStatusHandler handles PUT /api/orders/:code/status (owner/service).
+func UpdateOrderStatusHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"owner", "service"}, func(w http.ResponseWriter, r *http.Request) {
+		code, _ := parseOrderPath(r.URL.Path)
+		var req statusRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || !validOrderStatuses[req.Status] {
+			writeError(w, r, http.StatusBadRequest, "invalid_status", nil)
+			return
+		}
+		if err := ctx.OrderRepo.UpdateStatus(r.Context(), code, req.Status); err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		httpx.OkJsonCtx(r.Context(), w, map[string]any{"ok": true})
+	})
+}
+
+type complaintRequest struct {
+	ComplaintStatus string `json:"complaintStatus"`
+}
+
+// UpdateOrderComplaintHandler handles PUT /api/orders/:code/complaint (owner/service).
+func UpdateOrderComplaintHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"owner", "service"}, func(w http.ResponseWriter, r *http.Request) {
+		code, _ := parseOrderPath(r.URL.Path)
+		var req complaintRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || !validComplaintStatuses[req.ComplaintStatus] {
+			writeError(w, r, http.StatusBadRequest, "invalid_complaint", nil)
+			return
+		}
+		if err := ctx.OrderRepo.UpdateComplaint(r.Context(), code, req.ComplaintStatus); err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		httpx.OkJsonCtx(r.Context(), w, map[string]any{"ok": true})
 	})
 }
