@@ -1,0 +1,25 @@
+-- server/migrations/002_create_orders.sql
+CREATE TABLE orders (
+  id               BIGINT       AUTO_INCREMENT PRIMARY KEY,
+  code             VARCHAR(20)  NOT NULL UNIQUE,
+  title            VARCHAR(100) NOT NULL,
+  order_type       ENUM('guarantee','fun','companion','teaching') NOT NULL,
+  price            DECIMAL(10,2) NOT NULL,
+  commission_rate  DECIMAL(5,2)  NOT NULL DEFAULT 20.00,
+  bonus_rate       DECIMAL(5,2)  NOT NULL DEFAULT 3.00,
+  player_count     TINYINT       NOT NULL,
+  dispatcher_id    BIGINT        NOT NULL,
+  dispatcher_name  VARCHAR(50)   NOT NULL,
+  enforcer_a_id    BIGINT        NULL,
+  enforcer_a_name  VARCHAR(50)   NULL,
+  enforcer_b_id    BIGINT        NULL,
+  enforcer_b_name  VARCHAR(50)   NULL,
+  remark           VARCHAR(500)  NULL,
+  status           ENUM('dispatching','ongoing','settled','refunded') NOT NULL DEFAULT 'dispatching',
+  complaint_status ENUM('none','complained','resolved') NOT NULL DEFAULT 'none',
+  created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_enforcer_a (enforcer_a_id),
+  INDEX idx_enforcer_b (enforcer_b_id),
+  INDEX idx_status (status)
+);
