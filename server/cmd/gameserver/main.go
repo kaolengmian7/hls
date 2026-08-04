@@ -67,6 +67,14 @@ func main() {
 		{Method: http.MethodPut, Path: "/api/admin/users/:id/nickname", Handler: handler.ResetNicknameHandler(ctx)},
 		{Method: http.MethodPut, Path: "/api/user/password", Handler: handler.UpdatePasswordHandler(ctx)},
 		{Method: http.MethodPut, Path: "/api/user/nickname", Handler: handler.UpdateNicknameHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/orders", Handler: handler.CreateOrderHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/orders", Handler: handler.ListOrdersHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/my-orders", Handler: handler.MyOrdersHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/orders/:code", Handler: handler.OrderDetailHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/orders/:code/claim", Handler: handler.ClaimOrderHandler(ctx)},
+		{Method: http.MethodDelete, Path: "/api/orders/:code/enforcer/:slot", Handler: handler.RemoveEnforcerHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/orders/:code/status", Handler: handler.UpdateOrderStatusHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/orders/:code/complaint", Handler: handler.UpdateOrderComplaintHandler(ctx)},
 	})
 
 	logx.Infof("gameserver starting at %s:%d", cfg.Host, cfg.Port)
