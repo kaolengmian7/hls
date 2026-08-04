@@ -18,6 +18,33 @@ func TestParseOrderPath(t *testing.T) {
 	}
 }
 
+func TestCreateOrderHandler_NoAuth_ReturnsUnauthorized(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPost, "/api/orders", nil)
+	w := httptest.NewRecorder()
+	handler.CreateOrderHandler(nil)(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", w.Code)
+	}
+}
+
+func TestListOrdersHandler_NoAuth_ReturnsUnauthorized(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/orders", nil)
+	w := httptest.NewRecorder()
+	handler.ListOrdersHandler(nil)(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", w.Code)
+	}
+}
+
+func TestMyOrdersHandler_NoAuth_ReturnsUnauthorized(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/api/my-orders", nil)
+	w := httptest.NewRecorder()
+	handler.MyOrdersHandler(nil)(w, req)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", w.Code)
+	}
+}
+
 func TestClaimHandler_NoAuth_ReturnsUnauthorized(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/orders/123/claim", nil)
 	w := httptest.NewRecorder()
