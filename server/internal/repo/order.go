@@ -29,6 +29,7 @@ type Order struct {
 	Remark          sql.NullString `db:"remark"           json:"-"`
 	Status          string         `db:"status"           json:"status"`
 	ComplaintStatus string         `db:"complaint_status" json:"complaintStatus"`
+	BonusQualified  bool           `db:"bonus_qualified"  json:"bonusQualified"`
 	CreatedAt       time.Time      `db:"created_at"       json:"createdAt"`
 	UpdatedAt       time.Time      `db:"updated_at"       json:"updatedAt"`
 }
@@ -40,7 +41,10 @@ func (o *Order) Earnings() float64 {
 		return 0
 	}
 	net := o.Price * (1 - o.CommissionRate/100)
-	bonus := o.Price * o.BonusRate / 100
+	bonus := 0.0
+	if o.BonusQualified {
+		bonus = o.Price * o.BonusRate / 100
+	}
 	per := (net + bonus) / float64(o.PlayerCount)
 	return math.Round(per*100) / 100
 }
@@ -50,7 +54,7 @@ var ErrSlotTaken = errors.New("slot taken")
 
 const orderCols = "id, code, title, order_type, price, commission_rate, bonus_rate, " +
 	"player_count, dispatcher_id, dispatcher_name, enforcer_a_id, enforcer_a_name, " +
-	"enforcer_b_id, enforcer_b_name, remark, status, complaint_status, created_at, updated_at"
+	"enforcer_b_id, enforcer_b_name, remark, status, complaint_status, bonus_qualified, created_at, updated_at"
 
 // OrderRepo provides database access for orders.
 type OrderRepo struct {
