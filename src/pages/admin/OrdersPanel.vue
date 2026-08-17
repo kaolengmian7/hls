@@ -7,7 +7,7 @@ import {
 } from '../../api/orders'
 import {
   orderTypeLabels, orderStatusLabels, complaintLabels, reviewFlagLabels,
-  type OrderView, type OrderType, type OrderStatus, type ComplaintStatus, type ReviewFlagKey,
+  type OrderView, type OrderType, type OrderStatus, type ComplaintStatus, type ReviewFlagKey, type OrderReview,
 } from '../../shared/orderLabels'
 import ConfirmDialog from '../../shared/components/ConfirmDialog.vue'
 
@@ -236,8 +236,24 @@ async function submitReview() {
   }
 }
 
-// filled in by later tasks
-async function openReviewDetail(_code: string) {}
+// ---- review detail ----
+const showReviewDetail = ref(false)
+const reviewDetail = ref<OrderReview | null>(null)
+const reviewDetailFlags = computed(() =>
+  reviewDetail.value
+    ? reviewFlagOptions.filter(([key]) => reviewDetail.value![key])
+    : [],
+)
+
+async function openReviewDetail(code: string) {
+  reviewDetail.value = null
+  showReviewDetail.value = true
+  try {
+    reviewDetail.value = await getOrderReview(code)
+  } catch {
+    reviewDetail.value = null
+  }
+}
 </script>
 
 <template>
@@ -578,6 +594,43 @@ async function openReviewDetail(_code: string) {}
                 {{ savingReview ? '保存中…' : '保存评价' }}
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Review Detail Modal -->
+    <transition name="fade">
+      <div v-if="showReviewDetail" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" @click.self="showReviewDetail = false">
+        <div class="hls-panel w-[94%] max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div class="hls-panel-title text-center">评价详情</div>
+          <div class="p-6 space-y-5">
+            <template v-if="reviewDetail">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center rounded-full border border-hls-border/25 bg-black/10 px-3 py-1 font-body text-xs text-hls-text-dark">态度 {{ reviewDetail.attitudeScore }}/5</span>
+                <span class="inline-flex items-center rounded-full border border-hls-border/25 bg-black/10 px-3 py-1 font-body text-xs text-hls-text-dark">技术 {{ reviewDetail.technicalScore }}/5</span>
+                <span class="inline-flex items-center rounded-full border px-3 py-1 font-body text-xs" :class="getRatingClass(reviewDetail.total)">总分 {{ reviewDetail.total }}/10</span>
+                <span v-if="reviewDetail.bonusQualified" class="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-3 py-1 font-body text-xs text-amber-900">🍗 鸡腿达标</span>
+              </div>
+
+              <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-4">
+                <p class="font-body text-sm font-semibold text-hls-text-dark">扣分项</p>
+                <div v-if="reviewDetailFlags.length" class="mt-3 flex flex-wrap gap-2">
+                  <span v-for="[key, label] in reviewDetailFlags" :key="key" class="inline-flex items-center rounded-full border border-rose-300 bg-rose-100 px-3 py-1 font-body text-xs text-rose-900">{{ label }}</span>
+                </div>
+                <p v-else class="mt-3 font-body text-sm text-hls-text-light">无扣分项</p>
+              </div>
+
+              <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-4">
+                <p class="font-body text-sm font-semibold text-hls-text-dark">评语</p>
+                <p class="mt-2 font-body text-sm leading-6 text-hls-text-light whitespace-pre-wrap break-words">{{ reviewDetail.comment || '暂无评语' }}</p>
+              </div>
+
+              <p class="font-body text-xs text-hls-text-light">代录人：{{ reviewDetail.reviewerName }} · {{ formatDate(reviewDetail.createdAt) }}</p>
+            </template>
+            <p v-else class="font-body text-sm text-hls-text-light text-center">暂无评价</p>
+
+            <button class="hls-btn-secondary py-2 w-full" @click="showReviewDetail = false">关闭</button>
           </div>
         </div>
       </div>
