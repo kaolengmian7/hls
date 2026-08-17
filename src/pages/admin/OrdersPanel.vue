@@ -177,6 +177,16 @@ function getComplaintClass(status: ComplaintStatus) {
 function getFillCount(order: OrderView) {
   return Number(Boolean(order.enforcerA)) + Number(Boolean(order.enforcerB))
 }
+
+function getRatingClass(total: number) {
+  if (total >= 8) return 'bg-emerald-100 text-emerald-900 border-emerald-300'
+  if (total < 6) return 'bg-rose-100 text-rose-900 border-rose-300'
+  return 'bg-stone-100 text-stone-800 border-stone-300'
+}
+
+// filled in by later tasks
+async function openReviewForm(_o: OrderView) {}
+async function openReviewDetail(_code: string) {}
 </script>
 
 <template>
@@ -325,6 +335,27 @@ function getFillCount(order: OrderView) {
               <p class="mt-2 font-body text-sm leading-6 text-hls-text-light whitespace-pre-wrap break-words">
                 {{ o.remark || '暂无备注信息' }}
               </p>
+            </div>
+
+            <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-4">
+              <div class="flex items-center justify-between gap-3 flex-wrap">
+                <p class="font-body text-sm font-semibold text-hls-text-dark">订单评价</p>
+                <div class="flex gap-2">
+                  <button class="hls-btn-secondary text-xs px-3 py-1.5" @click="openReviewForm(o)">
+                    {{ o.review ? '修改评价' : '录入评价' }}
+                  </button>
+                  <button v-if="o.review" class="hls-btn-secondary text-xs px-3 py-1.5" @click="openReviewDetail(o.code)">
+                    评价详情
+                  </button>
+                </div>
+              </div>
+              <div v-if="o.review" class="mt-3 flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center rounded-full border border-hls-border/25 bg-black/10 px-3 py-1 font-body text-xs text-hls-text-dark">态度 {{ o.review.attitudeScore }}/5</span>
+                <span class="inline-flex items-center rounded-full border border-hls-border/25 bg-black/10 px-3 py-1 font-body text-xs text-hls-text-dark">技术 {{ o.review.technicalScore }}/5</span>
+                <span class="inline-flex items-center rounded-full border px-3 py-1 font-body text-xs" :class="getRatingClass(o.review.total)">总分 {{ o.review.total }}/10</span>
+                <span v-if="o.review.bonusQualified" class="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-3 py-1 font-body text-xs text-amber-900">🍗 鸡腿达标</span>
+              </div>
+              <p v-else class="mt-3 font-body text-sm text-hls-text-light">暂无评价</p>
             </div>
           </section>
 
