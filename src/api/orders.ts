@@ -1,5 +1,5 @@
 import http from '../http'
-import type { OrderView, OrderType, OrderStatus, ComplaintStatus } from '../shared/orderLabels'
+import type { OrderView, OrderType, OrderStatus, ComplaintStatus, OrderReview } from '../shared/orderLabels'
 
 export interface CreateOrderPayload {
   title: string
@@ -47,4 +47,29 @@ export async function updateOrderStatus(code: string, status: OrderStatus): Prom
 
 export async function updateComplaint(code: string, complaintStatus: ComplaintStatus): Promise<void> {
   await http.put(`/orders/${code}/complaint`, { complaintStatus })
+}
+
+export interface ReviewPayload {
+  attitudeScore: number
+  technicalScore: number
+  blameBoss: boolean
+  late: boolean
+  tempUnavailable: boolean
+  slowReply: boolean
+  noBackpack: boolean
+  noChannelCard: boolean
+  noSupplyCard: boolean
+  noEmotionalValue: boolean
+  grabContainer: boolean
+  comment: string
+}
+
+export async function getOrderReview(code: string): Promise<OrderReview> {
+  const res = await http.get<OrderReview>(`/orders/${code}/review`)
+  return res.data
+}
+
+export async function upsertOrderReview(code: string, payload: ReviewPayload): Promise<OrderReview> {
+  const res = await http.put<OrderReview>(`/orders/${code}/review`, payload)
+  return res.data
 }
