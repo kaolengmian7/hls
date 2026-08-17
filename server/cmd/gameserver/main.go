@@ -75,6 +75,8 @@ func main() {
 		{Method: http.MethodDelete, Path: "/api/orders/:code/enforcer/:slot", Handler: handler.RemoveEnforcerHandler(ctx)},
 		{Method: http.MethodPut, Path: "/api/orders/:code/status", Handler: handler.UpdateOrderStatusHandler(ctx)},
 		{Method: http.MethodPut, Path: "/api/orders/:code/complaint", Handler: handler.UpdateOrderComplaintHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/orders/:code/review", Handler: handler.UpsertReviewHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/orders/:code/review", Handler: handler.OrderReviewHandler(ctx)},
 	})
 
 	logx.Infof("gameserver starting at %s:%d", cfg.Host, cfg.Port)
