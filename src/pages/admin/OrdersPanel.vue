@@ -2,11 +2,12 @@
 import { computed, ref, onMounted } from 'vue'
 import {
   listOrders, createOrder, removeEnforcer, updateOrderStatus, updateComplaint,
-  type CreateOrderPayload,
+  getOrderReview, upsertOrderReview,
+  type CreateOrderPayload, type ReviewPayload,
 } from '../../api/orders'
 import {
-  orderTypeLabels, orderStatusLabels, complaintLabels,
-  type OrderView, type OrderType, type OrderStatus, type ComplaintStatus,
+  orderTypeLabels, orderStatusLabels, complaintLabels, reviewFlagLabels,
+  type OrderView, type OrderType, type OrderStatus, type ComplaintStatus, type ReviewFlagKey,
 } from '../../shared/orderLabels'
 import ConfirmDialog from '../../shared/components/ConfirmDialog.vue'
 
@@ -184,8 +185,58 @@ function getRatingClass(total: number) {
   return 'bg-stone-100 text-stone-800 border-stone-300'
 }
 
+// ---- review form ----
+const emptyReview = (): ReviewPayload => ({
+  attitudeScore: 5, technicalScore: 5,
+  blameBoss: false, late: false, tempUnavailable: false, slowReply: false,
+  noBackpack: false, noChannelCard: false, noSupplyCard: false,
+  noEmotionalValue: false, grabContainer: false, comment: '',
+})
+const showReviewForm = ref(false)
+const reviewForm = ref<ReviewPayload>(emptyReview())
+const reviewCode = ref('')
+const reviewError = ref('')
+const savingReview = ref(false)
+const reviewFlagOptions = Object.entries(reviewFlagLabels) as [ReviewFlagKey, string][]
+const reviewTotal = computed(() => reviewForm.value.attitudeScore + reviewForm.value.technicalScore)
+
+async function openReviewForm(o: OrderView) {
+  reviewCode.value = o.code
+  reviewError.value = ''
+  if (o.review) {
+    try {
+      const r = await getOrderReview(o.code)
+      reviewForm.value = {
+        attitudeScore: r.attitudeScore, technicalScore: r.technicalScore,
+        blameBoss: r.blameBoss, late: r.late, tempUnavailable: r.tempUnavailable,
+        slowReply: r.slowReply, noBackpack: r.noBackpack, noChannelCard: r.noChannelCard,
+        noSupplyCard: r.noSupplyCard, noEmotionalValue: r.noEmotionalValue,
+        grabContainer: r.grabContainer, comment: r.comment,
+      }
+    } catch {
+      reviewForm.value = emptyReview()
+    }
+  } else {
+    reviewForm.value = emptyReview()
+  }
+  showReviewForm.value = true
+}
+
+async function submitReview() {
+  reviewError.value = ''
+  savingReview.value = true
+  try {
+    await upsertOrderReview(reviewCode.value, { ...reviewForm.value, comment: reviewForm.value.comment.trim() })
+    showReviewForm.value = false
+    await load()
+  } catch {
+    reviewError.value = '保存失败，请重试'
+  } finally {
+    savingReview.value = false
+  }
+}
+
 // filled in by later tasks
-async function openReviewForm(_o: OrderView) {}
 async function openReviewDetail(_code: string) {}
 </script>
 
@@ -468,6 +519,63 @@ async function openReviewDetail(_code: string) {}
               <button class="flex-1 hls-btn-secondary py-2" @click="showCreate = false">取消</button>
               <button class="flex-1 hls-btn py-2 disabled:opacity-40" :disabled="creating" @click="submitCreate">
                 {{ creating ? '创建中…' : '▶ 创建' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Review Form Modal -->
+    <transition name="fade">
+      <div v-if="showReviewForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" @click.self="showReviewForm = false">
+        <div class="hls-panel w-[94%] max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div class="hls-panel-title text-center">订单评价</div>
+          <div class="p-6 space-y-5">
+            <p v-if="reviewError" class="font-body text-xs text-red-400 text-center">{{ reviewError }}</p>
+            <div class="grid gap-4 md:grid-cols-2">
+              <label class="block">
+                <span class="font-body text-xs text-hls-text-dark/75">态度评分</span>
+                <select v-model.number="reviewForm.attitudeScore" class="hls-input mt-2 w-full">
+                  <option v-for="n in 5" :key="n" :value="n">{{ n }} 分</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="font-body text-xs text-hls-text-dark/75">技术评分</span>
+                <select v-model.number="reviewForm.technicalScore" class="hls-input mt-2 w-full">
+                  <option v-for="n in 5" :key="n" :value="n">{{ n }} 分</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-3">
+              <p class="font-body text-xs text-hls-text-dark/75">总分</p>
+              <p class="mt-1 font-body text-lg font-bold" :class="reviewTotal >= 8 ? 'text-emerald-700' : reviewTotal < 6 ? 'text-rose-700' : 'text-hls-text-dark'">
+                {{ reviewTotal }}/10
+                <span v-if="reviewTotal >= 8" class="font-body text-xs text-amber-700">· 🍗 鸡腿达标</span>
+                <span v-else-if="reviewTotal < 6" class="font-body text-xs text-rose-600">· 低于 6 分将标记为客诉</span>
+              </p>
+            </div>
+
+            <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-4">
+              <p class="font-body text-sm font-semibold text-hls-text-dark">扣分项标记</p>
+              <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                <label v-for="[key, label] in reviewFlagOptions" :key="key" class="flex items-center gap-2 font-body text-sm text-hls-text-dark">
+                  <input type="checkbox" v-model="reviewForm[key]" class="h-4 w-4" />
+                  {{ label }}
+                </label>
+              </div>
+            </div>
+
+            <label class="block">
+              <span class="font-body text-xs text-hls-text-dark/75">评语</span>
+              <textarea v-model="reviewForm.comment" placeholder="补充评价内容（选填，最多 500 字）" class="hls-input mt-2 w-full" rows="3" />
+            </label>
+
+            <div class="flex gap-3 pt-1">
+              <button class="flex-1 hls-btn-secondary py-2" @click="showReviewForm = false">取消</button>
+              <button class="flex-1 hls-btn py-2 disabled:opacity-40" :disabled="savingReview" @click="submitReview">
+                {{ savingReview ? '保存中…' : '保存评价' }}
               </button>
             </div>
           </div>
