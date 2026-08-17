@@ -123,11 +123,7 @@ func UpsertReviewHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			ReviewerID:       userID,
 			ReviewerName:     user.Nickname,
 		}
-		if err := ctx.ReviewRepo.Upsert(r.Context(), rv); err != nil {
-			writeError(w, r, http.StatusInternalServerError, "db_error", err)
-			return
-		}
-		if err := ctx.OrderRepo.ApplyReviewEffects(r.Context(), code, bonusQualified, newComplaint); err != nil {
+		if err := ctx.ReviewRepo.UpsertWithEffects(r.Context(), rv, bonusQualified, newComplaint); err != nil {
 			writeError(w, r, http.StatusInternalServerError, "db_error", err)
 			return
 		}

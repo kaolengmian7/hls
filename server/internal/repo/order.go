@@ -153,12 +153,3 @@ func (r *OrderRepo) UpdateComplaint(ctx context.Context, code, complaint string)
 	_, err := r.db.ExecCtx(ctx, "UPDATE orders SET complaint_status = ? WHERE code = ?", complaint, code)
 	return err
 }
-
-// ApplyReviewEffects updates the review-derived fields on an order:
-// chicken-leg qualification and the (possibly changed) complaint status.
-func (r *OrderRepo) ApplyReviewEffects(ctx context.Context, code string, bonusQualified bool, complaint string) error {
-	_, err := r.db.ExecCtx(ctx,
-		"UPDATE orders SET bonus_qualified = ?, complaint_status = ? WHERE code = ?",
-		bonusQualified, complaint, code)
-	return err
-}

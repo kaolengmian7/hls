@@ -51,24 +51,34 @@ func NewReviewRepo(db sqlx.SqlConn) *ReviewRepo {
 	return &ReviewRepo{db: db}
 }
 
-// Upsert inserts or overwrites the single review for rv.OrderCode.
-func (r *ReviewRepo) Upsert(ctx context.Context, rv *Review) error {
-	_, err := r.db.ExecCtx(ctx,
-		"INSERT INTO reviews (order_code, attitude_score, technical_score, blame_boss, late, "+
-			"temp_unavailable, slow_reply, no_backpack, no_channel_card, no_supply_card, "+
-			"no_emotional_value, grab_container, comment, reviewer_id, reviewer_name) "+
-			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "+
-			"ON DUPLICATE KEY UPDATE attitude_score=VALUES(attitude_score), "+
-			"technical_score=VALUES(technical_score), blame_boss=VALUES(blame_boss), "+
-			"late=VALUES(late), temp_unavailable=VALUES(temp_unavailable), "+
-			"slow_reply=VALUES(slow_reply), no_backpack=VALUES(no_backpack), "+
-			"no_channel_card=VALUES(no_channel_card), no_supply_card=VALUES(no_supply_card), "+
-			"no_emotional_value=VALUES(no_emotional_value), grab_container=VALUES(grab_container), "+
-			"comment=VALUES(comment), reviewer_id=VALUES(reviewer_id), reviewer_name=VALUES(reviewer_name)",
-		rv.OrderCode, rv.AttitudeScore, rv.TechnicalScore, rv.BlameBoss, rv.Late,
-		rv.TempUnavailable, rv.SlowReply, rv.NoBackpack, rv.NoChannelCard, rv.NoSupplyCard,
-		rv.NoEmotionalValue, rv.GrabContainer, rv.Comment, rv.ReviewerID, rv.ReviewerName)
-	return err
+// UpsertWithEffects inserts or overwrites the single review for rv.OrderCode
+// and applies the review-derived bonus_qualified/complaint_status update to
+// the corresponding order, all within a single DB transaction so a crash
+// between the two writes can never leave the order stale relative to the review.
+func (r *ReviewRepo) UpsertWithEffects(ctx context.Context, rv *Review, bonusQualified bool, complaint string) error {
+	return r.db.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		if _, err := session.ExecCtx(ctx,
+			"INSERT INTO reviews (order_code, attitude_score, technical_score, blame_boss, late, "+
+				"temp_unavailable, slow_reply, no_backpack, no_channel_card, no_supply_card, "+
+				"no_emotional_value, grab_container, comment, reviewer_id, reviewer_name) "+
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "+
+				"ON DUPLICATE KEY UPDATE attitude_score=VALUES(attitude_score), "+
+				"technical_score=VALUES(technical_score), blame_boss=VALUES(blame_boss), "+
+				"late=VALUES(late), temp_unavailable=VALUES(temp_unavailable), "+
+				"slow_reply=VALUES(slow_reply), no_backpack=VALUES(no_backpack), "+
+				"no_channel_card=VALUES(no_channel_card), no_supply_card=VALUES(no_supply_card), "+
+				"no_emotional_value=VALUES(no_emotional_value), grab_container=VALUES(grab_container), "+
+				"comment=VALUES(comment), reviewer_id=VALUES(reviewer_id), reviewer_name=VALUES(reviewer_name)",
+			rv.OrderCode, rv.AttitudeScore, rv.TechnicalScore, rv.BlameBoss, rv.Late,
+			rv.TempUnavailable, rv.SlowReply, rv.NoBackpack, rv.NoChannelCard, rv.NoSupplyCard,
+			rv.NoEmotionalValue, rv.GrabContainer, rv.Comment, rv.ReviewerID, rv.ReviewerName); err != nil {
+			return err
+		}
+		_, err := session.ExecCtx(ctx,
+			"UPDATE orders SET bonus_qualified = ?, complaint_status = ? WHERE code = ?",
+			bonusQualified, complaint, rv.OrderCode)
+		return err
+	})
 }
 
 // GetByOrderCode returns the review for code, or sqlx.ErrNotFound.

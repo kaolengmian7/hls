@@ -214,7 +214,8 @@ async function openReviewForm(o: OrderView) {
         grabContainer: r.grabContainer, comment: r.comment,
       }
     } catch {
-      reviewForm.value = emptyReview()
+      reviewError.value = '加载评价失败，请重试'
+      return
     }
   } else {
     reviewForm.value = emptyReview()
@@ -239,6 +240,7 @@ async function submitReview() {
 // ---- review detail ----
 const showReviewDetail = ref(false)
 const reviewDetail = ref<OrderReview | null>(null)
+const reviewDetailError = ref('')
 const reviewDetailFlags = computed(() =>
   reviewDetail.value
     ? reviewFlagOptions.filter(([key]) => reviewDetail.value![key])
@@ -247,11 +249,13 @@ const reviewDetailFlags = computed(() =>
 
 async function openReviewDetail(code: string) {
   reviewDetail.value = null
+  reviewDetailError.value = ''
   showReviewDetail.value = true
   try {
     reviewDetail.value = await getOrderReview(code)
   } catch {
     reviewDetail.value = null
+    reviewDetailError.value = '加载评价详情失败，请重试'
   }
 }
 </script>
@@ -628,6 +632,7 @@ async function openReviewDetail(code: string) {
 
               <p class="font-body text-xs text-hls-text-light">代录人：{{ reviewDetail.reviewerName }} · {{ formatDate(reviewDetail.createdAt) }}</p>
             </template>
+            <p v-else-if="reviewDetailError" class="font-body text-sm text-red-400 text-center">{{ reviewDetailError }}</p>
             <p v-else class="font-body text-sm text-hls-text-light text-center">暂无评价</p>
 
             <button class="hls-btn-secondary py-2 w-full" @click="showReviewDetail = false">关闭</button>
