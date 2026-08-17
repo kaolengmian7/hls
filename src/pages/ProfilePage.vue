@@ -7,6 +7,7 @@ import axios from 'axios'
 
 const auth = useAuthStore()
 const router = useRouter()
+const adminRoles = ['owner', 'service', 'enforcer']
 
 const nickname = ref(auth.user?.nickname ?? '')
 const nicknameLoading = ref(false)
@@ -112,8 +113,8 @@ async function updatePassword() {
       </div>
     </div>
 
-    <!-- 店长专属 -->
-    <div v-if="auth.user?.role === 'owner'" class="hls-panel">
+    <!-- 后台入口 -->
+    <div v-if="auth.user && adminRoles.includes(auth.user.role)" class="hls-panel">
       <div class="p-5">
         <button class="hls-btn-secondary w-full py-2.5" @click="router.push('/admin')">
           ▶ 进入后台管理
