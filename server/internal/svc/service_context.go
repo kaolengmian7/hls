@@ -29,6 +29,7 @@ type ServiceContext struct {
 	WechatClient  *auth.WechatClient
 	ShopRepo      *repo.ShopRepo
 	OrderRepo     *repo.OrderRepo
+	ReviewRepo    *repo.ReviewRepo
 
 	SmsStore  *SmsStore
 	SmsSender auth.SmsSender
@@ -62,6 +63,7 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 		WechatClient:  auth.NewWechatClient(cfg.WechatOpen.AppID, cfg.WechatOpen.AppSecret),
 		ShopRepo:      shopRepo,
 		OrderRepo:     repo.NewOrderRepo(conn),
+		ReviewRepo:    repo.NewReviewRepo(conn),
 		SmsStore:      NewSmsStore(),
 		SmsSender:     smsSender,
 	}
