@@ -90,6 +90,7 @@ func toOrderView(o *repo.Order) map[string]any {
 		"remark":          o.Remark.String,
 		"status":          o.Status,
 		"complaintStatus": o.ComplaintStatus,
+		"bonusQualified":  o.BonusQualified,
 		"earnings":        o.Earnings(),
 		"createdAt":       o.CreatedAt,
 	}
@@ -161,9 +162,26 @@ func ListOrdersHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			writeError(w, r, http.StatusInternalServerError, "db_error", err)
 			return
 		}
+		summaries, err := ctx.ReviewRepo.ListSummaries(r.Context())
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
 		views := make([]map[string]any, 0, len(orders))
 		for _, o := range orders {
-			views = append(views, toOrderView(o))
+			v := toOrderView(o)
+			if s, ok := summaries[o.Code]; ok {
+				total := s.Attitude + s.Technical
+				v["review"] = map[string]any{
+					"attitudeScore":  s.Attitude,
+					"technicalScore": s.Technical,
+					"total":          total,
+					"bonusQualified": total >= 8,
+				}
+			} else {
+				v["review"] = nil
+			}
+			views = append(views, v)
 		}
 		httpx.OkJsonCtx(r.Context(), w, views)
 	})
