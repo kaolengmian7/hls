@@ -97,3 +97,8 @@ export async function upsertPublicOrderReview(code: string, payload: PublicRevie
   const res = await publicHttp.put<OrderReview>(`/public/orders/${code}/review`, payload)
   return res.data
 }
+
+export async function settleOrder(code: string): Promise<OrderView> {
+  const res = await http.post<OrderView>(`/orders/${code}/settle`)
+  return res.data
+}
