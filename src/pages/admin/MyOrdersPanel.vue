@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { myOrders } from '../../api/orders'
+import { myOrders, settleOrder } from '../../api/orders'
 import {
   complaintLabels,
   orderStatusLabels,
@@ -13,6 +13,8 @@ import {
 const orders = ref<OrderView[]>([])
 const loading = ref(false)
 const listError = ref('')
+const settlingCode = ref<string | null>(null)
+const actionError = ref('')
 
 const summary = computed(() => ({
   total: orders.value.length,
@@ -33,6 +35,20 @@ async function load() {
   }
 }
 onMounted(load)
+
+async function settle(code: string) {
+  if (!window.confirm('确认结单？结单后将进入工资结算流程。')) return
+  settlingCode.value = code
+  actionError.value = ''
+  try {
+    await settleOrder(code)
+    await load()
+  } catch {
+    actionError.value = '结单失败，请刷新后重试'
+  } finally {
+    settlingCode.value = null
+  }
+}
 
 function formatMoney(value: number) {
   return Number.isInteger(value) ? `${value}` : value.toFixed(2)
@@ -80,6 +96,7 @@ function getComplaintClass(status: ComplaintStatus) {
     </div>
 
     <p v-if="listError" class="font-body text-sm text-red-400">{{ listError }}</p>
+    <p v-if="actionError" class="font-body text-sm text-red-400">{{ actionError }}</p>
     <p v-if="loading" class="font-body text-sm text-hls-text-light">加载中…</p>
 
     <div v-if="!loading" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -127,6 +144,14 @@ function getComplaintClass(status: ComplaintStatus) {
               >
                 {{ complaintLabels[o.complaintStatus] }}
               </span>
+              <button
+                v-if="o.status === 'ongoing'"
+                class="hls-btn-secondary px-3 py-1.5 text-xs"
+                :disabled="settlingCode === o.code"
+                @click="settle(o.code)"
+              >
+                {{ settlingCode === o.code ? '结单中…' : '✅ 结单' }}
+              </button>
             </div>
 
             <div>
