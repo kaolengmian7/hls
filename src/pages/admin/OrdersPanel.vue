@@ -88,16 +88,24 @@ async function submitCreate() {
   }
 }
 
-const copiedCode = ref('')
+const copiedLinkKey = ref('')
 
-function shareLink(code: string) {
-  const url = `${window.location.origin}/order/${code}`
+function copyLink(linkKey: string, path: string) {
+  const url = `${window.location.origin}${path}`
   navigator.clipboard?.writeText(url).then(() => {
-    copiedCode.value = code
-    setTimeout(() => { if (copiedCode.value === code) copiedCode.value = '' }, 1500)
+    copiedLinkKey.value = linkKey
+    setTimeout(() => { if (copiedLinkKey.value === linkKey) copiedLinkKey.value = '' }, 1500)
   }).catch(() => {
     listError.value = '复制失败，请重试'
   })
+}
+
+function shareLink(code: string) {
+  copyLink(`claim:${code}`, `/order/${code}`)
+}
+
+function shareReviewLink(code: string) {
+  copyLink(`review:${code}`, `/review/${code}`)
 }
 
 function askRemoveEnforcer(code: string, slot: 'a' | 'b') {
@@ -427,6 +435,9 @@ async function openReviewDetail(code: string) {
                 <span v-if="o.review.bonusQualified" class="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-3 py-1 font-body text-xs text-amber-900">🍗 鸡腿达标</span>
               </div>
               <p v-else class="mt-3 font-body text-sm text-hls-text-light">暂无评价</p>
+              <button class="mt-4 hls-btn-secondary w-full py-2.5" @click="shareReviewLink(o.code)">
+                {{ copiedLinkKey === `review:${o.code}` ? '已复制评价链接' : '复制评价链接' }}
+              </button>
             </div>
           </section>
 
@@ -457,7 +468,7 @@ async function openReviewDetail(code: string) {
                 </label>
 
                 <button class="hls-btn-secondary w-full py-2.5" @click="shareLink(o.code)">
-                  {{ copiedCode === o.code ? '已复制接单链接' : '复制接单链接' }}
+                  {{ copiedLinkKey === `claim:${o.code}` ? '已复制接单链接' : '复制接单链接' }}
                 </button>
               </div>
             </div>

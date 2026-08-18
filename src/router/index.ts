@@ -38,6 +38,11 @@ export const router = createRouter({
       name: 'order-claim',
       component: () => import('@/pages/OrderClaimPage.vue'),
     },
+    {
+      path: '/review/:code',
+      name: 'public-order-review',
+      component: () => import('@/pages/PublicOrderReviewPage.vue'),
+    },
     ...shopRoutes,
     ...teachRoutes,
     ...auditionRoutes,

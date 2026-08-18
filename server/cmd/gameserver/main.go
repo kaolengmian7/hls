@@ -77,6 +77,8 @@ func main() {
 		{Method: http.MethodPut, Path: "/api/orders/:code/complaint", Handler: handler.UpdateOrderComplaintHandler(ctx)},
 		{Method: http.MethodPut, Path: "/api/orders/:code/review", Handler: handler.UpsertReviewHandler(ctx)},
 		{Method: http.MethodGet, Path: "/api/orders/:code/review", Handler: handler.OrderReviewHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/public/orders/:code/review", Handler: handler.PublicUpsertReviewHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/public/orders/:code/review", Handler: handler.PublicOrderReviewHandler(ctx)},
 	})
 
 	logx.Infof("gameserver starting at %s:%d", cfg.Host, cfg.Port)

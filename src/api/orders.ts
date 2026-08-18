@@ -1,5 +1,10 @@
+import axios from 'axios'
 import http from '../http'
 import type { OrderView, OrderType, OrderStatus, ComplaintStatus, OrderReview } from '../shared/orderLabels'
+
+const publicHttp = axios.create({
+  baseURL: ((import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/+$/, '') ?? '') + '/api',
+})
 
 export interface CreateOrderPayload {
   title: string
@@ -64,6 +69,15 @@ export interface ReviewPayload {
   comment: string
 }
 
+export interface PublicReviewPayload extends ReviewPayload {
+  reviewerName?: string
+}
+
+export interface PublicOrderReviewContext {
+  order: OrderView
+  review: OrderReview | null
+}
+
 export async function getOrderReview(code: string): Promise<OrderReview> {
   const res = await http.get<OrderReview>(`/orders/${code}/review`)
   return res.data
@@ -71,5 +85,15 @@ export async function getOrderReview(code: string): Promise<OrderReview> {
 
 export async function upsertOrderReview(code: string, payload: ReviewPayload): Promise<OrderReview> {
   const res = await http.put<OrderReview>(`/orders/${code}/review`, payload)
+  return res.data
+}
+
+export async function getPublicOrderReview(code: string): Promise<PublicOrderReviewContext> {
+  const res = await publicHttp.get<PublicOrderReviewContext>(`/public/orders/${code}/review`)
+  return res.data
+}
+
+export async function upsertPublicOrderReview(code: string, payload: PublicReviewPayload): Promise<OrderReview> {
+  const res = await publicHttp.put<OrderReview>(`/public/orders/${code}/review`, payload)
   return res.data
 }
