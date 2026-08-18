@@ -157,6 +157,22 @@ func (r *OrderRepo) UpdateComplaint(ctx context.Context, code, complaint string)
 	return err
 }
 
+// RefundWithPayrollCleanup sets the order to "refunded" and removes any
+// still-pending payroll items for it, in a single transaction, so a partial
+// failure can never leave a payable pending item behind for a refunded order.
+func (r *OrderRepo) RefundWithPayrollCleanup(ctx context.Context, code string) error {
+	return r.db.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		if _, err := session.ExecCtx(ctx, "UPDATE orders SET status = 'refunded' WHERE code = ?", code); err != nil {
+			return err
+		}
+		if _, err := session.ExecCtx(ctx,
+			"DELETE FROM payroll_items WHERE order_code = ? AND status = 'pending'", code); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 // SettleWithPayroll sets the order to "settled" and inserts one pending
 // payroll item per filled enforcer slot, in a single transaction. When
 // expectStatus is non-empty the status update is guarded on it and returns

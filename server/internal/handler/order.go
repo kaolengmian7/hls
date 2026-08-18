@@ -343,9 +343,7 @@ func UpdateOrderStatusHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		case "settled":
 			err = ctx.OrderRepo.SettleWithPayroll(r.Context(), code, "")
 		case "refunded":
-			if err = ctx.OrderRepo.UpdateStatus(r.Context(), code, "refunded"); err == nil {
-				err = ctx.PayrollRepo.DeletePendingByOrder(r.Context(), code)
-			}
+			err = ctx.OrderRepo.RefundWithPayrollCleanup(r.Context(), code)
 		default:
 			err = ctx.OrderRepo.UpdateStatus(r.Context(), code, req.Status)
 		}

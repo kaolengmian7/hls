@@ -133,7 +133,7 @@ type depositRequest struct {
 func UpdateEnforcerDepositHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	return requireOwner(ctx, func(w http.ResponseWriter, r *http.Request) {
 		id, _ := parseEnforcerPath(r.URL.Path)
-		if id == 0 {
+		if id <= 0 {
 			writeError(w, r, http.StatusBadRequest, "invalid_id", nil)
 			return
 		}
@@ -162,7 +162,7 @@ type fineRequest struct {
 func UpdateEnforcerFineHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	return requireOwner(ctx, func(w http.ResponseWriter, r *http.Request) {
 		id, _ := parseEnforcerPath(r.URL.Path)
-		if id == 0 {
+		if id <= 0 {
 			writeError(w, r, http.StatusBadRequest, "invalid_id", nil)
 			return
 		}

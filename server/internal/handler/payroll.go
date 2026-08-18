@@ -156,6 +156,8 @@ func PayPayrollHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 				writeError(w, r, http.StatusNotFound, "payroll_not_found", nil)
 			case repo.ErrAlreadyPaid:
 				writeError(w, r, http.StatusConflict, "already_paid", nil)
+			case repo.ErrOrderRefunded:
+				writeError(w, r, http.StatusConflict, "order_refunded", nil)
 			default:
 				writeError(w, r, http.StatusInternalServerError, "db_error", err)
 			}

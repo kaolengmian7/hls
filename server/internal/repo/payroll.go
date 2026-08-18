@@ -39,6 +39,10 @@ var ErrPayrollNotFound = errors.New("payroll item not found")
 // ErrAlreadyPaid is returned when paying an item that is not pending.
 var ErrAlreadyPaid = errors.New("payroll item already paid")
 
+// ErrOrderRefunded is returned when paying an item whose order has been
+// refunded (defense-in-depth alongside the atomic refund cleanup).
+var ErrOrderRefunded = errors.New("order refunded")
+
 // PayrollItem mirrors a row in payroll_items (one per enforcer per order).
 type PayrollItem struct {
 	ID              int64        `db:"id"`
@@ -118,12 +122,15 @@ func (r *PayrollRepo) Pay(ctx context.Context, id int64, defaultDeposit float64)
 		if err := session.QueryRowCtx(ctx, &o, "SELECT "+orderCols+" FROM orders WHERE code = ?", item.OrderCode); err != nil {
 			return err
 		}
+		if o.Status == "refunded" {
+			return ErrOrderRefunded
+		}
 		gross := o.Earnings()
 
 		var acc EnforcerAccount
 		required := defaultDeposit
 		err := session.QueryRowCtx(ctx, &acc,
-			"SELECT "+enforcerAccountCols+" FROM enforcer_accounts WHERE user_id = ?", item.EnforcerID)
+			"SELECT "+enforcerAccountCols+" FROM enforcer_accounts WHERE user_id = ? FOR UPDATE", item.EnforcerID)
 		if err != nil && err != sqlx.ErrNotFound {
 			return err
 		}
