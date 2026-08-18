@@ -36,6 +36,15 @@ const roleLabels: Record<AdminUser['role'], string> = {
   customer: '客户',
 }
 
+function getRoleClass(role: AdminUser['role']) {
+  return {
+    owner: 'bg-sky-100 text-sky-900 border-sky-300',
+    service: 'bg-amber-100 text-amber-900 border-amber-300',
+    enforcer: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+    customer: 'bg-stone-100 text-stone-800 border-stone-300',
+  }[role]
+}
+
 async function loadUsers() {
   loading.value = true
   listError.value = ''
@@ -112,45 +121,85 @@ async function handleConfirm() {
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <button class="hls-btn py-2 px-5" @click="openCreate">▶ 创建用户</button>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div class="space-y-1">
+        <h2 class="font-body font-bold text-xl text-hls-gold">用户管理</h2>
+        <p class="font-body text-sm text-hls-text-light">
+          管理账号与角色<span v-if="users.length"> · 共 {{ users.length }} 人</span>
+        </p>
+      </div>
+      <button class="hls-btn w-full py-2.5 sm:w-auto sm:px-5 whitespace-nowrap" @click="openCreate">▶ 创建用户</button>
     </div>
 
     <p v-if="listError" class="font-body text-sm text-red-400">{{ listError }}</p>
     <p v-if="loading" class="font-body text-sm text-hls-text-nav/60 animate-pixel-pulse">加载中…</p>
 
-    <div v-if="!loading && !listError" class="hls-panel overflow-hidden">
-      <div class="hls-panel-title">用户列表</div>
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b-2 border-hls-border/50">
-            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">ID</th>
-            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">账号</th>
-            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">昵称</th>
-            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">角色</th>
-            <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="u in users"
-            :key="u.id"
-            class="border-b border-hls-border/25 last:border-0"
-          >
-            <td class="px-4 py-3 font-body text-hls-text-muted">{{ u.id }}</td>
-            <td class="px-4 py-3 font-body text-hls-text-dark">{{ u.username }}</td>
-            <td class="px-4 py-3 font-body text-hls-text-dark">{{ u.nickname }}</td>
-            <td class="px-4 py-3"><span class="hls-badge hls-badge-gold">{{ roleLabels[u.role] }}</span></td>
-            <td class="px-4 py-3">
-              <div class="flex gap-2">
-                <button class="hls-btn-secondary text-xs py-1 px-3" @click="askResetPassword(u)">重置密码</button>
-                <button class="hls-btn-secondary text-xs py-1 px-3" @click="askResetNickname(u)">重置昵称</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <template v-if="!loading && !listError">
+      <!-- Mobile: cards -->
+      <div class="space-y-3 lg:hidden">
+        <article v-for="u in users" :key="u.id" class="hls-panel p-4 space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0 space-y-1">
+              <p class="font-body text-base font-bold text-hls-text-dark break-all">{{ u.username }}</p>
+              <p class="font-body text-sm text-hls-text-light break-all">{{ u.nickname || '—' }}</p>
+            </div>
+            <span
+              class="inline-flex shrink-0 items-center rounded-full border px-3 py-1 font-body text-xs"
+              :class="getRoleClass(u.role)"
+            >
+              {{ roleLabels[u.role] }}
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button class="hls-btn-secondary text-xs py-2" @click="askResetPassword(u)">重置密码</button>
+            <button class="hls-btn-secondary text-xs py-2" @click="askResetNickname(u)">重置昵称</button>
+          </div>
+        </article>
+      </div>
+
+      <!-- Desktop: table -->
+      <div class="hidden lg:block hls-panel overflow-hidden">
+        <div class="hls-panel-title">用户列表</div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b-2 border-hls-border/50">
+                <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">ID</th>
+                <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">账号</th>
+                <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">昵称</th>
+                <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">角色</th>
+                <th class="text-left px-4 py-3 font-body text-hls-text-dark font-medium">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="u in users"
+                :key="u.id"
+                class="border-b border-hls-border/25 last:border-0 transition-colors hover:bg-hls-bg/40"
+              >
+                <td class="px-4 py-3 font-body text-hls-text-muted">{{ u.id }}</td>
+                <td class="px-4 py-3 font-body text-hls-text-dark">{{ u.username }}</td>
+                <td class="px-4 py-3 font-body text-hls-text-dark">{{ u.nickname }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center rounded-full border px-3 py-1 font-body text-xs"
+                    :class="getRoleClass(u.role)"
+                  >
+                    {{ roleLabels[u.role] }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex gap-2">
+                    <button class="hls-btn-secondary text-xs py-1 px-3" @click="askResetPassword(u)">重置密码</button>
+                    <button class="hls-btn-secondary text-xs py-1 px-3" @click="askResetNickname(u)">重置昵称</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </template>
 
     <!-- Create User Modal -->
     <transition name="fade">
