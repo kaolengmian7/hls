@@ -338,7 +338,18 @@ func UpdateOrderStatusHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			writeError(w, r, http.StatusBadRequest, "invalid_status", nil)
 			return
 		}
-		if err := ctx.OrderRepo.UpdateStatus(r.Context(), code, req.Status); err != nil {
+		var err error
+		switch req.Status {
+		case "settled":
+			err = ctx.OrderRepo.SettleWithPayroll(r.Context(), code, "")
+		case "refunded":
+			if err = ctx.OrderRepo.UpdateStatus(r.Context(), code, "refunded"); err == nil {
+				err = ctx.PayrollRepo.DeletePendingByOrder(r.Context(), code)
+			}
+		default:
+			err = ctx.OrderRepo.UpdateStatus(r.Context(), code, req.Status)
+		}
+		if err != nil {
 			writeError(w, r, http.StatusInternalServerError, "db_error", err)
 			return
 		}
@@ -364,5 +375,43 @@ func UpdateOrderComplaintHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 		httpx.OkJsonCtx(r.Context(), w, map[string]any{"ok": true})
+	})
+}
+
+// SettleOrderHandler handles POST /api/orders/:code/settle (enforcer).
+// The caller must occupy a slot on the order and the order must be "ongoing".
+func SettleOrderHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"enforcer"}, func(w http.ResponseWriter, r *http.Request) {
+		userID, _ := extractUserID(r, ctx)
+		code, _ := parseOrderPath(r.URL.Path)
+		o, err := ctx.OrderRepo.GetByCode(r.Context(), code)
+		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				writeError(w, r, http.StatusNotFound, "order_not_found", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		isMine := (o.EnforcerAID.Valid && o.EnforcerAID.Int64 == userID) ||
+			(o.EnforcerBID.Valid && o.EnforcerBID.Int64 == userID)
+		if !isMine {
+			writeError(w, r, http.StatusForbidden, "not_your_order", nil)
+			return
+		}
+		if err := ctx.OrderRepo.SettleWithPayroll(r.Context(), code, "ongoing"); err != nil {
+			if errors.Is(err, repo.ErrNotSettleable) {
+				writeError(w, r, http.StatusConflict, "order_not_settleable", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		o, err = ctx.OrderRepo.GetByCode(r.Context(), code)
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		httpx.OkJsonCtx(r.Context(), w, toOrderView(o))
 	})
 }
