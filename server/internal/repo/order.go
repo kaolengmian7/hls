@@ -52,6 +52,9 @@ func (o *Order) Earnings() float64 {
 // ErrSlotTaken is returned when assigning to an already-filled enforcer slot.
 var ErrSlotTaken = errors.New("slot taken")
 
+// ErrNotSettleable is returned when a guarded settle finds no matching order/status.
+var ErrNotSettleable = errors.New("not settleable")
+
 const orderCols = "id, code, title, order_type, price, commission_rate, bonus_rate, " +
 	"player_count, dispatcher_id, dispatcher_name, enforcer_a_id, enforcer_a_name, " +
 	"enforcer_b_id, enforcer_b_name, remark, status, complaint_status, bonus_qualified, created_at, updated_at"
@@ -152,4 +155,50 @@ func (r *OrderRepo) UpdateStatus(ctx context.Context, code, status string) error
 func (r *OrderRepo) UpdateComplaint(ctx context.Context, code, complaint string) error {
 	_, err := r.db.ExecCtx(ctx, "UPDATE orders SET complaint_status = ? WHERE code = ?", complaint, code)
 	return err
+}
+
+// SettleWithPayroll sets the order to "settled" and inserts one pending
+// payroll item per filled enforcer slot, in a single transaction. When
+// expectStatus is non-empty the status update is guarded on it and returns
+// ErrNotSettleable if no row matches. INSERT IGNORE keeps item creation
+// idempotent across repeated settles.
+func (r *OrderRepo) SettleWithPayroll(ctx context.Context, code, expectStatus string) error {
+	return r.db.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		q := "UPDATE orders SET status = 'settled' WHERE code = ?"
+		args := []any{code}
+		if expectStatus != "" {
+			q += " AND status = ?"
+			args = append(args, expectStatus)
+		}
+		res, err := session.ExecCtx(ctx, q, args...)
+		if err != nil {
+			return err
+		}
+		if expectStatus != "" {
+			if n, _ := res.RowsAffected(); n == 0 {
+				return ErrNotSettleable
+			}
+		}
+		var o Order
+		if err := session.QueryRowCtx(ctx, &o, "SELECT "+orderCols+" FROM orders WHERE code = ?", code); err != nil {
+			return err
+		}
+		insert := func(id int64, name string) error {
+			_, err := session.ExecCtx(ctx,
+				"INSERT IGNORE INTO payroll_items (order_code, enforcer_id, enforcer_name, status) "+
+					"VALUES (?, ?, ?, 'pending')", code, id, name)
+			return err
+		}
+		if o.EnforcerAID.Valid {
+			if err := insert(o.EnforcerAID.Int64, o.EnforcerAName.String); err != nil {
+				return err
+			}
+		}
+		if o.EnforcerBID.Valid {
+			if err := insert(o.EnforcerBID.Int64, o.EnforcerBName.String); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
