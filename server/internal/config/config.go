@@ -13,6 +13,7 @@ type Config struct {
 	WechatOpen WechatOpenConfig
 	TencentSMS TencentSMSConfig
 	Shop       ShopConfig
+	Payroll    PayrollConfig
 }
 
 // CorsConfig CORS 允许列表。
@@ -63,4 +64,10 @@ type ShopConfig struct {
 	VIPUsers     []int64             `json:",optional"`
 	VIPHighBoost float64             `json:",default=5"`
 	LotteryPool  []LotteryItemConfig `json:",optional"`
+}
+
+// PayrollConfig 打手工资/押金配置。
+type PayrollConfig struct {
+	DefaultDeposit  float64 `json:",default=300"`
+	SettleDelayDays int     `json:",default=3"`
 }
