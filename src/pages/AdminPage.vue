@@ -4,8 +4,9 @@ import { useAuthStore } from '../stores/auth'
 import UsersPanel from './admin/UsersPanel.vue'
 import OrdersPanel from './admin/OrdersPanel.vue'
 import MyOrdersPanel from './admin/MyOrdersPanel.vue'
+import EnforcersPanel from './admin/EnforcersPanel.vue'
 
-type TabKey = 'orders' | 'users' | 'my-orders'
+type TabKey = 'orders' | 'users' | 'my-orders' | 'enforcers'
 
 const auth = useAuthStore()
 
@@ -13,6 +14,7 @@ interface TabDef { key: TabKey; label: string; roles: string[] }
 const allTabs: TabDef[] = [
   { key: 'orders', label: '订单管理', roles: ['owner', 'service'] },
   { key: 'users', label: '用户管理', roles: ['owner'] },
+  { key: 'enforcers', label: '打手管理', roles: ['owner'] },
   { key: 'my-orders', label: '我的订单', roles: ['enforcer'] },
 ]
 
@@ -121,6 +123,7 @@ onUnmounted(() => {
     <main class="flex-1 w-full min-w-0 px-4 py-5 lg:px-6 lg:py-8 lg:max-w-5xl">
       <OrdersPanel v-if="active === 'orders'" />
       <UsersPanel v-else-if="active === 'users'" />
+      <EnforcersPanel v-else-if="active === 'enforcers'" />
       <MyOrdersPanel v-else-if="active === 'my-orders'" />
     </main>
   </div>
