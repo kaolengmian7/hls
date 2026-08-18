@@ -270,19 +270,19 @@ async function openReviewDetail(code: string) {
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-start justify-between gap-4 flex-wrap">
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
       <div class="space-y-1">
         <h2 class="font-body font-bold text-xl text-hls-gold">订单管理</h2>
         <p class="font-body text-sm text-hls-text-light">查看完整订单信息、处理状态变更，并快速管理接单人员。</p>
       </div>
-      <button class="hls-btn py-2 px-5 whitespace-nowrap" @click="openCreate">▶ 创建订单</button>
+      <button class="hls-btn w-full py-2.5 sm:w-auto sm:px-5 whitespace-nowrap" @click="openCreate">▶ 创建订单</button>
     </div>
 
     <p v-if="listError" class="font-body text-sm text-red-400">{{ listError }}</p>
     <p v-if="loading" class="font-body text-sm text-hls-text-light">加载中…</p>
 
-    <div v-if="!loading" class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-      <div class="hls-panel px-4 py-4 xl:col-span-2">
+    <div v-if="!loading" class="grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-6">
+      <div class="hls-panel px-4 py-4 sm:col-span-2 xl:col-span-2">
         <p class="font-body text-xs uppercase tracking-[0.3em] text-hls-text-dark/75">总订单</p>
         <div class="mt-3 flex items-end justify-between">
           <p class="font-body text-3xl font-bold text-hls-gold-dark">{{ summary.total }}</p>
@@ -313,7 +313,7 @@ async function openReviewDetail(code: string) {
         :key="o.code"
         class="hls-panel overflow-hidden"
       >
-        <div class="flex flex-col gap-4 border-b border-hls-border/20 bg-hls-panel-deep/45 px-5 py-4 lg:flex-row lg:items-start lg:justify-between">
+        <div class="flex flex-col gap-4 border-b border-hls-border/20 bg-hls-panel-deep/45 px-4 py-4 sm:px-5 lg:flex-row lg:items-start lg:justify-between">
           <div class="space-y-3 min-w-0">
             <div class="flex flex-wrap items-center gap-2">
               <span class="inline-flex items-center rounded-full border border-amber-300 bg-amber-100 px-3 py-1 font-body text-xs text-amber-900">
@@ -334,14 +334,16 @@ async function openReviewDetail(code: string) {
             </div>
 
             <div>
-              <h3 class="font-body text-xl font-bold text-hls-text-dark break-all">{{ o.title }}</h3>
-              <p class="mt-1 font-body text-xs text-hls-text-light">
-                订单编号：{{ o.code }} · 创建时间：{{ formatDate(o.createdAt) }}
+              <h3 class="font-body text-lg sm:text-xl font-bold text-hls-text-dark break-all">{{ o.title }}</h3>
+              <p class="mt-1 font-body text-xs leading-5 text-hls-text-light break-all">
+                订单编号：{{ o.code }}
+                <span class="hidden sm:inline"> · </span>
+                <span class="block sm:inline">创建时间：{{ formatDate(o.createdAt) }}</span>
               </p>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:min-w-[24rem]">
+          <div class="grid grid-cols-2 gap-3 lg:min-w-[24rem]">
             <div class="rounded-lg border border-hls-border/20 bg-black/10 px-3 py-3">
               <p class="font-body text-xs text-hls-text-dark/75">订单金额</p>
               <p class="mt-2 font-body text-lg font-bold text-hls-gold-dark">{{ formatMoney(o.price) }}</p>
@@ -361,7 +363,7 @@ async function openReviewDetail(code: string) {
           </div>
         </div>
 
-        <div class="grid gap-4 px-5 py-5 lg:grid-cols-[1.2fr_1fr]">
+        <div class="grid gap-4 px-4 py-4 sm:px-5 sm:py-5 lg:grid-cols-[1.2fr_1fr]">
           <section class="space-y-4">
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-3">
@@ -379,29 +381,29 @@ async function openReviewDetail(code: string) {
             </div>
 
             <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-4">
-              <div class="flex items-center justify-between gap-3 flex-wrap">
+              <div class="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <p class="font-body text-sm font-semibold text-hls-text-dark">接单人员</p>
                 <p class="font-body text-xs text-hls-text-light">可直接移除已占位打手</p>
               </div>
               <div class="mt-3 grid gap-3 md:grid-cols-2">
                 <div class="rounded-lg border border-hls-border/15 bg-black/10 px-4 py-3">
-                  <div class="flex items-center justify-between gap-3">
-                    <div>
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
                       <p class="font-body text-xs text-hls-text-dark/75">打手 A</p>
                       <p class="mt-1 font-body text-base text-hls-text-dark break-all">{{ o.enforcerA?.name || '空缺' }}</p>
                     </div>
-                    <button v-if="o.enforcerA" class="hls-btn-danger text-xs px-3 py-1.5" @click="askRemoveEnforcer(o.code, 'a')">
+                    <button v-if="o.enforcerA" class="hls-btn-danger w-full text-xs px-3 py-2 sm:w-auto sm:py-1.5" @click="askRemoveEnforcer(o.code, 'a')">
                       移除
                     </button>
                   </div>
                 </div>
                 <div v-if="o.playerCount === 2" class="rounded-lg border border-hls-border/15 bg-black/10 px-4 py-3">
-                  <div class="flex items-center justify-between gap-3">
-                    <div>
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
                       <p class="font-body text-xs text-hls-text-dark/75">打手 B</p>
                       <p class="mt-1 font-body text-base text-hls-text-dark break-all">{{ o.enforcerB?.name || '空缺' }}</p>
                     </div>
-                    <button v-if="o.enforcerB" class="hls-btn-danger text-xs px-3 py-1.5" @click="askRemoveEnforcer(o.code, 'b')">
+                    <button v-if="o.enforcerB" class="hls-btn-danger w-full text-xs px-3 py-2 sm:w-auto sm:py-1.5" @click="askRemoveEnforcer(o.code, 'b')">
                       移除
                     </button>
                   </div>
@@ -417,13 +419,13 @@ async function openReviewDetail(code: string) {
             </div>
 
             <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-4">
-              <div class="flex items-center justify-between gap-3 flex-wrap">
+              <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <p class="font-body text-sm font-semibold text-hls-text-dark">订单评价</p>
-                <div class="flex gap-2">
-                  <button class="hls-btn-secondary text-xs px-3 py-1.5" @click="openReviewForm(o)">
+                <div class="grid grid-cols-1 gap-2 sm:flex">
+                  <button class="hls-btn-secondary w-full text-xs px-3 py-2 sm:w-auto sm:py-1.5" @click="openReviewForm(o)">
                     {{ o.review ? '修改评价' : '录入评价' }}
                   </button>
-                  <button v-if="o.review" class="hls-btn-secondary text-xs px-3 py-1.5" @click="openReviewDetail(o.code)">
+                  <button v-if="o.review" class="hls-btn-secondary w-full text-xs px-3 py-2 sm:w-auto sm:py-1.5" @click="openReviewDetail(o.code)">
                     评价详情
                   </button>
                 </div>
@@ -486,10 +488,10 @@ async function openReviewDetail(code: string) {
 
     <!-- Create Modal -->
     <transition name="fade">
-      <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" @click.self="showCreate = false">
-        <div class="hls-panel w-[94%] max-w-2xl">
+      <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 sm:p-4" @click.self="showCreate = false">
+        <div class="hls-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div class="hls-panel-title text-center">创建订单</div>
-          <div class="p-6 space-y-5">
+          <div class="space-y-5 p-4 sm:p-6 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
             <p v-if="createError" class="font-body text-xs text-red-400 text-center">{{ createError }}</p>
             <div class="grid gap-4 md:grid-cols-2">
               <label class="block md:col-span-2">
@@ -546,9 +548,9 @@ async function openReviewDetail(code: string) {
               </p>
             </div>
 
-            <div class="flex gap-3 pt-1">
-              <button class="flex-1 hls-btn-secondary py-2" @click="showCreate = false">取消</button>
-              <button class="flex-1 hls-btn py-2 disabled:opacity-40" :disabled="creating" @click="submitCreate">
+            <div class="flex flex-col-reverse gap-3 pt-1 sm:flex-row">
+              <button class="hls-btn-secondary w-full py-2.5 sm:flex-1" @click="showCreate = false">取消</button>
+              <button class="hls-btn w-full py-2.5 disabled:opacity-40 sm:flex-1" :disabled="creating" @click="submitCreate">
                 {{ creating ? '创建中…' : '▶ 创建' }}
               </button>
             </div>
@@ -559,10 +561,10 @@ async function openReviewDetail(code: string) {
 
     <!-- Review Form Modal -->
     <transition name="fade">
-      <div v-if="showReviewForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" @click.self="showReviewForm = false">
-        <div class="hls-panel w-[94%] max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div v-if="showReviewForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 sm:p-4" @click.self="showReviewForm = false">
+        <div class="hls-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div class="hls-panel-title text-center">订单评价</div>
-          <div class="p-6 space-y-5">
+          <div class="space-y-5 p-4 sm:p-6 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
             <p v-if="reviewError" class="font-body text-xs text-red-400 text-center">{{ reviewError }}</p>
             <div class="grid gap-4 md:grid-cols-2">
               <label class="block">
@@ -603,9 +605,9 @@ async function openReviewDetail(code: string) {
               <textarea v-model="reviewForm.comment" placeholder="补充评价内容（选填，最多 500 字）" class="hls-input mt-2 w-full" rows="3" />
             </label>
 
-            <div class="flex gap-3 pt-1">
-              <button class="flex-1 hls-btn-secondary py-2" @click="showReviewForm = false">取消</button>
-              <button class="flex-1 hls-btn py-2 disabled:opacity-40" :disabled="savingReview" @click="submitReview">
+            <div class="flex flex-col-reverse gap-3 pt-1 sm:flex-row">
+              <button class="hls-btn-secondary w-full py-2.5 sm:flex-1" @click="showReviewForm = false">取消</button>
+              <button class="hls-btn w-full py-2.5 disabled:opacity-40 sm:flex-1" :disabled="savingReview" @click="submitReview">
                 {{ savingReview ? '保存中…' : '保存评价' }}
               </button>
             </div>
@@ -616,10 +618,10 @@ async function openReviewDetail(code: string) {
 
     <!-- Review Detail Modal -->
     <transition name="fade">
-      <div v-if="showReviewDetail" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4" @click.self="showReviewDetail = false">
-        <div class="hls-panel w-[94%] max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div v-if="showReviewDetail" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 sm:p-4" @click.self="showReviewDetail = false">
+        <div class="hls-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div class="hls-panel-title text-center">评价详情</div>
-          <div class="p-6 space-y-5">
+          <div class="space-y-5 p-4 sm:p-6 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
             <template v-if="reviewDetail">
               <div class="flex flex-wrap items-center gap-2">
                 <span class="inline-flex items-center rounded-full border border-hls-border/25 bg-black/10 px-3 py-1 font-body text-xs text-hls-text-dark">态度 {{ reviewDetail.attitudeScore }}/5</span>
