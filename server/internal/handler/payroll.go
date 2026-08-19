@@ -23,6 +23,7 @@ type payrollView struct {
 	NetPaid         float64 `json:"netPaid"`
 	CreatedAt       string  `json:"createdAt"`
 	PaidAt          *string `json:"paidAt"`
+	UnlockAt        *string `json:"unlockAt"`
 }
 
 // projectPayrollView builds a pending row's live projection (gross recomputed
@@ -113,6 +114,24 @@ func ListPayrollHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			}
 			for _, it := range items {
 				views = append(views, projectPayrollView(it, byCode[it.OrderCode], accounts[it.EnforcerID], ctx.Config.Payroll.DefaultDeposit))
+			}
+		case "frozen":
+			items, err := ctx.PayrollRepo.ListPendingFrozen(r.Context(), ctx.Config.Payroll.SettleDelayDays)
+			if err != nil {
+				writeError(w, r, http.StatusInternalServerError, "db_error", err)
+				return
+			}
+			accounts, err := ctx.EnforcerAccountRepo.ListAccounts(r.Context())
+			if err != nil {
+				writeError(w, r, http.StatusInternalServerError, "db_error", err)
+				return
+			}
+			for _, it := range items {
+				v := projectPayrollView(it, byCode[it.OrderCode], accounts[it.EnforcerID], ctx.Config.Payroll.DefaultDeposit)
+				v.Status = "frozen"
+				unlock := it.CreatedAt.AddDate(0, 0, ctx.Config.Payroll.SettleDelayDays).Format("2006-01-02T15:04:05Z07:00")
+				v.UnlockAt = &unlock
+				views = append(views, v)
 			}
 		case "paid":
 			items, err := ctx.PayrollRepo.ListPaid(r.Context())

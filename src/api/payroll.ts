@@ -1,6 +1,6 @@
 import http from '../http'
 
-export type PayrollStatus = 'pending' | 'paid'
+export type PayrollStatus = 'frozen' | 'pending' | 'paid'
 
 export interface PayrollRow {
   id: number
@@ -14,6 +14,7 @@ export interface PayrollRow {
   netPaid: number
   createdAt: string
   paidAt: string | null
+  unlockAt: string | null
 }
 
 export async function listPayroll(status: PayrollStatus): Promise<PayrollRow[]> {

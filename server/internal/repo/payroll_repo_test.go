@@ -87,6 +87,58 @@ func TestSettleWithPayroll_And_Pay(t *testing.T) {
 	_, _ = conn.ExecCtx(ctx, "DELETE FROM enforcer_accounts WHERE user_id = ?", uid)
 }
 
+func TestListPendingFrozenVsDue(t *testing.T) {
+	conn := payrollTestConn(t)
+	payRepo := repo.NewPayrollRepo(conn)
+	ctx := context.Background()
+
+	suffix := strconv.FormatInt(time.Now().UnixNano(), 10)
+	dueCode := "frzdue" + suffix
+	frozenCode := "frzhot" + suffix
+	const delayDays = 3
+
+	insert := func(code string, ageDays int) {
+		_, err := conn.ExecCtx(ctx,
+			"INSERT INTO payroll_items (order_code, enforcer_id, enforcer_name, status, gross, "+
+				"deposit_deducted, fine_deducted, net_paid, created_at) "+
+				"VALUES (?, ?, ?, 'pending', 0, 0, 0, 0, NOW() - INTERVAL ? DAY)",
+			code, 990303, "打手丙", ageDays)
+		if err != nil {
+			t.Fatalf("insert %s: %v", code, err)
+		}
+	}
+	insert(dueCode, 5)    // past the freeze window -> due
+	insert(frozenCode, 0) // just created -> still frozen
+	t.Cleanup(func() {
+		_, _ = conn.ExecCtx(ctx, "DELETE FROM payroll_items WHERE order_code IN (?, ?)", dueCode, frozenCode)
+	})
+
+	has := func(list []*repo.PayrollItem, code string) bool {
+		for _, it := range list {
+			if it.OrderCode == code {
+				return true
+			}
+		}
+		return false
+	}
+
+	due, err := payRepo.ListPendingDue(ctx, delayDays)
+	if err != nil {
+		t.Fatalf("ListPendingDue: %v", err)
+	}
+	if !has(due, dueCode) || has(due, frozenCode) {
+		t.Fatalf("due list should contain %s and not %s", dueCode, frozenCode)
+	}
+
+	frozen, err := payRepo.ListPendingFrozen(ctx, delayDays)
+	if err != nil {
+		t.Fatalf("ListPendingFrozen: %v", err)
+	}
+	if !has(frozen, frozenCode) || has(frozen, dueCode) {
+		t.Fatalf("frozen list should contain %s and not %s", frozenCode, dueCode)
+	}
+}
+
 func TestRefundWithPayrollCleanup(t *testing.T) {
 	conn := payrollTestConn(t)
 	orderRepo := repo.NewOrderRepo(conn)

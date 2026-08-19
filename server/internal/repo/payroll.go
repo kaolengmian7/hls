@@ -83,6 +83,19 @@ func (r *PayrollRepo) ListPendingDue(ctx context.Context, delayDays int) ([]*Pay
 	return list, nil
 }
 
+// ListPendingFrozen returns pending items still within the freeze window
+// (created less than delayDays ago), newest first.
+func (r *PayrollRepo) ListPendingFrozen(ctx context.Context, delayDays int) ([]*PayrollItem, error) {
+	var list []*PayrollItem
+	err := r.db.QueryRowsCtx(ctx, &list,
+		"SELECT "+payrollCols+" FROM payroll_items WHERE status = 'pending' "+
+			"AND created_at > NOW() - INTERVAL ? DAY ORDER BY created_at DESC", delayDays)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
 // ListPaid returns paid items, newest first.
 func (r *PayrollRepo) ListPaid(ctx context.Context) ([]*PayrollItem, error) {
 	var list []*PayrollItem
