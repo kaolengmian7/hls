@@ -68,7 +68,7 @@ router.beforeEach((to) => {
 
   if (to.path === '/admin') {
     if (!auth.token) return { name: 'login', query: { redirect: to.fullPath } }
-    const allowed = ['owner', 'service', 'enforcer']
+    const allowed = ['owner', 'service', 'enforcer', 'customer']
     if (auth.user && !allowed.includes(auth.user.role)) return { name: 'home' }
   }
 });
