@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"math"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -35,18 +34,8 @@ type Order struct {
 }
 
 // Earnings returns per-player earnings, rounded to two decimals.
-// Formula: (price*(1-commission%/100) + price*bonus%/100) / playerCount.
 func (o *Order) Earnings() float64 {
-	if o.PlayerCount <= 0 {
-		return 0
-	}
-	net := o.Price * (1 - o.CommissionRate/100)
-	bonus := 0.0
-	if o.BonusQualified {
-		bonus = o.Price * o.BonusRate / 100
-	}
-	per := (net + bonus) / float64(o.PlayerCount)
-	return math.Round(per*100) / 100
+	return ComputeEarnings(o.Price, o.CommissionRate, o.BonusRate, o.BonusQualified, o.PlayerCount)
 }
 
 // ErrSlotTaken is returned when assigning to an already-filled enforcer slot.
