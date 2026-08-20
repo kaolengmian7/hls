@@ -177,3 +177,55 @@ func (r *TeachingRepo) Claim(ctx context.Context, code string, teacherID int64, 
 	}
 	return nil
 }
+
+const scorecardCols = "id, teaching_order_code, duration_minutes, scores, comment, teacher_id, teacher_name, created_at"
+
+// AddScorecard 录一节课的成绩单并扣减剩余课时，单事务；剩余不足则 ErrInsufficientTime。
+func (r *TeachingRepo) AddScorecard(ctx context.Context, code string, sc *TeachingScorecard) (*TeachingScorecard, error) {
+	var newID int64
+	err := r.db.TransactCtx(ctx, func(ctx context.Context, s sqlx.Session) error {
+		res, err := s.ExecCtx(ctx,
+			"INSERT INTO teaching_scorecards (teaching_order_code, duration_minutes, scores, comment, teacher_id, teacher_name) "+
+				"VALUES (?, ?, ?, ?, ?, ?)",
+			code, sc.DurationMinutes, sc.Scores, sc.Comment, sc.TeacherID, sc.TeacherName)
+		if err != nil {
+			return err
+		}
+		newID, err = res.LastInsertId()
+		if err != nil {
+			return err
+		}
+		if _, err := s.ExecCtx(ctx,
+			"INSERT INTO teaching_time_logs (teaching_order_code, delta_minutes, reason, ref_scorecard_id, "+
+				"operator_id, operator_name, operator_role, note) VALUES (?, ?, 'lesson', ?, ?, ?, 'enforcer', '上课扣减')",
+			code, -sc.DurationMinutes, newID, sc.TeacherID, sc.TeacherName); err != nil {
+			return err
+		}
+		upd, err := s.ExecCtx(ctx,
+			"UPDATE teaching_orders SET remaining_minutes = remaining_minutes - ? WHERE code = ? AND remaining_minutes >= ?",
+			sc.DurationMinutes, code, sc.DurationMinutes)
+		if err != nil {
+			return err
+		}
+		if n, _ := upd.RowsAffected(); n == 0 {
+			return ErrInsufficientTime
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	var out TeachingScorecard
+	if err := r.db.QueryRowCtx(ctx, &out, "SELECT "+scorecardCols+" FROM teaching_scorecards WHERE id = ?", newID); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListScorecards 返回某教学单的成绩单，最新在前。
+func (r *TeachingRepo) ListScorecards(ctx context.Context, code string) ([]*TeachingScorecard, error) {
+	var list []*TeachingScorecard
+	err := r.db.QueryRowsCtx(ctx, &list,
+		"SELECT "+scorecardCols+" FROM teaching_scorecards WHERE teaching_order_code = ? ORDER BY id DESC", code)
+	return list, err
+}

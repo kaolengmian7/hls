@@ -2,6 +2,7 @@ package repo_test
 
 import (
 	"context"
+	"database/sql"
 	"os"
 	"strconv"
 	"testing"
@@ -94,5 +95,47 @@ func TestTeachingClaim(t *testing.T) {
 	// second claim rejected
 	if err := r.Claim(ctx, code, 800999, "打手乙"); err != repo.ErrTeacherTaken {
 		t.Fatalf("want ErrTeacherTaken, got %v", err)
+	}
+}
+
+func sqlNullStr(s string) sql.NullString { return sql.NullString{String: s, Valid: s != ""} }
+
+func TestTeachingAddScorecardAndGuard(t *testing.T) {
+	conn := teachingTestConn(t)
+	r := repo.NewTeachingRepo(conn)
+	ctx := context.Background()
+	code := "JXsc" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	t.Cleanup(func() { cleanupTeaching(ctx, conn, code) })
+
+	if _, err := r.Create(ctx, newTeachingOrder(code, 120), repo.Operator{ID: 1, Name: "客服A", Role: "service"}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	_ = r.Claim(ctx, code, 800123, "打手甲")
+
+	sc := &repo.TeachingScorecard{
+		TeachingOrderCode: code, DurationMinutes: 90,
+		Scores:      sqlNullStr(`{"pre_aim":8,"peek":6}`),
+		Comment:     sqlNullStr("进步明显"),
+		TeacherID:   800123, TeacherName: "打手甲",
+	}
+	if _, err := r.AddScorecard(ctx, code, sc); err != nil {
+		t.Fatalf("AddScorecard: %v", err)
+	}
+	o, _ := r.GetByCode(ctx, code)
+	if o.RemainingMinutes != 30 {
+		t.Fatalf("want remaining 30, got %d", o.RemainingMinutes)
+	}
+	// second 90 exceeds remaining 30 -> ErrInsufficientTime, remaining unchanged
+	sc2 := &repo.TeachingScorecard{TeachingOrderCode: code, DurationMinutes: 90, TeacherID: 800123, TeacherName: "打手甲"}
+	if _, err := r.AddScorecard(ctx, code, sc2); err != repo.ErrInsufficientTime {
+		t.Fatalf("want ErrInsufficientTime, got %v", err)
+	}
+	o, _ = r.GetByCode(ctx, code)
+	if o.RemainingMinutes != 30 {
+		t.Fatalf("remaining must stay 30 after failed add, got %d", o.RemainingMinutes)
+	}
+	cards, _ := r.ListScorecards(ctx, code)
+	if len(cards) != 1 {
+		t.Fatalf("want 1 scorecard, got %d", len(cards))
 	}
 }
