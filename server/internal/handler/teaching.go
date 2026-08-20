@@ -419,6 +419,10 @@ func TopUpTeachingOrderHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 		op := repo.Operator{ID: uid, Name: me.Nickname, Role: me.Role}
 		if err := ctx.TeachingRepo.TopUp(r.Context(), code, hoursToMinutes(req.AddHours), req.AddPrice, op); err != nil {
+			if errors.Is(err, repo.ErrTeachingNotActive) {
+				writeError(w, r, http.StatusConflict, "teaching_not_active", nil)
+				return
+			}
 			writeError(w, r, http.StatusInternalServerError, "db_error", err)
 			return
 		}
@@ -552,7 +556,8 @@ func UpsertTeachingReviewHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 		}
 		var req teachingReviewRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil ||
-			req.AttitudeScore < 0 || req.TechnicalScore < 0 {
+			req.AttitudeScore < 0 || req.AttitudeScore > 5 ||
+			req.TechnicalScore < 0 || req.TechnicalScore > 5 {
 			writeError(w, r, http.StatusBadRequest, "invalid_review", nil)
 			return
 		}

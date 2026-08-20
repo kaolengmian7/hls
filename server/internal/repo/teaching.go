@@ -83,6 +83,7 @@ var (
 	ErrTeacherTaken          = errors.New("teacher slot taken")
 	ErrInsufficientTime      = errors.New("insufficient remaining time")
 	ErrTeachingNotSettleable = errors.New("teaching order not settleable")
+	ErrTeachingNotActive     = errors.New("teaching order not active")
 )
 
 const teachingOrderCols = "id, code, title, student_id, student_name, dispatcher_id, dispatcher_name, " +
@@ -234,6 +235,8 @@ const timeLogCols = "id, teaching_order_code, delta_minutes, reason, ref_scoreca
 	"operator_id, operator_name, operator_role, note, created_at"
 
 // TopUp 为教学单增加课时与对应价格，单事务，并写 topup 台账。
+// 仅当教学单处于 dispatching/ongoing（未结单）时才生效，否则回滚整个事务并返回
+// ErrTeachingNotActive，避免给已结单（时间早已教完）的订单加课时/加价，虚增打手工资。
 func (r *TeachingRepo) TopUp(ctx context.Context, code string, addMinutes int, addPrice float64, op Operator) error {
 	return r.db.TransactCtx(ctx, func(ctx context.Context, s sqlx.Session) error {
 		if _, err := s.ExecCtx(ctx,
@@ -242,10 +245,17 @@ func (r *TeachingRepo) TopUp(ctx context.Context, code string, addMinutes int, a
 			code, addMinutes, addPrice, op.ID, op.Name, op.Role); err != nil {
 			return err
 		}
-		_, err := s.ExecCtx(ctx,
-			"UPDATE teaching_orders SET total_minutes=total_minutes+?, remaining_minutes=remaining_minutes+?, price=price+? WHERE code=?",
+		res, err := s.ExecCtx(ctx,
+			"UPDATE teaching_orders SET total_minutes=total_minutes+?, remaining_minutes=remaining_minutes+?, price=price+? "+
+				"WHERE code=? AND status IN ('dispatching','ongoing')",
 			addMinutes, addMinutes, addPrice, code)
-		return err
+		if err != nil {
+			return err
+		}
+		if n, _ := res.RowsAffected(); n == 0 {
+			return ErrTeachingNotActive
+		}
+		return nil
 	})
 }
 

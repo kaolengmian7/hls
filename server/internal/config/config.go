@@ -74,17 +74,20 @@ type PayrollConfig struct {
 }
 
 // SyllabusItemConfig 是教学大纲单个评分项。
+// json 标签显式小写，使 HTTP 响应（encoding/json）与前端类型（key/label/desc）一致；
+// go-zero 的 conf 加载按大小写不敏感匹配字段名，YAML 里的 Key/Label/Desc 仍能正确加载。
 type SyllabusItemConfig struct {
-	Key   string `json:",optional"`
-	Label string `json:",optional"`
-	Desc  string `json:",optional"`
+	Key   string `json:"key,optional"`
+	Label string `json:"label,optional"`
+	Desc  string `json:"desc,optional"`
 }
 
 // SyllabusCategoryConfig 是教学大纲的一个分类。
+// 同上，json 标签显式小写以匹配前端 key/label/items。
 type SyllabusCategoryConfig struct {
-	Key   string               `json:",optional"`
-	Label string               `json:",optional"`
-	Items []SyllabusItemConfig `json:",optional"`
+	Key   string               `json:"key,optional"`
+	Label string               `json:"label,optional"`
+	Items []SyllabusItemConfig `json:"items,optional"`
 }
 
 // SyllabusItemKeys 返回所有大纲评分项 key 的集合，供成绩单打分校验。

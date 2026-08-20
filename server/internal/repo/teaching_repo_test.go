@@ -163,6 +163,41 @@ func TestTeachingTopUp(t *testing.T) {
 	}
 }
 
+func TestTeachingTopUpRejectsSettled(t *testing.T) {
+	conn := teachingTestConn(t)
+	r := repo.NewTeachingRepo(conn)
+	ctx := context.Background()
+	code := "JXtps" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	t.Cleanup(func() { cleanupTeaching(ctx, conn, code) })
+
+	if _, err := r.Create(ctx, newTeachingOrder(code, 60), repo.Operator{ID: 1, Name: "客服A", Role: "service"}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	_ = r.Claim(ctx, code, 800123, "打手甲")
+	// consume all time then settle
+	if _, err := r.AddScorecard(ctx, code, &repo.TeachingScorecard{TeachingOrderCode: code, DurationMinutes: 60, TeacherID: 800123, TeacherName: "打手甲"}); err != nil {
+		t.Fatalf("AddScorecard: %v", err)
+	}
+	if err := r.Settle(ctx, code); err != nil {
+		t.Fatalf("Settle: %v", err)
+	}
+	before, _ := r.GetByCode(ctx, code)
+
+	if err := r.TopUp(ctx, code, 240, 500, repo.Operator{ID: 2, Name: "店长", Role: "owner"}); err != repo.ErrTeachingNotActive {
+		t.Fatalf("want ErrTeachingNotActive, got %v", err)
+	}
+	after, _ := r.GetByCode(ctx, code)
+	if after.Price != before.Price || after.TotalMinutes != before.TotalMinutes || after.RemainingMinutes != before.RemainingMinutes {
+		t.Fatalf("settled order mutated by rejected topup: before=%+v after=%+v", before, after)
+	}
+	logs, _ := r.ListTimeLogs(ctx, code)
+	for _, l := range logs {
+		if l.Reason == "topup" {
+			t.Fatalf("rejected topup must not leave an orphan time log: %+v", logs)
+		}
+	}
+}
+
 func TestTeachingSettle(t *testing.T) {
 	conn := teachingTestConn(t)
 	r := repo.NewTeachingRepo(conn)
