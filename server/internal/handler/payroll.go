@@ -27,13 +27,13 @@ type payrollView struct {
 }
 
 // projectPayrollView builds a pending row's live projection (gross recomputed
-// from the order, deductions projected against the account's current state).
-func projectPayrollView(item *repo.PayrollItem, order *repo.Order, acc *repo.EnforcerAccount, defaultDeposit float64) payrollView {
+// from the source, deductions projected against the account's current state).
+func projectPayrollView(item *repo.PayrollItem, src *payrollSource, acc *repo.EnforcerAccount, defaultDeposit float64) payrollView {
 	gross := 0.0
 	title := ""
-	if order != nil {
-		gross = order.Earnings()
-		title = order.Title
+	if src != nil {
+		gross = src.Gross
+		title = src.Title
 	}
 	required := defaultDeposit
 	paid := 0.0
@@ -59,10 +59,10 @@ func projectPayrollView(item *repo.PayrollItem, order *repo.Order, acc *repo.Enf
 }
 
 // paidPayrollView builds a paid row from its frozen snapshot.
-func paidPayrollView(item *repo.PayrollItem, order *repo.Order) payrollView {
+func paidPayrollView(item *repo.PayrollItem, src *payrollSource) payrollView {
 	title := ""
-	if order != nil {
-		title = order.Title
+	if src != nil {
+		title = src.Title
 	}
 	v := payrollView{
 		ID: item.ID, OrderCode: item.OrderCode, OrderTitle: title,
@@ -78,12 +78,34 @@ func paidPayrollView(item *repo.PayrollItem, order *repo.Order) payrollView {
 	return v
 }
 
-func ordersByCode(orders []*repo.Order) map[string]*repo.Order {
-	m := make(map[string]*repo.Order, len(orders))
+type payrollSource struct {
+	Title    string
+	Gross    float64
+	Refunded bool
+}
+
+// buildPayrollSources 合并订单与教学单为 code -> 来源投影，供工资面板统一取用。
+func buildPayrollSources(orders []*repo.Order, teach []*repo.TeachingOrder) map[string]payrollSource {
+	m := make(map[string]payrollSource, len(orders)+len(teach))
 	for _, o := range orders {
-		m[o.Code] = o
+		m[o.Code] = payrollSource{Title: o.Title, Gross: o.Earnings(), Refunded: o.Status == "refunded"}
+	}
+	for _, t := range teach {
+		m[t.Code] = payrollSource{
+			Title: t.Title,
+			Gross: repo.ComputeEarnings(t.Price, t.CommissionRate, t.BonusRate, t.BonusQualified, 1),
+			// 教学无退款
+		}
 	}
 	return m
+}
+
+// srcPtr looks up a merged payroll source by code, returning nil when absent.
+func srcPtr(m map[string]payrollSource, code string) *payrollSource {
+	if s, ok := m[code]; ok {
+		return &s
+	}
+	return nil
 }
 
 // ListPayrollHandler handles GET /api/payroll?status=pending|paid (owner).
@@ -98,7 +120,12 @@ func ListPayrollHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			writeError(w, r, http.StatusInternalServerError, "db_error", err)
 			return
 		}
-		byCode := ordersByCode(orders)
+		teach, err := ctx.TeachingRepo.ListAll(r.Context())
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		sources := buildPayrollSources(orders, teach)
 		views := make([]payrollView, 0)
 		switch status {
 		case "pending":
@@ -113,7 +140,7 @@ func ListPayrollHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 				return
 			}
 			for _, it := range items {
-				views = append(views, projectPayrollView(it, byCode[it.OrderCode], accounts[it.EnforcerID], ctx.Config.Payroll.DefaultDeposit))
+				views = append(views, projectPayrollView(it, srcPtr(sources, it.OrderCode), accounts[it.EnforcerID], ctx.Config.Payroll.DefaultDeposit))
 			}
 		case "frozen":
 			items, err := ctx.PayrollRepo.ListPendingFrozen(r.Context(), ctx.Config.Payroll.SettleDelayDays)
@@ -127,7 +154,7 @@ func ListPayrollHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 				return
 			}
 			for _, it := range items {
-				v := projectPayrollView(it, byCode[it.OrderCode], accounts[it.EnforcerID], ctx.Config.Payroll.DefaultDeposit)
+				v := projectPayrollView(it, srcPtr(sources, it.OrderCode), accounts[it.EnforcerID], ctx.Config.Payroll.DefaultDeposit)
 				v.Status = "frozen"
 				unlock := it.CreatedAt.AddDate(0, 0, ctx.Config.Payroll.SettleDelayDays).Format("2006-01-02T15:04:05Z07:00")
 				v.UnlockAt = &unlock
@@ -140,7 +167,7 @@ func ListPayrollHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 				return
 			}
 			for _, it := range items {
-				views = append(views, paidPayrollView(it, byCode[it.OrderCode]))
+				views = append(views, paidPayrollView(it, srcPtr(sources, it.OrderCode)))
 			}
 		default:
 			writeError(w, r, http.StatusBadRequest, "invalid_status", nil)
@@ -182,7 +209,16 @@ func PayPayrollHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 			}
 			return
 		}
-		order, _ := ctx.OrderRepo.GetByCode(r.Context(), item.OrderCode)
-		httpx.OkJsonCtx(r.Context(), w, paidPayrollView(item, order))
+		var src *payrollSource
+		if item.Source == "teaching" {
+			if t, e := ctx.TeachingRepo.GetByCode(r.Context(), item.OrderCode); e == nil {
+				src = &payrollSource{Title: t.Title}
+			}
+		} else {
+			if o, e := ctx.OrderRepo.GetByCode(r.Context(), item.OrderCode); e == nil {
+				src = &payrollSource{Title: o.Title}
+			}
+		}
+		httpx.OkJsonCtx(r.Context(), w, paidPayrollView(item, src))
 	})
 }

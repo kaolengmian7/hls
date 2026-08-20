@@ -33,6 +33,7 @@ type ServiceContext struct {
 
 	EnforcerAccountRepo *repo.EnforcerAccountRepo
 	PayrollRepo         *repo.PayrollRepo
+	TeachingRepo        *repo.TeachingRepo
 
 	SmsStore  *SmsStore
 	SmsSender auth.SmsSender
@@ -70,6 +71,7 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 
 		EnforcerAccountRepo: repo.NewEnforcerAccountRepo(conn),
 		PayrollRepo:         repo.NewPayrollRepo(conn),
+		TeachingRepo:        repo.NewTeachingRepo(conn),
 
 		SmsStore:  NewSmsStore(),
 		SmsSender: smsSender,
