@@ -139,3 +139,26 @@ func TestTeachingAddScorecardAndGuard(t *testing.T) {
 		t.Fatalf("want 1 scorecard, got %d", len(cards))
 	}
 }
+
+func TestTeachingTopUp(t *testing.T) {
+	conn := teachingTestConn(t)
+	r := repo.NewTeachingRepo(conn)
+	ctx := context.Background()
+	code := "JXtop" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	t.Cleanup(func() { cleanupTeaching(ctx, conn, code) })
+
+	if _, err := r.Create(ctx, newTeachingOrder(code, 120), repo.Operator{ID: 1, Name: "客服A", Role: "service"}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if err := r.TopUp(ctx, code, 240, 500, repo.Operator{ID: 2, Name: "店长", Role: "owner"}); err != nil {
+		t.Fatalf("TopUp: %v", err)
+	}
+	o, _ := r.GetByCode(ctx, code)
+	if o.TotalMinutes != 360 || o.RemainingMinutes != 360 || o.Price != 1500 {
+		t.Fatalf("unexpected after topup: total=%d remaining=%d price=%v", o.TotalMinutes, o.RemainingMinutes, o.Price)
+	}
+	logs, _ := r.ListTimeLogs(ctx, code)
+	if len(logs) != 2 || logs[0].Reason != "initial" || logs[1].Reason != "topup" {
+		t.Fatalf("unexpected logs: %+v", logs)
+	}
+}

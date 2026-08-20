@@ -229,3 +229,30 @@ func (r *TeachingRepo) ListScorecards(ctx context.Context, code string) ([]*Teac
 		"SELECT "+scorecardCols+" FROM teaching_scorecards WHERE teaching_order_code = ? ORDER BY id DESC", code)
 	return list, err
 }
+
+const timeLogCols = "id, teaching_order_code, delta_minutes, reason, ref_scorecard_id, price_delta, " +
+	"operator_id, operator_name, operator_role, note, created_at"
+
+// TopUp 为教学单增加课时与对应价格，单事务，并写 topup 台账。
+func (r *TeachingRepo) TopUp(ctx context.Context, code string, addMinutes int, addPrice float64, op Operator) error {
+	return r.db.TransactCtx(ctx, func(ctx context.Context, s sqlx.Session) error {
+		if _, err := s.ExecCtx(ctx,
+			"INSERT INTO teaching_time_logs (teaching_order_code, delta_minutes, reason, price_delta, "+
+				"operator_id, operator_name, operator_role, note) VALUES (?, ?, 'topup', ?, ?, ?, ?, '店长续时长')",
+			code, addMinutes, addPrice, op.ID, op.Name, op.Role); err != nil {
+			return err
+		}
+		_, err := s.ExecCtx(ctx,
+			"UPDATE teaching_orders SET total_minutes=total_minutes+?, remaining_minutes=remaining_minutes+?, price=price+? WHERE code=?",
+			addMinutes, addMinutes, addPrice, code)
+		return err
+	})
+}
+
+// ListTimeLogs 返回某教学单的时长台账，按时间正序。
+func (r *TeachingRepo) ListTimeLogs(ctx context.Context, code string) ([]*TeachingTimeLog, error) {
+	var list []*TeachingTimeLog
+	err := r.db.QueryRowsCtx(ctx, &list,
+		"SELECT "+timeLogCols+" FROM teaching_time_logs WHERE teaching_order_code = ? ORDER BY id ASC", code)
+	return list, err
+}
