@@ -256,3 +256,29 @@ func (r *TeachingRepo) ListTimeLogs(ctx context.Context, code string) ([]*Teachi
 		"SELECT "+timeLogCols+" FROM teaching_time_logs WHERE teaching_order_code = ? ORDER BY id ASC", code)
 	return list, err
 }
+
+// Settle 在剩余课时为 0 且状态 ongoing 时结单，并生成一条 teaching 来源的待发工资条。
+func (r *TeachingRepo) Settle(ctx context.Context, code string) error {
+	return r.db.TransactCtx(ctx, func(ctx context.Context, s sqlx.Session) error {
+		res, err := s.ExecCtx(ctx,
+			"UPDATE teaching_orders SET status='settled' WHERE code=? AND status='ongoing' AND remaining_minutes=0", code)
+		if err != nil {
+			return err
+		}
+		if n, _ := res.RowsAffected(); n == 0 {
+			return ErrTeachingNotSettleable
+		}
+		var o TeachingOrder
+		if err := s.QueryRowCtx(ctx, &o, "SELECT "+teachingOrderCols+" FROM teaching_orders WHERE code=?", code); err != nil {
+			return err
+		}
+		if !o.TeacherID.Valid {
+			return ErrTeachingNotSettleable
+		}
+		_, err = s.ExecCtx(ctx,
+			"INSERT IGNORE INTO payroll_items (order_code, enforcer_id, enforcer_name, source, status) "+
+				"VALUES (?, ?, ?, 'teaching', 'pending')",
+			code, o.TeacherID.Int64, o.TeacherName.String)
+		return err
+	})
+}

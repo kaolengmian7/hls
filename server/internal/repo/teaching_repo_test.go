@@ -162,3 +162,41 @@ func TestTeachingTopUp(t *testing.T) {
 		t.Fatalf("unexpected logs: %+v", logs)
 	}
 }
+
+func TestTeachingSettle(t *testing.T) {
+	conn := teachingTestConn(t)
+	r := repo.NewTeachingRepo(conn)
+	ctx := context.Background()
+	code := "JXset" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	t.Cleanup(func() { cleanupTeaching(ctx, conn, code) })
+
+	if _, err := r.Create(ctx, newTeachingOrder(code, 60), repo.Operator{ID: 1, Name: "客服A", Role: "service"}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	_ = r.Claim(ctx, code, 800123, "打手甲")
+
+	// remaining not zero -> not settleable
+	if err := r.Settle(ctx, code); err != repo.ErrTeachingNotSettleable {
+		t.Fatalf("want ErrTeachingNotSettleable, got %v", err)
+	}
+	// consume all time
+	if _, err := r.AddScorecard(ctx, code, &repo.TeachingScorecard{TeachingOrderCode: code, DurationMinutes: 60, TeacherID: 800123, TeacherName: "打手甲"}); err != nil {
+		t.Fatalf("AddScorecard: %v", err)
+	}
+	if err := r.Settle(ctx, code); err != nil {
+		t.Fatalf("Settle: %v", err)
+	}
+	// idempotent-ish: second settle finds status!=ongoing -> not settleable
+	if err := r.Settle(ctx, code); err != repo.ErrTeachingNotSettleable {
+		t.Fatalf("second settle want ErrTeachingNotSettleable, got %v", err)
+	}
+	var cnt int
+	_ = conn.QueryRowCtx(ctx, &cnt, "SELECT COUNT(*) FROM payroll_items WHERE order_code=? AND source='teaching'", code)
+	if cnt != 1 {
+		t.Fatalf("want 1 teaching payroll item, got %d", cnt)
+	}
+	o, _ := r.GetByCode(ctx, code)
+	if o.Status != "settled" {
+		t.Fatalf("want settled, got %s", o.Status)
+	}
+}
