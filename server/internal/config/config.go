@@ -7,13 +7,14 @@ import "github.com/zeromicro/go-zero/rest"
 type Config struct {
 	rest.RestConf
 
-	Cors       CorsConfig
-	DB         DBConfig
-	JWT        JWTConfig
-	WechatOpen WechatOpenConfig
-	TencentSMS TencentSMSConfig
-	Shop       ShopConfig
-	Payroll    PayrollConfig
+	Cors             CorsConfig
+	DB               DBConfig
+	JWT              JWTConfig
+	WechatOpen       WechatOpenConfig
+	TencentSMS       TencentSMSConfig
+	Shop             ShopConfig
+	Payroll          PayrollConfig
+	TeachingSyllabus []SyllabusCategoryConfig `json:",optional"`
 }
 
 // CorsConfig CORS 允许列表。
@@ -70,4 +71,29 @@ type ShopConfig struct {
 type PayrollConfig struct {
 	DefaultDeposit  float64 `json:",default=300"`
 	SettleDelayDays int     `json:",default=3"`
+}
+
+// SyllabusItemConfig 是教学大纲单个评分项。
+type SyllabusItemConfig struct {
+	Key   string `json:",optional"`
+	Label string `json:",optional"`
+	Desc  string `json:",optional"`
+}
+
+// SyllabusCategoryConfig 是教学大纲的一个分类。
+type SyllabusCategoryConfig struct {
+	Key   string               `json:",optional"`
+	Label string               `json:",optional"`
+	Items []SyllabusItemConfig `json:",optional"`
+}
+
+// SyllabusItemKeys 返回所有大纲评分项 key 的集合，供成绩单打分校验。
+func SyllabusItemKeys(cats []SyllabusCategoryConfig) map[string]bool {
+	m := make(map[string]bool)
+	for _, c := range cats {
+		for _, it := range c.Items {
+			m[it.Key] = true
+		}
+	}
+	return m
 }

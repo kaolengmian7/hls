@@ -407,3 +407,30 @@ Shop:
       Value: 15
       Weight: 6.08
       ImageURL: https://hls-1307859563.cos.ap-shanghai.myqcloud.com/red/ultrasonic-cutter.webp
+
+TeachingSyllabus:
+  - Key: gunplay
+    Label: 枪法与身法
+    Items:
+      - { Key: pre_aim,         Label: 预瞄,               Desc: "移动时准星始终保持在敌方头部高度与常见拉出点，做到出掩体即开枪。" }
+      - { Key: peek,            Label: 闪身枪与小身位Peek,  Desc: "利用掩体极快速拉出并收回身位，分为探头Peek与提速闪身枪。" }
+      - { Key: jump_slide_peek, Label: 跳拉与铲拉,          Desc: "利用跳跃或滑铲大身位快速拉出掩体，打破敌方架枪的爆头线与预瞄节奏。" }
+      - { Key: prone_dodge,     Label: 拜佛,               Desc: "近距离贴脸对枪时突然卧倒，躲避对方第一波爆头线。" }
+      - { Key: bunny_hop,       Label: 兔子跳,             Desc: "跳拉出去后连续跳跃，躲避敌方枪线，增加敌方跟枪难度。" }
+      - { Key: recoil_control,  Label: 控枪,               Desc: "熟练掌握主流枪械的前20发后坐力规律。" }
+      - { Key: tracking,        Label: 跟枪,               Desc: "瞄准移动靶的能力。" }
+      - { Key: spray_transfer,  Label: 扫射转移,           Desc: "同时面对多个敌人时的枪械控制能力。" }
+  - Key: awareness
+    Label: 意识与信息收集
+    Items:
+      - { Key: map_headlines,   Label: 地图地形与爆头线,     Desc: "熟记各地图高频交战点、优势掩体、高地位以及撤离/复活路线。" }
+      - { Key: sound_sense,     Label: 听声辨位与细节感知,   Desc: "通过音效判断脚声、换弹声、修甲声及技能音效的距离与空间感知。" }
+      - { Key: info_integration, Label: 地图与信息流整合,     Desc: "收集地图信息，推算敌方小队的人数与包抄路径。" }
+      - { Key: rotate_bait,     Label: 转场与拉扯,          Desc: "利用道具或地形转场，创造侧面偷袭机会。" }
+  - Key: utility_teamwork
+    Label: 道具与干员协同
+    Items:
+      - { Key: utility_clear,   Label: 道具清点,           Desc: "熟练运用道具将死角架枪的敌人逼出掩体。" }
+      - { Key: oneway_skill,    Label: 单向视线与技能组合,   Desc: "运用道具制造单向输出环境，发挥不同兵种的功能定位。" }
+      - { Key: crossfire,       Label: 交叉火力与补枪,      Desc: "与队友形成不同角度的交叉架枪线，第一时间拉出补枪。" }
+      - { Key: callout,         Label: 高效战术报点,        Desc: "遵循方向+参照物+状态原则，拒绝无效废话。" }
