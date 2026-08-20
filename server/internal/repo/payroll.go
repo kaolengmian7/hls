@@ -56,10 +56,11 @@ type PayrollItem struct {
 	NetPaid         float64      `db:"net_paid"`
 	CreatedAt       time.Time    `db:"created_at"`
 	PaidAt          sql.NullTime `db:"paid_at"`
+	Source          string       `db:"source"`
 }
 
 const payrollCols = "id, order_code, enforcer_id, enforcer_name, status, gross, " +
-	"deposit_deducted, fine_deducted, net_paid, created_at, paid_at"
+	"deposit_deducted, fine_deducted, net_paid, created_at, paid_at, source"
 
 // PayrollRepo provides database access for payroll items.
 type PayrollRepo struct {
@@ -131,14 +132,28 @@ func (r *PayrollRepo) Pay(ctx context.Context, id int64, defaultDeposit float64)
 		if item.Status != "pending" {
 			return ErrAlreadyPaid
 		}
-		var o Order
-		if err := session.QueryRowCtx(ctx, &o, "SELECT "+orderCols+" FROM orders WHERE code = ?", item.OrderCode); err != nil {
-			return err
+		var gross float64
+		refunded := false
+		if item.Source == "teaching" {
+			var t TeachingOrder
+			if err := session.QueryRowCtx(ctx, &t,
+				"SELECT "+teachingOrderCols+" FROM teaching_orders WHERE code = ?", item.OrderCode); err != nil {
+				return err
+			}
+			gross = ComputeEarnings(t.Price, t.CommissionRate, t.BonusRate, t.BonusQualified, 1)
+			// 教学 v1 无退款，refunded 恒 false
+		} else {
+			var o Order
+			if err := session.QueryRowCtx(ctx, &o,
+				"SELECT "+orderCols+" FROM orders WHERE code = ?", item.OrderCode); err != nil {
+				return err
+			}
+			gross = o.Earnings()
+			refunded = o.Status == "refunded"
 		}
-		if o.Status == "refunded" {
+		if refunded {
 			return ErrOrderRefunded
 		}
-		gross := o.Earnings()
 
 		var acc EnforcerAccount
 		required := defaultDeposit

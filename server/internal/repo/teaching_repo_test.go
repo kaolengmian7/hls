@@ -238,3 +238,46 @@ func TestTeachingReviewUpsert(t *testing.T) {
 		t.Fatalf("want 1 review row, got %d", cnt)
 	}
 }
+
+func TestPayTeachingPayroll(t *testing.T) {
+	conn := teachingTestConn(t)
+	r := repo.NewTeachingRepo(conn)
+	payRepo := repo.NewPayrollRepo(conn)
+	accRepo := repo.NewEnforcerAccountRepo(conn)
+	ctx := context.Background()
+	code := "JXpay" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	const teacher = 800555
+	t.Cleanup(func() {
+		cleanupTeaching(ctx, conn, code)
+		_, _ = conn.ExecCtx(ctx, "DELETE FROM enforcer_accounts WHERE user_id = ?", teacher)
+	})
+
+	o := newTeachingOrder(code, 60)
+	o.Price = 1000
+	o.CommissionRate = 20
+	o.BonusRate = 5
+	if _, err := r.Create(ctx, o, repo.Operator{ID: 1, Name: "客服A", Role: "service"}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	_ = r.Claim(ctx, code, teacher, "打手甲")
+	_, _ = r.AddScorecard(ctx, code, &repo.TeachingScorecard{TeachingOrderCode: code, DurationMinutes: 60, TeacherID: teacher, TeacherName: "打手甲"})
+	if err := r.Settle(ctx, code); err != nil {
+		t.Fatalf("Settle: %v", err)
+	}
+	_, _ = conn.ExecCtx(ctx, "DELETE FROM enforcer_accounts WHERE user_id = ?", teacher)
+
+	var id int64
+	_ = conn.QueryRowCtx(ctx, &id, "SELECT id FROM payroll_items WHERE order_code=? AND enforcer_id=?", code, teacher)
+	// gross = 1000 * (1-0.2) = 800 (bonus unqualified). deposit default 300 owed, no fine.
+	item, err := payRepo.Pay(ctx, id, 300)
+	if err != nil {
+		t.Fatalf("Pay: %v", err)
+	}
+	if item.Gross != 800 || item.DepositDeducted != 300 || item.NetPaid != 500 {
+		t.Fatalf("unexpected paid teaching item: %+v", item)
+	}
+	acc, _ := accRepo.GetOrDefault(ctx, teacher)
+	if acc.DepositPaid != 300 {
+		t.Fatalf("deposit not updated: %+v", acc)
+	}
+}
