@@ -85,6 +85,20 @@ func main() {
 		{Method: http.MethodPost, Path: "/api/orders/:code/settle", Handler: handler.SettleOrderHandler(ctx)},
 		{Method: http.MethodGet, Path: "/api/payroll", Handler: handler.ListPayrollHandler(ctx)},
 		{Method: http.MethodPost, Path: "/api/payroll/:id/pay", Handler: handler.PayPayrollHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/teaching-orders", Handler: handler.CreateTeachingOrderHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/teaching-orders", Handler: handler.ListTeachingOrdersHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/teaching-orders/:code", Handler: handler.TeachingOrderDetailHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/teaching-orders/:code/claim", Handler: handler.ClaimTeachingOrderHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/teaching-orders/:code/topup", Handler: handler.TopUpTeachingOrderHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/teaching-orders/:code/settle", Handler: handler.SettleTeachingOrderHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/teaching-orders/:code/scorecards", Handler: handler.ListScorecardsHandler(ctx)},
+		{Method: http.MethodPost, Path: "/api/teaching-orders/:code/scorecards", Handler: handler.CreateScorecardHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/teaching-orders/:code/timelogs", Handler: handler.ListTimeLogsHandler(ctx)},
+		{Method: http.MethodPut, Path: "/api/teaching-orders/:code/review", Handler: handler.UpsertTeachingReviewHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/teaching-orders/:code/review", Handler: handler.TeachingReviewHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/my-teaching", Handler: handler.MyTeachingHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/teaching/syllabus", Handler: handler.SyllabusHandler(ctx)},
+		{Method: http.MethodGet, Path: "/api/customers", Handler: handler.ListCustomersHandler(ctx)},
 	})
 
 	logx.Infof("gameserver starting at %s:%d", cfg.Host, cfg.Port)

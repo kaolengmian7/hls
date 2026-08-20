@@ -2,6 +2,7 @@ package handler
 
 import (
 	crand "crypto/rand"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"math"
@@ -12,6 +13,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"golang.org/x/crypto/bcrypt"
 
+	"hls.dev/server/internal/config"
 	"hls.dev/server/internal/repo"
 	"hls.dev/server/internal/svc"
 )
@@ -315,4 +317,279 @@ func ListCustomersHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 // genTeachingCode returns a prefixed timestamp code, isolated from order codes.
 func genTeachingCode() string {
 	return "JX" + genOrderCode()
+}
+
+func toScorecardView(sc *repo.TeachingScorecard) map[string]any {
+	scores := map[string]int{}
+	if sc.Scores.Valid && sc.Scores.String != "" {
+		_ = json.Unmarshal([]byte(sc.Scores.String), &scores)
+	}
+	return map[string]any{
+		"id":            sc.ID,
+		"durationHours": minutesToHours(sc.DurationMinutes),
+		"scores":        scores,
+		"comment":       sc.Comment.String,
+		"teacherName":   sc.TeacherName,
+		"createdAt":     sc.CreatedAt,
+	}
+}
+
+func toTimeLogView(l *repo.TeachingTimeLog) map[string]any {
+	return map[string]any{
+		"deltaHours":   minutesToHours(l.DeltaMinutes),
+		"reason":       l.Reason,
+		"priceDelta":   l.PriceDelta,
+		"operatorName": l.OperatorName,
+		"operatorRole": l.OperatorRole,
+		"note":         l.Note.String,
+		"createdAt":    l.CreatedAt,
+	}
+}
+
+func toTeachingReviewView(rv *repo.TeachingReview) map[string]any {
+	return map[string]any{
+		"attitudeScore":  rv.AttitudeScore,
+		"technicalScore": rv.TechnicalScore,
+		"total":          rv.AttitudeScore + rv.TechnicalScore,
+		"bonusQualified": BonusQualifies(rv.AttitudeScore, rv.TechnicalScore),
+		"comment":        rv.Comment.String,
+		"reviewerName":   rv.ReviewerName,
+		"createdAt":      rv.CreatedAt,
+	}
+}
+
+// loadTeachingForActor loads the order and the acting user, returning them or writing an error.
+func loadTeachingForActor(ctx *svc.ServiceContext, w http.ResponseWriter, r *http.Request) (*repo.User, *repo.TeachingOrder, bool) {
+	uid, errKey := extractUserID(r, ctx)
+	if errKey != "" {
+		writeError(w, r, http.StatusUnauthorized, errKey, nil)
+		return nil, nil, false
+	}
+	me, err := ctx.UserRepo.FindByID(r.Context(), uid)
+	if err != nil {
+		writeError(w, r, http.StatusUnauthorized, "user_not_found", nil)
+		return nil, nil, false
+	}
+	code, _ := parseTeachingPath(r.URL.Path)
+	o, err := ctx.TeachingRepo.GetByCode(r.Context(), code)
+	if err != nil {
+		if errors.Is(err, sqlx.ErrNotFound) {
+			writeError(w, r, http.StatusNotFound, "teaching_not_found", nil)
+			return nil, nil, false
+		}
+		writeError(w, r, http.StatusInternalServerError, "db_error", err)
+		return nil, nil, false
+	}
+	return me, o, true
+}
+
+func isTeacherOf(u *repo.User, o *repo.TeachingOrder) bool {
+	return o.TeacherID.Valid && o.TeacherID.Int64 == u.ID
+}
+
+// ClaimTeachingOrderHandler POST /api/teaching-orders/:code/claim (enforcer).
+func ClaimTeachingOrderHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"enforcer"}, func(w http.ResponseWriter, r *http.Request) {
+		uid, _ := extractUserID(r, ctx)
+		me, _ := ctx.UserRepo.FindByID(r.Context(), uid)
+		code, _ := parseTeachingPath(r.URL.Path)
+		if err := ctx.TeachingRepo.Claim(r.Context(), code, uid, me.Nickname); err != nil {
+			if errors.Is(err, repo.ErrTeacherTaken) {
+				writeError(w, r, http.StatusConflict, "teacher_taken", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		o, _ := ctx.TeachingRepo.GetByCode(r.Context(), code)
+		httpx.OkJsonCtx(r.Context(), w, toTeachingOrderView(o))
+	})
+}
+
+// TopUpTeachingOrderHandler POST /api/teaching-orders/:code/topup (owner).
+func TopUpTeachingOrderHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"owner"}, func(w http.ResponseWriter, r *http.Request) {
+		uid, _ := extractUserID(r, ctx)
+		me, _ := ctx.UserRepo.FindByID(r.Context(), uid)
+		code, _ := parseTeachingPath(r.URL.Path)
+		var req topUpRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.AddHours <= 0 || req.AddPrice < 0 {
+			writeError(w, r, http.StatusBadRequest, "invalid_topup", nil)
+			return
+		}
+		op := repo.Operator{ID: uid, Name: me.Nickname, Role: me.Role}
+		if err := ctx.TeachingRepo.TopUp(r.Context(), code, hoursToMinutes(req.AddHours), req.AddPrice, op); err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		o, _ := ctx.TeachingRepo.GetByCode(r.Context(), code)
+		httpx.OkJsonCtx(r.Context(), w, toTeachingOrderView(o))
+	})
+}
+
+// CreateScorecardHandler POST /api/teaching-orders/:code/scorecards (enforcer = teacher).
+func CreateScorecardHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"enforcer"}, func(w http.ResponseWriter, r *http.Request) {
+		me, o, ok := loadTeachingForActor(ctx, w, r)
+		if !ok {
+			return
+		}
+		if !isTeacherOf(me, o) {
+			writeError(w, r, http.StatusForbidden, "not_your_teaching", nil)
+			return
+		}
+		if o.Status != "ongoing" {
+			writeError(w, r, http.StatusConflict, "teaching_not_ongoing", nil)
+			return
+		}
+		var req scorecardRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.DurationHours <= 0 {
+			writeError(w, r, http.StatusBadRequest, "invalid_scorecard", nil)
+			return
+		}
+		if errKey := validateScores(req.Scores, config.SyllabusItemKeys(ctx.Config.TeachingSyllabus)); errKey != "" {
+			writeError(w, r, http.StatusBadRequest, errKey, nil)
+			return
+		}
+		scoresJSON := sql.NullString{}
+		if len(req.Scores) > 0 {
+			b, _ := json.Marshal(req.Scores)
+			scoresJSON = sql.NullString{String: string(b), Valid: true}
+		}
+		sc := &repo.TeachingScorecard{
+			TeachingOrderCode: o.Code, DurationMinutes: hoursToMinutes(req.DurationHours),
+			Scores: scoresJSON, Comment: sql.NullString{String: strings.TrimSpace(req.Comment), Valid: req.Comment != ""},
+			TeacherID: me.ID, TeacherName: me.Nickname,
+		}
+		saved, err := ctx.TeachingRepo.AddScorecard(r.Context(), o.Code, sc)
+		if err != nil {
+			if errors.Is(err, repo.ErrInsufficientTime) {
+				writeError(w, r, http.StatusConflict, "insufficient_time", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		httpx.OkJsonCtx(r.Context(), w, toScorecardView(saved))
+	})
+}
+
+// ListScorecardsHandler GET /api/teaching-orders/:code/scorecards (owner, teacher, student).
+func ListScorecardsHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		me, o, ok := loadTeachingForActor(ctx, w, r)
+		if !ok {
+			return
+		}
+		if !canViewTeaching(me, o) {
+			writeError(w, r, http.StatusForbidden, "forbidden", nil)
+			return
+		}
+		cards, err := ctx.TeachingRepo.ListScorecards(r.Context(), o.Code)
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		views := make([]map[string]any, 0, len(cards))
+		for _, c := range cards {
+			views = append(views, toScorecardView(c))
+		}
+		httpx.OkJsonCtx(r.Context(), w, views)
+	}
+}
+
+// SettleTeachingOrderHandler POST /api/teaching-orders/:code/settle (enforcer = teacher).
+func SettleTeachingOrderHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"enforcer"}, func(w http.ResponseWriter, r *http.Request) {
+		me, o, ok := loadTeachingForActor(ctx, w, r)
+		if !ok {
+			return
+		}
+		if !isTeacherOf(me, o) {
+			writeError(w, r, http.StatusForbidden, "not_your_teaching", nil)
+			return
+		}
+		if err := ctx.TeachingRepo.Settle(r.Context(), o.Code); err != nil {
+			if errors.Is(err, repo.ErrTeachingNotSettleable) {
+				writeError(w, r, http.StatusConflict, "not_settleable", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		updated, _ := ctx.TeachingRepo.GetByCode(r.Context(), o.Code)
+		httpx.OkJsonCtx(r.Context(), w, toTeachingOrderView(updated))
+	})
+}
+
+// ListTimeLogsHandler GET /api/teaching-orders/:code/timelogs (owner).
+func ListTimeLogsHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"owner"}, func(w http.ResponseWriter, r *http.Request) {
+		code, _ := parseTeachingPath(r.URL.Path)
+		logs, err := ctx.TeachingRepo.ListTimeLogs(r.Context(), code)
+		if err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		views := make([]map[string]any, 0, len(logs))
+		for _, l := range logs {
+			views = append(views, toTimeLogView(l))
+		}
+		httpx.OkJsonCtx(r.Context(), w, views)
+	})
+}
+
+// UpsertTeachingReviewHandler PUT /api/teaching-orders/:code/review (customer = student).
+func UpsertTeachingReviewHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return requireAnyRole(ctx, []string{"customer"}, func(w http.ResponseWriter, r *http.Request) {
+		me, o, ok := loadTeachingForActor(ctx, w, r)
+		if !ok {
+			return
+		}
+		if o.StudentID != me.ID {
+			writeError(w, r, http.StatusForbidden, "not_your_teaching", nil)
+			return
+		}
+		var req teachingReviewRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil ||
+			req.AttitudeScore < 0 || req.TechnicalScore < 0 {
+			writeError(w, r, http.StatusBadRequest, "invalid_review", nil)
+			return
+		}
+		rv := &repo.TeachingReview{
+			TeachingOrderCode: o.Code, AttitudeScore: req.AttitudeScore, TechnicalScore: req.TechnicalScore,
+			Comment:    sql.NullString{String: strings.TrimSpace(req.Comment), Valid: req.Comment != ""},
+			ReviewerID: me.ID, ReviewerName: me.Nickname,
+		}
+		if err := ctx.TeachingRepo.UpsertReviewWithEffects(r.Context(), rv, BonusQualifies(req.AttitudeScore, req.TechnicalScore)); err != nil {
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		saved, _ := ctx.TeachingRepo.GetReview(r.Context(), o.Code)
+		httpx.OkJsonCtx(r.Context(), w, toTeachingReviewView(saved))
+	})
+}
+
+// TeachingReviewHandler GET /api/teaching-orders/:code/review (owner, teacher, student).
+func TeachingReviewHandler(ctx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		me, o, ok := loadTeachingForActor(ctx, w, r)
+		if !ok {
+			return
+		}
+		if !canViewTeaching(me, o) {
+			writeError(w, r, http.StatusForbidden, "forbidden", nil)
+			return
+		}
+		rv, err := ctx.TeachingRepo.GetReview(r.Context(), o.Code)
+		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				writeError(w, r, http.StatusNotFound, "review_not_found", nil)
+				return
+			}
+			writeError(w, r, http.StatusInternalServerError, "db_error", err)
+			return
+		}
+		httpx.OkJsonCtx(r.Context(), w, toTeachingReviewView(rv))
+	}
 }
