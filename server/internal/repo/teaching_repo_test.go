@@ -73,3 +73,26 @@ func TestTeachingCreateAndReads(t *testing.T) {
 		t.Fatalf("created order not in dispatching list")
 	}
 }
+
+func TestTeachingClaim(t *testing.T) {
+	conn := teachingTestConn(t)
+	r := repo.NewTeachingRepo(conn)
+	ctx := context.Background()
+	code := "JXclm" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	t.Cleanup(func() { cleanupTeaching(ctx, conn, code) })
+
+	if _, err := r.Create(ctx, newTeachingOrder(code, 360), repo.Operator{ID: 1, Name: "客服A", Role: "service"}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if err := r.Claim(ctx, code, 800123, "打手甲"); err != nil {
+		t.Fatalf("Claim: %v", err)
+	}
+	o, _ := r.GetByCode(ctx, code)
+	if o.Status != "ongoing" || !o.TeacherID.Valid || o.TeacherID.Int64 != 800123 {
+		t.Fatalf("unexpected after claim: %+v", o)
+	}
+	// second claim rejected
+	if err := r.Claim(ctx, code, 800999, "打手乙"); err != repo.ErrTeacherTaken {
+		t.Fatalf("want ErrTeacherTaken, got %v", err)
+	}
+}

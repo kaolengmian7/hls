@@ -162,3 +162,18 @@ func (r *TeachingRepo) ListByStudent(ctx context.Context, studentID int64) ([]*T
 		"SELECT "+teachingOrderCols+" FROM teaching_orders WHERE student_id = ? ORDER BY id DESC", studentID)
 	return list, err
 }
+
+// Claim 把 code 的老师槽从空占为 teacherID，状态转 ongoing；已被占则 ErrTeacherTaken。
+func (r *TeachingRepo) Claim(ctx context.Context, code string, teacherID int64, teacherName string) error {
+	res, err := r.db.ExecCtx(ctx,
+		"UPDATE teaching_orders SET teacher_id=?, teacher_name=?, status='ongoing' "+
+			"WHERE code=? AND teacher_id IS NULL AND status='dispatching'",
+		teacherID, teacherName, code)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return ErrTeacherTaken
+	}
+	return nil
+}
