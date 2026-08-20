@@ -200,3 +200,41 @@ func TestTeachingSettle(t *testing.T) {
 		t.Fatalf("want settled, got %s", o.Status)
 	}
 }
+
+func TestTeachingReviewUpsert(t *testing.T) {
+	conn := teachingTestConn(t)
+	r := repo.NewTeachingRepo(conn)
+	ctx := context.Background()
+	code := "JXrev" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	t.Cleanup(func() { cleanupTeaching(ctx, conn, code) })
+
+	if _, err := r.Create(ctx, newTeachingOrder(code, 60), repo.Operator{ID: 1, Name: "客服A", Role: "service"}); err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	rv := &repo.TeachingReview{TeachingOrderCode: code, AttitudeScore: 5, TechnicalScore: 4, ReviewerID: 700001, ReviewerName: "学员甲"}
+	if err := r.UpsertReviewWithEffects(ctx, rv, true); err != nil {
+		t.Fatalf("Upsert: %v", err)
+	}
+	o, _ := r.GetByCode(ctx, code)
+	if !o.BonusQualified {
+		t.Fatalf("bonus should be qualified")
+	}
+	// re-submit lower, unqualify
+	rv2 := &repo.TeachingReview{TeachingOrderCode: code, AttitudeScore: 2, TechnicalScore: 2, ReviewerID: 700001, ReviewerName: "学员甲"}
+	if err := r.UpsertReviewWithEffects(ctx, rv2, false); err != nil {
+		t.Fatalf("Upsert2: %v", err)
+	}
+	o, _ = r.GetByCode(ctx, code)
+	if o.BonusQualified {
+		t.Fatalf("bonus should be unqualified after re-review")
+	}
+	got, _ := r.GetReview(ctx, code)
+	if got.AttitudeScore != 2 {
+		t.Fatalf("review not overwritten: %+v", got)
+	}
+	var cnt int
+	_ = conn.QueryRowCtx(ctx, &cnt, "SELECT COUNT(*) FROM teaching_reviews WHERE teaching_order_code=?", code)
+	if cnt != 1 {
+		t.Fatalf("want 1 review row, got %d", cnt)
+	}
+}

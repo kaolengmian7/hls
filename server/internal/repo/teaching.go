@@ -282,3 +282,33 @@ func (r *TeachingRepo) Settle(ctx context.Context, code string) error {
 		return err
 	})
 }
+
+const teachingReviewCols = "id, teaching_order_code, attitude_score, technical_score, comment, " +
+	"reviewer_id, reviewer_name, created_at, updated_at"
+
+// UpsertReviewWithEffects 写/覆盖学员评价，并在同事务回写教学单的 bonus_qualified。
+func (r *TeachingRepo) UpsertReviewWithEffects(ctx context.Context, rv *TeachingReview, bonusQualified bool) error {
+	return r.db.TransactCtx(ctx, func(ctx context.Context, s sqlx.Session) error {
+		if _, err := s.ExecCtx(ctx,
+			"INSERT INTO teaching_reviews (teaching_order_code, attitude_score, technical_score, comment, reviewer_id, reviewer_name) "+
+				"VALUES (?, ?, ?, ?, ?, ?) "+
+				"ON DUPLICATE KEY UPDATE attitude_score=VALUES(attitude_score), technical_score=VALUES(technical_score), "+
+				"comment=VALUES(comment), reviewer_id=VALUES(reviewer_id), reviewer_name=VALUES(reviewer_name)",
+			rv.TeachingOrderCode, rv.AttitudeScore, rv.TechnicalScore, rv.Comment, rv.ReviewerID, rv.ReviewerName); err != nil {
+			return err
+		}
+		_, err := s.ExecCtx(ctx,
+			"UPDATE teaching_orders SET bonus_qualified=? WHERE code=?", bonusQualified, rv.TeachingOrderCode)
+		return err
+	})
+}
+
+// GetReview 返回某教学单的学员评价，或 sqlx.ErrNotFound。
+func (r *TeachingRepo) GetReview(ctx context.Context, code string) (*TeachingReview, error) {
+	var rv TeachingReview
+	err := r.db.QueryRowCtx(ctx, &rv, "SELECT "+teachingReviewCols+" FROM teaching_reviews WHERE teaching_order_code = ?", code)
+	if err != nil {
+		return nil, err
+	}
+	return &rv, nil
+}
