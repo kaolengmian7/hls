@@ -247,13 +247,20 @@ func TeachingOrderDetailHandler(ctx *svc.ServiceContext) http.HandlerFunc {
 	}
 }
 
-// canViewTeaching: staff, the assigned teacher, or the student.
+// canViewTeaching: staff, the assigned teacher, or the student. An enforcer may
+// also preview a still-dispatching (unassigned) order so they can claim it via
+// the public claim link, mirroring the order claim flow.
 func canViewTeaching(u *repo.User, o *repo.TeachingOrder) bool {
 	if u.Role == "owner" || u.Role == "service" {
 		return true
 	}
-	if u.Role == "enforcer" && o.TeacherID.Valid && o.TeacherID.Int64 == u.ID {
-		return true
+	if u.Role == "enforcer" {
+		if o.TeacherID.Valid && o.TeacherID.Int64 == u.ID {
+			return true
+		}
+		if o.Status == "dispatching" {
+			return true
+		}
 	}
 	if u.Role == "customer" && o.StudentID == u.ID {
 		return true

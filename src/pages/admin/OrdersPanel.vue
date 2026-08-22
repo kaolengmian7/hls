@@ -10,6 +10,7 @@ import {
   type OrderView, type OrderType, type OrderStatus, type ComplaintStatus, type ReviewFlagKey, type OrderReview,
 } from '../../shared/orderLabels'
 import ConfirmDialog from '../../shared/components/ConfirmDialog.vue'
+import { formatMoney, formatDate } from '../../shared/format'
 
 const orders = ref<OrderView[]>([])
 const loading = ref(false)
@@ -149,22 +150,6 @@ async function onComplaint(code: string, complaintStatus: ComplaintStatus) {
 }
 
 const orderTypeOptions = Object.entries(orderTypeLabels) as [OrderType, string][]
-
-function formatMoney(value: number) {
-  return Number.isInteger(value) ? `${value}` : value.toFixed(2)
-}
-
-function formatDate(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
-}
 
 function getStatusClass(status: OrderStatus) {
   return {
