@@ -40,6 +40,11 @@ export function estimateTeachingEarnings(price: number, commissionRate: number, 
   return price * (1 - commissionRate / 100) + (price * bonusRate) / 100
 }
 
+/** Teaching review bonus threshold: attitude + technical >= 8 (each 0–5). */
+export function teachingBonusQualifies(attitudeScore: number, technicalScore: number) {
+  return attitudeScore + technicalScore >= 8
+}
+
 export interface GroupedScore {
   categoryKey: string
   categoryLabel: string

@@ -45,6 +45,13 @@ onUnmounted(() => document.removeEventListener('click', handleOutsideClick))
         class="absolute right-0 top-full mt-2 min-w-[120px] hls-panel-deep py-1 z-50"
       >
         <button
+          v-if="auth.user.role === 'customer'"
+          class="w-full text-left font-body text-sm text-hls-text-nav hover:text-hls-gold px-4 py-2 transition-colors"
+          @click="router.push('/admin'); open = false"
+        >
+          我的教学
+        </button>
+        <button
           class="w-full text-left font-body text-sm text-hls-text-nav hover:text-hls-gold px-4 py-2 transition-colors"
           @click="router.push('/profile'); open = false"
         >

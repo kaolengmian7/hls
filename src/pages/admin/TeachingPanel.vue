@@ -9,11 +9,12 @@ import {
 } from '../../api/teaching'
 import {
   teachingStatusLabels, timeLogReasonLabels, getTeachingStatusClass,
-  getScoreClass, estimateTeachingEarnings, groupScoresBySyllabus,
+  estimateTeachingEarnings,
   type TeachingStatus,
 } from '../../shared/teachingLabels'
 import { formatMoney, formatDate } from '../../shared/format'
 import ConfirmDialog from '../../shared/components/ConfirmDialog.vue'
+import TeachingScorecardCard from '../../shared/components/TeachingScorecardCard.vue'
 
 const auth = useAuthStore()
 const isOwner = computed(() => auth.user?.role === 'owner')
@@ -208,10 +209,6 @@ async function openScorecards(o: TeachingOrderView) {
   } finally {
     loadingScorecards.value = false
   }
-}
-
-function scoreGroups(card: ScorecardView) {
-  return groupScoresBySyllabus(card.scores, syllabus.categories)
 }
 
 // ---- time logs modal ----
@@ -521,30 +518,29 @@ async function openTimeLogs(o: TeachingOrderView) {
         <div class="hls-panel w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <div class="hls-panel-title text-center">教学成绩单</div>
           <div class="space-y-5 p-4 sm:p-6 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-            <p class="font-body text-xs text-hls-text-light break-all">{{ scorecardTitle }}</p>
+            <div class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="font-body text-sm font-semibold text-hls-text-dark break-all">{{ scorecardTitle }}</p>
+                  <p class="mt-1 font-body text-xs text-hls-text-light">统一查看教师录入的每节课成绩与评语</p>
+                </div>
+                <div class="rounded-lg border border-hls-border/20 bg-white/75 px-3 py-2 text-center">
+                  <p class="font-body text-[11px] uppercase tracking-[0.2em] text-hls-text-dark/70">成绩单数</p>
+                  <p class="mt-1 font-body text-lg font-bold text-hls-gold-dark">{{ scorecards.length }}</p>
+                </div>
+              </div>
+            </div>
             <p v-if="loadingScorecards" class="font-body text-sm text-hls-text-light text-center">加载中…</p>
             <p v-else-if="scorecardError" class="font-body text-sm text-red-400 text-center">{{ scorecardError }}</p>
             <p v-else-if="!scorecards.length" class="font-body text-sm text-hls-text-light text-center">暂无成绩单</p>
 
-            <div v-for="card in scorecards" :key="card.id" class="rounded-lg border border-hls-border/20 bg-hls-bg/35 px-4 py-4 space-y-3">
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <p class="font-body text-sm font-semibold text-hls-text-dark">{{ card.teacherName }}</p>
-                <p class="font-body text-xs text-hls-text-light">课时 {{ formatMoney(card.durationHours) }}h · {{ formatDate(card.createdAt) }}</p>
-              </div>
-              <div v-for="group in scoreGroups(card)" :key="group.categoryKey">
-                <p class="font-body text-xs font-semibold text-hls-text-dark/75">{{ group.categoryLabel }}</p>
-                <div class="mt-2 flex flex-wrap gap-2">
-                  <span
-                    v-for="item in group.items"
-                    :key="item.key"
-                    class="inline-flex items-center gap-1 rounded-full border px-3 py-1 font-body text-xs"
-                    :class="getScoreClass(item.score)"
-                  >
-                    {{ item.label }} <span class="font-bold">{{ item.score }}</span>
-                  </span>
-                </div>
-              </div>
-              <p v-if="card.comment" class="font-body text-sm leading-6 text-hls-text-light whitespace-pre-wrap break-words">{{ card.comment }}</p>
+            <div class="space-y-3">
+              <TeachingScorecardCard
+                v-for="card in scorecards"
+                :key="card.id"
+                :card="card"
+                :categories="syllabus.categories"
+              />
             </div>
 
             <button class="hls-btn-secondary py-2 w-full" @click="showScorecards = false">关闭</button>
