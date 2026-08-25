@@ -31,6 +31,10 @@ type ServiceContext struct {
 	OrderRepo     *repo.OrderRepo
 	ReviewRepo    *repo.ReviewRepo
 
+	EnforcerAccountRepo *repo.EnforcerAccountRepo
+	PayrollRepo         *repo.PayrollRepo
+	TeachingRepo        *repo.TeachingRepo
+
 	SmsStore  *SmsStore
 	SmsSender auth.SmsSender
 }
@@ -64,8 +68,13 @@ func NewServiceContext(cfg config.Config) *ServiceContext {
 		ShopRepo:      shopRepo,
 		OrderRepo:     repo.NewOrderRepo(conn),
 		ReviewRepo:    repo.NewReviewRepo(conn),
-		SmsStore:      NewSmsStore(),
-		SmsSender:     smsSender,
+
+		EnforcerAccountRepo: repo.NewEnforcerAccountRepo(conn),
+		PayrollRepo:         repo.NewPayrollRepo(conn),
+		TeachingRepo:        repo.NewTeachingRepo(conn),
+
+		SmsStore:  NewSmsStore(),
+		SmsSender: smsSender,
 	}
 }
 

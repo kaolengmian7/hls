@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getOrder, claimOrder } from '../api/orders'
+import { getOrder, claimOrder, settleOrder } from '../api/orders'
 import { useAuthStore } from '../stores/auth'
 import {
   orderTypeLabels, orderStatusLabels, complaintLabels, type OrderView, type OrderStatus,
@@ -18,6 +18,7 @@ const loading = ref(true)
 const loadError = ref('')
 const actionError = ref('')
 const claiming = ref(false)
+const settling = ref(false)
 
 async function load() {
   loading.value = true
@@ -45,6 +46,11 @@ const isFull = computed(() => {
 const claimable = computed(() =>
   !!order.value && order.value.status === 'dispatching' && !isFull.value && !alreadyClaimed.value &&
   auth.user?.role === 'enforcer',
+)
+const canSettle = computed(() =>
+  !!order.value && order.value.status === 'ongoing' &&
+  auth.user?.role === 'enforcer' &&
+  ((order.value.enforcerA?.id === meId.value) || (order.value.enforcerB?.id === meId.value)),
 )
 const fillCount = computed(() => {
   const o = order.value
@@ -81,6 +87,19 @@ async function onClaim() {
     await load()
   } finally {
     claiming.value = false
+  }
+}
+
+async function settle() {
+  if (!window.confirm('确认结单？结单后将进入工资结算流程。')) return
+  settling.value = true
+  actionError.value = ''
+  try {
+    order.value = await settleOrder(code)
+  } catch {
+    actionError.value = '结单失败，请刷新后重试'
+  } finally {
+    settling.value = false
   }
 }
 
@@ -243,6 +262,15 @@ function getComplaintClass(status: ComplaintStatus) {
               @click="onClaim"
             >
               {{ actionLabel }}
+            </button>
+
+            <button
+              v-if="canSettle"
+              class="mt-3 hls-btn-secondary w-full py-3"
+              :disabled="settling"
+              @click="settle"
+            >
+              {{ settling ? '结单中…' : '✅ 结单' }}
             </button>
           </section>
         </aside>

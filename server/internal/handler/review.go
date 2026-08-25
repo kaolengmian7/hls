@@ -21,7 +21,7 @@ import (
 // auto-set "complained" back to "none" and never touches "resolved".
 func reviewEffects(attitude, technical int, currentComplaint string) (total int, bonusQualified bool, newComplaint string) {
 	total = attitude + technical
-	bonusQualified = total >= 8
+	bonusQualified = BonusQualifies(attitude, technical)
 	switch {
 	case total < 6:
 		newComplaint = "complained"
@@ -31,6 +31,11 @@ func reviewEffects(attitude, technical int, currentComplaint string) (total int,
 		newComplaint = currentComplaint
 	}
 	return
+}
+
+// BonusQualifies 判定评价是否达到奖金标准：两项分数之和 >= 8。
+func BonusQualifies(attitude, technical int) bool {
+	return attitude+technical >= 8
 }
 
 type reviewRequest struct {

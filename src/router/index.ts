@@ -43,6 +43,11 @@ export const router = createRouter({
       name: 'public-order-review',
       component: () => import('@/pages/PublicOrderReviewPage.vue'),
     },
+    {
+      path: '/teaching/:code',
+      name: 'teach-claim',
+      component: () => import('@/pages/TeachClaimPage.vue'),
+    },
     ...shopRoutes,
     ...teachRoutes,
     ...auditionRoutes,
@@ -66,9 +71,13 @@ router.beforeEach((to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
+  if (to.path.startsWith('/teaching/') && !auth.token) {
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
   if (to.path === '/admin') {
     if (!auth.token) return { name: 'login', query: { redirect: to.fullPath } }
-    const allowed = ['owner', 'service', 'enforcer']
+    const allowed = ['owner', 'service', 'enforcer', 'customer']
     if (auth.user && !allowed.includes(auth.user.role)) return { name: 'home' }
   }
 });

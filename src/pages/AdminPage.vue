@@ -4,8 +4,13 @@ import { useAuthStore } from '../stores/auth'
 import UsersPanel from './admin/UsersPanel.vue'
 import OrdersPanel from './admin/OrdersPanel.vue'
 import MyOrdersPanel from './admin/MyOrdersPanel.vue'
+import EnforcersPanel from './admin/EnforcersPanel.vue'
+import PayrollPanel from './admin/PayrollPanel.vue'
+import TeachingPanel from './admin/TeachingPanel.vue'
+import MyTeachingTeacherPanel from './admin/MyTeachingTeacherPanel.vue'
+import MyTeachingStudentPanel from './admin/MyTeachingStudentPanel.vue'
 
-type TabKey = 'orders' | 'users' | 'my-orders'
+type TabKey = 'orders' | 'users' | 'my-orders' | 'enforcers' | 'payroll' | 'teaching' | 'my-teaching-teacher' | 'my-teaching-student'
 
 const auth = useAuthStore()
 
@@ -13,7 +18,12 @@ interface TabDef { key: TabKey; label: string; roles: string[] }
 const allTabs: TabDef[] = [
   { key: 'orders', label: '订单管理', roles: ['owner', 'service'] },
   { key: 'users', label: '用户管理', roles: ['owner'] },
+  { key: 'enforcers', label: '打手管理', roles: ['owner'] },
+  { key: 'payroll', label: '工资管理', roles: ['owner'] },
   { key: 'my-orders', label: '我的订单', roles: ['enforcer'] },
+  { key: 'teaching', label: '教学管理', roles: ['owner', 'service'] },
+  { key: 'my-teaching-teacher', label: '我的教学', roles: ['enforcer'] },
+  { key: 'my-teaching-student', label: '我的教学', roles: ['customer'] },
 ]
 
 const tabs = computed(() =>
@@ -121,7 +131,12 @@ onUnmounted(() => {
     <main class="flex-1 w-full min-w-0 px-4 py-5 lg:px-6 lg:py-8 lg:max-w-5xl">
       <OrdersPanel v-if="active === 'orders'" />
       <UsersPanel v-else-if="active === 'users'" />
+      <EnforcersPanel v-else-if="active === 'enforcers'" />
+      <PayrollPanel v-else-if="active === 'payroll'" />
       <MyOrdersPanel v-else-if="active === 'my-orders'" />
+      <TeachingPanel v-else-if="active === 'teaching'" />
+      <MyTeachingTeacherPanel v-else-if="active === 'my-teaching-teacher'" />
+      <MyTeachingStudentPanel v-else-if="active === 'my-teaching-student'" />
     </main>
   </div>
 </template>

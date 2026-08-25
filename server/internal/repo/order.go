@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"math"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -35,22 +34,15 @@ type Order struct {
 }
 
 // Earnings returns per-player earnings, rounded to two decimals.
-// Formula: (price*(1-commission%/100) + price*bonus%/100) / playerCount.
 func (o *Order) Earnings() float64 {
-	if o.PlayerCount <= 0 {
-		return 0
-	}
-	net := o.Price * (1 - o.CommissionRate/100)
-	bonus := 0.0
-	if o.BonusQualified {
-		bonus = o.Price * o.BonusRate / 100
-	}
-	per := (net + bonus) / float64(o.PlayerCount)
-	return math.Round(per*100) / 100
+	return ComputeEarnings(o.Price, o.CommissionRate, o.BonusRate, o.BonusQualified, o.PlayerCount)
 }
 
 // ErrSlotTaken is returned when assigning to an already-filled enforcer slot.
 var ErrSlotTaken = errors.New("slot taken")
+
+// ErrNotSettleable is returned when a guarded settle finds no matching order/status.
+var ErrNotSettleable = errors.New("not settleable")
 
 const orderCols = "id, code, title, order_type, price, commission_rate, bonus_rate, " +
 	"player_count, dispatcher_id, dispatcher_name, enforcer_a_id, enforcer_a_name, " +
@@ -152,4 +144,66 @@ func (r *OrderRepo) UpdateStatus(ctx context.Context, code, status string) error
 func (r *OrderRepo) UpdateComplaint(ctx context.Context, code, complaint string) error {
 	_, err := r.db.ExecCtx(ctx, "UPDATE orders SET complaint_status = ? WHERE code = ?", complaint, code)
 	return err
+}
+
+// RefundWithPayrollCleanup sets the order to "refunded" and removes any
+// still-pending payroll items for it, in a single transaction, so a partial
+// failure can never leave a payable pending item behind for a refunded order.
+func (r *OrderRepo) RefundWithPayrollCleanup(ctx context.Context, code string) error {
+	return r.db.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		if _, err := session.ExecCtx(ctx, "UPDATE orders SET status = 'refunded' WHERE code = ?", code); err != nil {
+			return err
+		}
+		if _, err := session.ExecCtx(ctx,
+			"DELETE FROM payroll_items WHERE order_code = ? AND status = 'pending'", code); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+// SettleWithPayroll sets the order to "settled" and inserts one pending
+// payroll item per filled enforcer slot, in a single transaction. When
+// expectStatus is non-empty the status update is guarded on it and returns
+// ErrNotSettleable if no row matches. INSERT IGNORE keeps item creation
+// idempotent across repeated settles.
+func (r *OrderRepo) SettleWithPayroll(ctx context.Context, code, expectStatus string) error {
+	return r.db.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		q := "UPDATE orders SET status = 'settled' WHERE code = ?"
+		args := []any{code}
+		if expectStatus != "" {
+			q += " AND status = ?"
+			args = append(args, expectStatus)
+		}
+		res, err := session.ExecCtx(ctx, q, args...)
+		if err != nil {
+			return err
+		}
+		if expectStatus != "" {
+			if n, _ := res.RowsAffected(); n == 0 {
+				return ErrNotSettleable
+			}
+		}
+		var o Order
+		if err := session.QueryRowCtx(ctx, &o, "SELECT "+orderCols+" FROM orders WHERE code = ?", code); err != nil {
+			return err
+		}
+		insert := func(id int64, name string) error {
+			_, err := session.ExecCtx(ctx,
+				"INSERT IGNORE INTO payroll_items (order_code, enforcer_id, enforcer_name, status) "+
+					"VALUES (?, ?, ?, 'pending')", code, id, name)
+			return err
+		}
+		if o.EnforcerAID.Valid {
+			if err := insert(o.EnforcerAID.Int64, o.EnforcerAName.String); err != nil {
+				return err
+			}
+		}
+		if o.EnforcerBID.Valid {
+			if err := insert(o.EnforcerBID.Int64, o.EnforcerBName.String); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
